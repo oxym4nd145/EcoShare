@@ -9,4 +9,8 @@ Trabalho feito como requisito para aprovação no curso MC24 - Banco de Dados, m
 
 Desenvolvimento iniciado em 16/01/2025, e finalizado para o curso em DATA
 
+Diagrama conceitual e DER podem ser encontrados nesse link: https://drive.google.com/file/d/1LvL0J1WUHMB-azBDxigzCpRaIgBmo45I/view?usp=share_link
+
+<img width="1782" height="1332" alt="Diagrama Conceitual EcoShare-Esquema Conceitual drawio-4" src="https://github.com/user-attachments/assets/a6ed6e5f-da1a-4504-957a-b1c5f70c3c2c" />
+
 
