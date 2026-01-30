@@ -4,82 +4,99 @@ USE ECOSHARE;
 
 -- 1. Tabela de Tipos de Permissão
 CREATE TABLE Permissao_usuario (
-    id_permissao INT PRIMARY KEY,
-    tipo_permissao VARCHAR(50) NOT NULL -- Exemplos: Administrador, Moderador, Usuário
+    id_permissao INT,
+    tipo_permissao VARCHAR(50) NOT NULL,
+    PRIMARY KEY (id_permissao)
 );
 
 -- 2. Tabela de Tipos de Mensalidade
 CREATE TABLE Mensalidade_tipo (
-    id INT PRIMARY KEY,
-    tipo VARCHAR(50) NOT NULL -- Exemplos: Sem mensalidade, básica, plus
+    id INT,
+    tipo VARCHAR(50) NOT NULL,
+    PRIMARY KEY (id)
 );
 
--- 3. Tabela de Fotos (CDN)
-CREATE TABLE Foto (
-    id INT PRIMARY KEY,
-    endereco_CDN VARCHAR(255) NOT NULL
+-- 3. Tabela de Fotos de Itens
+CREATE TABLE Foto_item (
+    id INT,
+    endereco_CDN VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id)
 );
 
 -- 4. Tabela de Pontos de Coleta
 CREATE TABLE Ponto_coleta (
-    id_coleta INT PRIMARY KEY,
+    id_coleta INT,
     nome_coleta VARCHAR(100),
-    endereco_coleta VARCHAR(255)
+    endereco_coleta VARCHAR(255),
+    PRIMARY KEY (id_coleta)
 );
 
 -- 5. Tabela de Tipos de Transação
 CREATE TABLE Transacao_tipo (
-    id INT PRIMARY KEY,
-    tipo VARCHAR(50) NOT NULL -- Exemplos: Aluguel, empréstimo, doação
+    id INT,
+    tipo VARCHAR(50) NOT NULL,
+    PRIMARY KEY (id)
 );
 
 -- 6. Tabela de Usuários
 CREATE TABLE Usuarios (
-    id_usuario INT PRIMARY KEY,
+    id_usuario INT,
     nome VARCHAR(100) NOT NULL,
     cpf VARCHAR(14),
     cnpj VARCHAR(18),
     permissao_usuario INT,
     endereco VARCHAR(255),
     tipo_mensalidade INT,
+    PRIMARY KEY (id_usuario),
     FOREIGN KEY (permissao_usuario) REFERENCES Permissao_usuario(id_permissao),
     FOREIGN KEY (tipo_mensalidade) REFERENCES Mensalidade_tipo(id)
 );
 
--- 7. Tabela de Itens
+-- 7. Tabela de Fotos de Usuário (1:1 com Usuário)
+CREATE TABLE Foto_usuario (
+    id INT, -- PK e FK apontando para o id_usuario
+    endereco_CDN VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (id) REFERENCES Usuarios(id_usuario)
+);
+
+-- 8. Tabela de Itens
 CREATE TABLE Item (
-    id INT PRIMARY KEY,
+    id INT,
     nome_item VARCHAR(100) NOT NULL,
     descricao TEXT,
     preco DECIMAL(10, 2),
-    categoria VARCHAR(50), -- Exemplos: ferramentas, eletrônicos, etc.
+    categoria VARCHAR(50),
     dono_id INT,
     estado_conservacao VARCHAR(50),
     id_fotos INT,
+    PRIMARY KEY (id),
     FOREIGN KEY (dono_id) REFERENCES Usuarios(id_usuario),
-    FOREIGN KEY (id_fotos) REFERENCES Foto(id)
+    FOREIGN KEY (id_fotos) REFERENCES Foto_item(id)
 );
 
--- 8. Tabela de Manutenção
+-- 9. Tabela de Manutenção
 CREATE TABLE Manutencao (
-    id_manutencao INT PRIMARY KEY,
+    id_manutencao INT,
     id_item INT,
     data_inicio_manutencao DATE,
     data_final_manutencao DATE,
+    PRIMARY KEY (id_manutencao),
     FOREIGN KEY (id_item) REFERENCES Item(id)
 );
 
--- 9. Tabela de Transações
+-- 10. Tabela de Transações
 CREATE TABLE Transacao (
-    id_transacao INT PRIMARY KEY,
+    id_transacao INT,
     id_item INT,
-    id_usuario1 INT, -- Comprador/Locatário
-    id_usuario2 INT, -- Vendedor/Locador
+    id_usuario1 INT, -- Comprador
+    id_usuario2 INT, -- Vendedor
     tipo INT,
     id_coleta INT,
     data_transacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_coleta TIMESTAMP,
     prev_devolucao DATE,
+    PRIMARY KEY (id_transacao),
     FOREIGN KEY (id_item) REFERENCES Item(id),
     FOREIGN KEY (id_usuario1) REFERENCES Usuarios(id_usuario),
     FOREIGN KEY (id_usuario2) REFERENCES Usuarios(id_usuario),
@@ -87,32 +104,34 @@ CREATE TABLE Transacao (
     FOREIGN KEY (id_coleta) REFERENCES Ponto_coleta(id_coleta)
 );
 
--- 10. Tabela de Avaliações (Referente a uma transação concluída)
+-- 11. Tabela de Avaliações
 CREATE TABLE Avaliacao (
-    id_transacao INT PRIMARY KEY,
-    id_usuario1 INT,
-    id_usuario2 INT,
+    id_transacao INT,
+    id_comprador INT,
+    id_vendedor INT,
     id_item INT,
-    avaliacao1 TEXT, -- Comentário do usuário 1
-    avaliacao2 TEXT, -- Comentário do usuário 2
-    nota1 INT,       -- Nota dada pelo usuário 1
-    nota2 INT,       -- Nota dada pelo usuário 2
+    avaliacao_comprador TEXT,
+    avaliacao_vendedor TEXT,
+    nota_comprador INT CHECK (nota_comprador BETWEEN 0 AND 10),
+    nota_vendedor INT CHECK (nota_vendedor BETWEEN 0 AND 10),
+    PRIMARY KEY (id_transacao),
     FOREIGN KEY (id_transacao) REFERENCES Transacao(id_transacao),
-    FOREIGN KEY (id_usuario1) REFERENCES Usuarios(id_usuario),
-    FOREIGN KEY (id_usuario2) REFERENCES Usuarios(id_usuario),
+    FOREIGN KEY (id_comprador) REFERENCES Usuarios(id_usuario),
+    FOREIGN KEY (id_vendedor) REFERENCES Usuarios(id_usuario),
     FOREIGN KEY (id_item) REFERENCES Item(id)
 );
 
--- 11. Tabela de Mensagens (Chat entre usuários sobre um item)
+-- 12. Tabela de Mensagens (Chat entre comprador e vendedor sobre um item)
 CREATE TABLE Mensagem (
-    id_mensagem CHAR(36) PRIMARY KEY, -- UUID conforme indicado no diagrama
+    id_mensagem CHAR(36), -- UUID
     id_item INT,
-    id_usuario INT,   -- Remetente (quem mandou)
-    id_usuario2 INT,  -- Destinatário
+    id_comprador INT,
+    id_vendedor INT,
     mensagem TEXT,
-    direcao VARCHAR(50), -- Descritivo de quem mandou
-    data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    direcao VARCHAR(50), -- "Quem mandou a mensagem"
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_mensagem),
     FOREIGN KEY (id_item) REFERENCES Item(id),
-    FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario),
-    FOREIGN KEY (id_usuario2) REFERENCES Usuarios(id_usuario)
+    FOREIGN KEY (id_comprador) REFERENCES Usuarios(id_usuario),
+    FOREIGN KEY (id_vendedor) REFERENCES Usuarios(id_usuario)
 );
