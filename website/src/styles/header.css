@@ -1,0 +1,105 @@
+/* 1. Reset Básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* 2. O Container Principal (A faixa escura) */
+header {
+    background-color: #131921; /* Cor Amazon. Para ML use #fff159 */
+    height: 12vh;
+    display: flex; /* Mágica do alinhamento */
+    align-items: center;
+    padding: 0 20px;
+    color: white;
+    gap: 20px; /* Espaço entre os elementos */
+}
+
+/* 3. Logo */
+.logo {
+    /* font-size: 1.5rem;
+    font-weight: bold; */
+    cursor: pointer;
+    /* Se for ML, mude a cor do texto para preto ou azul */
+}
+
+.logo img {
+    width: 8rem;
+}
+
+/* 4. Barra de Busca (Ocupa o espaço restante) */
+.search-bar {
+    flex-grow: 1; /* Faz a barra crescer e ocupar o centro */
+    display: flex;
+    border-radius: 4px;
+    overflow: hidden; /* Garante que as bordas arredondadas funcionem */
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    outline: none;
+}
+
+.search-bar button {
+    /* background-color: #febd69; */
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.search-icon {
+    width: 1rem;
+}
+
+.search-bar button:hover {
+    background-color: #f3a847;
+}
+
+/* 5. Navegação (Direita) */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 0.9rem;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    line-height: 1.2;
+}
+
+.nav-item span:first-child {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+.nav-item span:last-child {
+    font-weight: bold;
+}
+
+/* Ícone do carrinho */
+.cart {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.shopping-cart, .user-icon {
+    width: 2rem;
+}
+
+/* Responsividade básica: some a busca em telas muito pequenas */
+@media (max-width: 600px) {
+    .search-bar {
+        display: none; 
+    }
+}
