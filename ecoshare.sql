@@ -2,49 +2,137 @@
 CREATE DATABASE ECOSHARE;
 USE ECOSHARE;
 
--- 1. Tabela de Tipos de Permissão
-CREATE TABLE Permissao_usuario (
-    id_permissao INT,
-    tipo_permissao VARCHAR(50) NOT NULL, -- Administrador, Moderador, Usuário
-    PRIMARY KEY (id_permissao)
+-- 1. Tabela de Tipos de Mensalidade
+CREATE TABLE Mensalidade_tipo (
+    id_mensalidade INT,
+    tipo_mensalidade VARCHAR(50) NOT NULL, -- Sem mensalidade, básica, plus
+    PRIMARY KEY (id)
 );
 
--- 2. Tabela de Tipos de Mensalidade
-CREATE TABLE Mensalidade_tipo (
-    id INT,
-    tipo VARCHAR(50) NOT NULL, -- Sem mensalidade, básica, plus
-    PRIMARY KEY (id)
+-- 2. Tabela de Usuários
+CREATE TABLE Usuario (
+    id_usuario INT,
+    mensalidade_id INT DEFAULT 1, -- 1 é sem mensalidade
+    nome_usuario VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    cpf CHAR(14),
+    cnpj CHAR(18),
+    hash_senha CHAR(36) NOT NULL,
+    data_nascimento DATE NOT NULL,
+    endereco VARCHAR(255),
+    cep CHAR(9),
+    PRIMARY KEY (id_usuario),
+    FOREIGN KEY (mensalidade_id) REFERENCES Mensalidade_tipo(id_mensalidade)
+        ON UPDATE CASCADE ON DELETE SET DEFAULT,
+    CHECK (
+    (cpf IS NOT NULL AND cnpj IS NULL) OR
+    (cpf IS NULL AND cnpj IS NOT NULL))
 );
 
 -- 3. Tabela de Fotos de Perfil
 CREATE TABLE Foto_perfil (
-    id INT,
-    endereco_CDN VARCHAR(255) NOT NULL,
-    PRIMARY KEY (id)
+    id_foto_perfil INT,
+    usuario_id INT,
+    endereco_cdn VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id_foto_perfil),
+    FOREIGN KEY (usuario_id) REFERENCES Usuario(id_usuario)
+        ON UPDATE CASCADE ON DELETE CASCADE
 );
 
--- 4. Tabela de Fotos de Itens
-CREATE TABLE Foto_item (
-    id INT,
-    endereco_CDN VARCHAR(255) NOT NULL,
-    PRIMARY KEY (id)
+-- 4. Tabela de Tipos de Permissão
+CREATE TABLE Permissao (
+    id_permissao INT,
+    tipo_permissao VARCHAR(31) NOT NULL, -- Administrador, Moderador, Usuário
+    PRIMARY KEY (id_permissao)
 );
 
--- 5. Tabela de Categorias de Itens
+-- 5. Tabela de concessões de permissão
+CREATE TABLE Permissao_usuario (
+    usuario_id INT,
+    permissao_id INT,
+    PRIMARY KEY (usuario_id, permissao_id)
+);
+
+-- 6. Tabela de Itens
+CREATE TABLE Item (
+    id_item INT,
+    dono_id INT,
+    nome_item VARCHAR(100) NOT NULL,
+    categoria INT,
+    disponibilidade INT,
+    descricao TEXT,
+    estado_conservacao INT,
+    PRIMARY KEY (id_item),
+    FOREIGN KEY (categoria) REFERENCES Categoria_tipo(id_categoria)
+        ON UPDATE CASCADE ON DELETE SET NULL,
+    FOREIGN KEY (dono_id) REFERENCES Usuario(id_usuario)
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (disponibilidade) REFERENCES Disponibilidade_tipo(id_disponibilidade)
+        ON UPDATE CASCADE ON DELETE SET NULL,
+    FOREIGN KEY (estado_conservacao) REFERENCES Estado_tipo(id_estado)
+        ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+-- 7. Tabela de Categorias de Itens
 CREATE TABLE Categoria_tipo (
-    id INT,
-    tipo VARCHAR(50) NOT NULL, -- Ferramentas, eletrônicos, etc.
+    id_categoria INT,
+    tipo_categoria VARCHAR(50) NOT NULL, -- Ferramentas, eletrônicos, etc.
     PRIMARY KEY (id)
 );
 
--- 6. Tabela de Estados de Conservação
+-- 8. Tabela de Estados de Conservação
 CREATE TABLE Estado_tipo (
-    id INT,
-    tipo VARCHAR(50) NOT NULL, -- Novo, usado, seminovo
-    PRIMARY KEY (id)
+    id_estado INT,
+    tipo_estado VARCHAR(50) NOT NULL, -- Novo, usado, seminovo
+    PRIMARY KEY (id_estado)
 );
 
--- 7. Tabela de Pontos de Coleta
+-- 9. Tabela de Disponibilidades de Itens
+CREATE TABLE Disponibilidade_tipo (
+    id_disponibilidade INT,
+    tipo_disponibilidade VARCHAR(50) NOT NULL, -- Disponível, Não disponível (doado), Em uso (emprestad/alugado), Em manutenção
+    PRIMARY KEY (id_disponibilidade)
+);
+
+-- 10. Tabela de Fotos de Itens
+CREATE TABLE Foto_item (
+    id_foto_item INT,
+    item_id INT,
+    endereco_cdn VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (item_id) REFERENCES Item(id_item)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- 11. Tabela de Manutenção
+CREATE TABLE Manutencao (
+    id_manutencao INT,
+    item_id INT,
+    data_inicio_manutencao DATE NOT NULL,
+    data_fim_manutencao DATE,
+    PRIMARY KEY (id_manutencao),
+    FOREIGN KEY (item_id) REFERENCES Item(id_item)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- 12. Tabela de Mensagens (Chat)
+CREATE TABLE Mensagem (
+    hash_mensagem CHAR(36), -- UUID
+    item_id INT,
+    remetente_id INT,
+    destinatario_id INT,
+    texto_mensagem TEXT,
+    horario_mensagem TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (hash_mensagem),
+    FOREIGN KEY (item_id) REFERENCES Item(id_item)
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (remetente_id) REFERENCES Usuario(id_usuario)
+        ON UPDATE CASCADE ON DELETE SET NULL,
+    FOREIGN KEY (destinatario_id) REFERENCES Usuario(id_usuario)
+        ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+-- 13. Tabela de Pontos de Coleta
 CREATE TABLE Ponto_coleta (
     id_coleta INT,
     nome_coleta VARCHAR(100),
@@ -52,98 +140,68 @@ CREATE TABLE Ponto_coleta (
     PRIMARY KEY (id_coleta)
 );
 
--- 8. Tabela de Tipos de Transação
-CREATE TABLE Transacao_tipo (
-    id INT,
-    tipo VARCHAR(50) NOT NULL, -- Aluguel, empréstimo, doação
-    PRIMARY KEY (id)
-);
-
--- 9. Tabela de Usuários
-CREATE TABLE Usuarios (
-    id_usuario INT,
-    nome VARCHAR(100) NOT NULL,
-    cpf VARCHAR(14),
-    cnpj VARCHAR(18),
-    permissao_usuario INT,
-    tipo_mensalidade INT,
-    id_foto INT,
-    cep VARCHAR(9),
-    endereco VARCHAR(255),
-    PRIMARY KEY (id_usuario),
-    FOREIGN KEY (permissao_usuario) REFERENCES Permissao_usuario(id_permissao),
-    FOREIGN KEY (tipo_mensalidade) REFERENCES Mensalidade_tipo(id),
-    FOREIGN KEY (id_foto) REFERENCES Foto_perfil(id)
-);
-
--- 10. Tabela de Itens
-CREATE TABLE Item (
-    id INT,
-    nome_item VARCHAR(100) NOT NULL,
-    descricao TEXT,
-    preco DECIMAL(10, 2),
-    categoria INT,
-    dono_id INT,
-    estado_conservacao INT,
-    id_fotos INT,
-    PRIMARY KEY (id),
-    FOREIGN KEY (categoria) REFERENCES Categoria_tipo(id),
-    FOREIGN KEY (dono_id) REFERENCES Usuarios(id_usuario),
-    FOREIGN KEY (estado_conservacao) REFERENCES Estado_tipo(id),
-    FOREIGN KEY (id_fotos) REFERENCES Foto_item(id)
-);
-
--- 11. Tabela de Manutenção
-CREATE TABLE Manutencao (
-    id_manutencao INT,
-    id_item INT,
-    data_inicio_manutencao DATE,
-    data_final_manutencao DATE,
-    PRIMARY KEY (id_manutencao),
-    FOREIGN KEY (id_item) REFERENCES Item(id)
-);
-
--- 12. Tabela de Transações
+-- 14. Tabela de Transações
 CREATE TABLE Transacao (
     id_transacao INT,
-    id_item INT,
-    id_comprador INT,
-    id_vendedor INT,
-    tipo INT,
-    id_coleta INT,
+    item_id INT,
+    vendedor_id INT,
+    comprador_id INT,
+    coleta_id INT,
     data_transacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_coleta TIMESTAMP,
-    prev_devolucao DATE,
     PRIMARY KEY (id_transacao),
-    FOREIGN KEY (id_item) REFERENCES Item(id),
-    FOREIGN KEY (id_comprador) REFERENCES Usuarios(id_usuario),
-    FOREIGN KEY (id_vendedor) REFERENCES Usuarios(id_usuario),
-    FOREIGN KEY (tipo) REFERENCES Transacao_tipo(id),
-    FOREIGN KEY (id_coleta) REFERENCES Ponto_coleta(id_coleta)
+    FOREIGN KEY (item_id) REFERENCES Item(id_item)
+        ON UPDATE CASCADE ON DELETE NO ACTION,
+    FOREIGN KEY (vendedor_id) REFERENCES Usuario(id_usuario)
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (comprador_id) REFERENCES Usuario(id_usuario)
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (coleta_id) REFERENCES Ponto_coleta(id_coleta)
+        ON UPDATE CASCADE ON DELETE SET NULL
 );
 
--- 13. Tabela de Avaliações
+-- 15. Tabela de Transações de Aluguel
+CREATE TABLE Aluguel (
+    transacao_id INT,
+    prev_devolucao DATE NOT NULL,
+    data_devolucao DATE,
+    preco DECIMAL(10, 2) NOT NULL,
+    multa DECIMAL(10, 2),
+    PRIMARY KEY (transacao_id),
+    FOREIGN KEY (transacao_id) REFERENCES Transacao(id_transacao)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- 16. Tabela de Transações de Doação
+CREATE TABLE Doacao (
+    transacao_id INT,
+    PRIMARY KEY (transacao_id),
+    FOREIGN KEY (transacao_id) REFERENCES Transacao(id_transacao)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- 15. Tabela de Transações de Empréstimo
+CREATE TABLE Emprestimo (
+    transacao_id INT,
+    prev_devolucao DATE NOT NULL,
+    data_devolucao DATE,
+    PRIMARY KEY (transacao_id),
+    FOREIGN KEY (transacao_id) REFERENCES Transacao(id_transacao)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- 18. Tabela de Avaliações
 CREATE TABLE Avaliacao (
-    id_transacao INT,
-    id_item INT,
-    avaliacao_comprador TEXT,
-    avaliacao_vendedor TEXT,
-    nota_comprador INT CHECK (nota_comprador BETWEEN 0 AND 10),
-    nota_vendedor INT CHECK (nota_vendedor BETWEEN 0 AND 10),
-    PRIMARY KEY (id_transacao),
-    FOREIGN KEY (id_transacao) REFERENCES Transacao(id_transacao),
-    FOREIGN KEY (id_item) REFERENCES Item(id)
-);
-
--- 14. Tabela de Mensagens (Chat)
-CREATE TABLE Mensagem (
-    hash_mensagem CHAR(36), -- UUID
-    id_item INT,
-    id_comprador INT,
-    texto_mensagem TEXT,
-    direcao_de_envio VARCHAR(50), -- Quem mandou a mensagem
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (hash_mensagem),
-    FOREIGN KEY (id_item) REFERENCES Item(id),
-    FOREIGN KEY (id_comprador) REFERENCES Usuarios(id_usuario)
+    transacao_id INT,
+    avaliador_id INT,
+    avaliado_id INT,
+    nota INT CHECK (nota BETWEEN 0 AND 10),
+    avaliacao TEXT,
+    PRIMARY KEY (transacao_id, avaliador_id, avaliado_id),
+    FOREIGN KEY (transacao_id) REFERENCES Transacao(id_transacao)
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (avaliador_id) REFERENCES Usuario(id_usuario)
+        ON UPDATE CASCADE ON DELETE SET NULL,
+    FOREIGN KEY (avaliado_id) REFERENCES Usuario(id_usuario)
+        ON UPDATE CASCADE ON DELETE SET NULL
 );
