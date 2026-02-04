@@ -6,7 +6,7 @@ USE ECOSHARE;
 CREATE TABLE Mensalidade_tipo (
     id_mensalidade INT,
     tipo_mensalidade VARCHAR(50) NOT NULL, -- Sem mensalidade, básica, plus
-    PRIMARY KEY (id)
+    PRIMARY KEY (id_mensalidade)
 );
 
 -- 2. Tabela de Usuários
@@ -50,10 +50,35 @@ CREATE TABLE Permissao (
 CREATE TABLE Permissao_usuario (
     usuario_id INT,
     permissao_id INT,
-    PRIMARY KEY (usuario_id, permissao_id)
+    PRIMARY KEY (usuario_id, permissao_id),
+    FOREIGN KEY (usuario_id) REFERENCES Usuario(id_usuario)
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (permissao_id) REFERENCES Permissao(id_permissao)
+        ON UPDATE CASCADE ON DELETE CASCADE
 );
 
--- 6. Tabela de Itens
+-- 6. Tabela de Categorias de Itens
+CREATE TABLE Categoria_tipo (
+    id_categoria INT,
+    tipo_categoria VARCHAR(50) NOT NULL, -- Ferramentas, eletrônicos, etc.
+    PRIMARY KEY (id_categoria)
+);
+
+-- 7. Tabela de Estados de Conservação
+CREATE TABLE Estado_tipo (
+    id_estado INT,
+    tipo_estado VARCHAR(50) NOT NULL, -- Novo, usado, seminovo
+    PRIMARY KEY (id_estado)
+);
+
+-- 8. Tabela de Disponibilidades de Itens
+CREATE TABLE Disponibilidade_tipo (
+    id_disponibilidade INT,
+    tipo_disponibilidade VARCHAR(50) NOT NULL, -- Disponível, Não disponível (doado), Em uso (emprestad/alugado), Em manutenção
+    PRIMARY KEY (id_disponibilidade)
+);
+
+-- 9. Tabela de Itens
 CREATE TABLE Item (
     id_item INT,
     dono_id INT,
@@ -73,33 +98,12 @@ CREATE TABLE Item (
         ON UPDATE CASCADE ON DELETE SET NULL
 );
 
--- 7. Tabela de Categorias de Itens
-CREATE TABLE Categoria_tipo (
-    id_categoria INT,
-    tipo_categoria VARCHAR(50) NOT NULL, -- Ferramentas, eletrônicos, etc.
-    PRIMARY KEY (id)
-);
-
--- 8. Tabela de Estados de Conservação
-CREATE TABLE Estado_tipo (
-    id_estado INT,
-    tipo_estado VARCHAR(50) NOT NULL, -- Novo, usado, seminovo
-    PRIMARY KEY (id_estado)
-);
-
--- 9. Tabela de Disponibilidades de Itens
-CREATE TABLE Disponibilidade_tipo (
-    id_disponibilidade INT,
-    tipo_disponibilidade VARCHAR(50) NOT NULL, -- Disponível, Não disponível (doado), Em uso (emprestad/alugado), Em manutenção
-    PRIMARY KEY (id_disponibilidade)
-);
-
 -- 10. Tabela de Fotos de Itens
 CREATE TABLE Foto_item (
     id_foto_item INT,
     item_id INT,
     endereco_cdn VARCHAR(255) NOT NULL,
-    PRIMARY KEY (id),
+    PRIMARY KEY (id_foto_item),
     FOREIGN KEY (item_id) REFERENCES Item(id_item)
         ON UPDATE CASCADE ON DELETE CASCADE
 );
