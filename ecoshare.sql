@@ -212,7 +212,7 @@ CREATE TABLE Avaliacao (
     FOREIGN KEY (avaliador_id) REFERENCES Usuario(id_usuario)
         ON UPDATE CASCADE ON DELETE SET NULL,
     FOREIGN KEY (avaliado_id) REFERENCES Usuario(id_usuario)
-        ON UPDATE CASCADE ON DELETE SET NULL
+        ON UPDATE CASCADE ON DELETE SET CASCADE
 );
 
 -- Triggers
