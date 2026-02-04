@@ -15,8 +15,8 @@ CREATE TABLE Usuario (
     mensalidade_id INT DEFAULT 1, -- 1 é sem mensalidade
     nome_usuario VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
-    cpf CHAR(14),
-    cnpj CHAR(18),
+    cpf CHAR(14) UNIQUE, -- Gabriel: coloquei unicidade aqui
+    cnpj CHAR(18) UNIQUE, -- Gabriel: coloquei unicidade aqui
     hash_senha CHAR(36) NOT NULL,
     data_nascimento DATE NOT NULL,
     endereco VARCHAR(255),
@@ -24,7 +24,7 @@ CREATE TABLE Usuario (
     PRIMARY KEY (id_usuario),
     FOREIGN KEY (mensalidade_id) REFERENCES Mensalidade_tipo(id_mensalidade)
         ON UPDATE CASCADE ON DELETE SET DEFAULT,
-    CHECK (
+    CONSTRAINT usuario_com_cpf_e_cnpj CHECK (
     (cpf IS NOT NULL AND cnpj IS NULL) OR
     (cpf IS NULL AND cnpj IS NOT NULL))
 );
@@ -84,7 +84,7 @@ CREATE TABLE Item (
     dono_id INT,
     nome_item VARCHAR(100) NOT NULL,
     categoria INT,
-    disponibilidade INT,
+    disponibilidade INT, 
     descricao TEXT,
     estado_conservacao INT,
     PRIMARY KEY (id_item),
@@ -125,7 +125,7 @@ CREATE TABLE Mensagem (
     item_id INT,
     remetente_id INT,
     destinatario_id INT,
-    texto_mensagem TEXT,
+    texto_mensagem TEXT NOT NULL,
     horario_mensagem TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (hash_mensagem),
     FOREIGN KEY (item_id) REFERENCES Item(id_item)
@@ -170,7 +170,7 @@ CREATE TABLE Aluguel (
     prev_devolucao DATE NOT NULL,
     data_devolucao DATE,
     preco DECIMAL(10, 2) NOT NULL,
-    multa DECIMAL(10, 2),
+    multa DECIMAL(10, 2), -- Gabriel: regra de negócio ctz
     PRIMARY KEY (transacao_id),
     FOREIGN KEY (transacao_id) REFERENCES Transacao(id_transacao)
         ON UPDATE CASCADE ON DELETE CASCADE
@@ -189,18 +189,23 @@ CREATE TABLE Emprestimo (
     transacao_id INT,
     prev_devolucao DATE NOT NULL,
     data_devolucao DATE,
+    update_date DATE, -- Gabriel: caso a previsão de devolução mude
     PRIMARY KEY (transacao_id),
     FOREIGN KEY (transacao_id) REFERENCES Transacao(id_transacao)
         ON UPDATE CASCADE ON DELETE CASCADE
+
+    -- Gabriel: criei essa constraint pra garantir que a data de devolução é maior ou igual que a prévia de devolução
+    CONSTRAINT data_devolucao_menor_que_prev_devlução CHECK ( prev_devolucao <= data_devolucao )
+    
 );
 
 -- 18. Tabela de Avaliações
 CREATE TABLE Avaliacao (
-    transacao_id INT,
-    avaliador_id INT,
-    avaliado_id INT,
+    transacao_id INT NOT NULL,
+    avaliador_id INT NOT NULL,
+    avaliado_id INT NOT NULL,
     nota INT CHECK (nota BETWEEN 0 AND 10),
-    avaliacao TEXT,
+    avaliacao TEXT, -- Gabriel: pode ser nula?
     PRIMARY KEY (transacao_id, avaliador_id, avaliado_id),
     FOREIGN KEY (transacao_id) REFERENCES Transacao(id_transacao)
         ON UPDATE CASCADE ON DELETE CASCADE,
@@ -209,3 +214,7 @@ CREATE TABLE Avaliacao (
     FOREIGN KEY (avaliado_id) REFERENCES Usuario(id_usuario)
         ON UPDATE CASCADE ON DELETE SET NULL
 );
+
+-- Triggers
+
+-- Transactions
