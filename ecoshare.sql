@@ -193,9 +193,6 @@ CREATE TABLE Emprestimo (
     PRIMARY KEY (transacao_id),
     FOREIGN KEY (transacao_id) REFERENCES Transacao(id_transacao)
         ON UPDATE CASCADE ON DELETE CASCADE
-
-    -- Gabriel: criei essa constraint pra garantir que a data de devolução é maior ou igual que a prévia de devolução
-    CONSTRAINT data_devolucao_menor_que_prev_devlução CHECK ( prev_devolucao <= data_devolucao )
     
 );
 
