@@ -175,7 +175,6 @@ CREATE TABLE Ponto_coleta (
 CREATE TABLE Transacao (
     id_transacao INT AUTO_INCREMENT,
     item_id INT NOT NULL,
-    vendedor_id INT NOT NULL,
     comprador_id INT,
     coleta_id INT,
     data_transacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -184,9 +183,6 @@ CREATE TABLE Transacao (
     PRIMARY KEY (id_transacao),
 
     FOREIGN KEY (item_id) REFERENCES Item(id_item)
-        ON UPDATE CASCADE ON DELETE NO ACTION,
-
-    FOREIGN KEY (vendedor_id) REFERENCES Usuario(id_usuario)
         ON UPDATE CASCADE ON DELETE NO ACTION,
 
     FOREIGN KEY (comprador_id) REFERENCES Usuario(id_usuario)
@@ -200,6 +196,7 @@ CREATE TABLE Transacao (
 CREATE TABLE Aluguel (
     transacao_id INT,
     prev_devolucao DATE NOT NULL,
+    update_date DATE,
     data_devolucao DATE,
     preco DECIMAL(10, 2) NOT NULL,
     multa DECIMAL(10, 2), -- Gabriel: regra de negócio ctz
@@ -224,8 +221,8 @@ CREATE TABLE Doacao (
 CREATE TABLE Emprestimo (
     transacao_id INT,
     prev_devolucao DATE NOT NULL,
-    data_devolucao DATE,
     update_date DATE, -- Gabriel: caso a previsão de devolução mude
+    data_devolucao DATE,
 
     PRIMARY KEY (transacao_id),
 
