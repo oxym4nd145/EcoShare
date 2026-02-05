@@ -1,6 +1,6 @@
 Mensalidade_tipo(
 id_mensalidade PK,
-tipo_mensalidade
+tipo_mensalidade UNIQUE
 )
 
 Usuario(
@@ -8,8 +8,8 @@ id_usuario PK,
 mensalidade_id FK,
 nome_usuario,
 email UNIQUE,
-cpf,
-cnpj,
+cpf UNIQUE,
+cnpj UNIQUE,
 hash_senha,
 data_nascimento,
 endereco,
@@ -24,12 +24,27 @@ endereco_cdn
 
 Permissao(
 id_permissao PK,
-tipo_permissao
+tipo_permissao UNIQUE
 )
 
 Permissao_usuario(
 usuario_id PK/FK,
 permissao_id PK/FK
+)
+
+Categoria_tipo(
+id_categoria PK,
+tipo_categoria UNIQUE
+)
+
+Estado_tipo(
+id_estado PK,
+tipo_estado UNIQUE
+)
+
+Disponibilidade_tipo(
+id_disponibilidade PK,
+tipo_disponibildade UNIQUE
 )
 
 Item(
@@ -40,21 +55,6 @@ categoria,
 disponibilidade,
 descrição,
 estado_conservação
-)
-
-Categoria_tipo(
-id_categoria PK,
-tipo_categoria
-)
-
-Estado_tipo(
-id_estado PK,
-tipo_estado
-)
-
-Disponibilidade_tipo(
-id_disponibilidade PK,
-tipo_disponibildade
 )
 
 Foto_item(
@@ -81,14 +81,13 @@ horario_mensagem
 
 Ponto_coleta(
 id_coleta PK,
-nome_coleta,
+nome_coleta UNIQUE,
 endereco_coleta
 )
 
 Transacao(
 id_transacao PK,
 item_id FK,
-vendedor_id FK,
 comprador_id FK,
 coleta_id FK,
 data_transacao,
@@ -98,6 +97,7 @@ data_coleta
 Aluguel(
 transacao_id PK/FK,
 prev_devolucao,
+update_date,
 data_devolução,
 preco,
 multa
@@ -110,6 +110,7 @@ transacao_id PK/FK
 Emprestimo(
 transacao_id PK/FK,
 prev_devolucao,
+update_date,
 data_devolucao
 )
 
