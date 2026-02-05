@@ -22,10 +22,14 @@ CREATE TABLE Usuario (
     data_nascimento DATE NOT NULL,
     endereco VARCHAR(255),
     cep CHAR(9),
+    nivel_permissao INT,
 
     PRIMARY KEY (id_usuario),
 
     FOREIGN KEY (mensalidade_id) REFERENCES Mensalidade_tipo(id_mensalidade)
+        ON UPDATE CASCADE ON DELETE NO ACTION,
+
+    FOREIGN KEY (nivel_permissao) REFERENCES Nivel_Usuario(codigo_nivel)
         ON UPDATE CASCADE ON DELETE NO ACTION,
 
     CONSTRAINT usuario_com_cpf_e_cnpj CHECK (
@@ -248,4 +252,42 @@ CREATE TABLE Avaliacao (
 
     FOREIGN KEY (avaliado_id) REFERENCES Usuario(id_usuario)
         ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+
+-- 19. Registro de Denúncias
+CREATE TABLE Denuncia (
+    denuncia_id INT AUTO_INCREMENT,
+    denuncia_tipo CHAR(1),
+    denuncia_denunciador_id INT,
+    denuncia_alvo_id INT,
+    denuncia_conteudo TINYTEXT,
+    denuncia_data DATE,
+
+    PRIMARY KEY denuncia_id
+)
+
+-- 20. Tabela de Permissões (RBAC)
+
+-- 1 - Usuário não verificado/suspenso - (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+-- 2 - Usuário verificado - (2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0)
+-- 3 - Moderador - (3, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0)
+-- 4 - Admin - (4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+
+CREATE TABLE Nivel_Usuario(
+    codigo_nivel INT,
+    pode_vender BOOLEAN,
+    pode_comprar BOOLEAN,
+    pode_avaliar BOOLEAN,
+    pode_enviar_mensagens BOOLEAN,
+    pode_denunciar BOOLEAN,
+    pode_ver_denuncias BOOLEAN,
+    pode_operar_em_itens BOOLEAN,
+    pode_operar_em_mensagens BOOLEAN,
+    pode_operar_em_avaliacoes BOOLEAN,
+    pode_operar_em_usuarios BOOLEAN, 
+    pode_operar_em_denuncias BOOLEAN,
+    pode_operar_no_sistema BOOLEAN,
+
+    PRIMARY KEY codigo_nivel
 );
