@@ -22,7 +22,6 @@ CREATE TABLE Usuario (
     data_nascimento DATE NOT NULL,
     endereco VARCHAR(255),
     cep CHAR(9),
-    nivel_permissao INT,
 
     PRIMARY KEY (id_usuario),
 
@@ -49,12 +48,29 @@ CREATE TABLE Foto_perfil (
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
--- 4. Tabela de Tipos de Permissão
-CREATE TABLE Permissao (
-    id_permissao INT AUTO_INCREMENT,
-    tipo_permissao VARCHAR(31) NOT NULL UNIQUE, -- Administrador, Moderador, Usuário
+-- 4. Tabela de Permissões (RBAC)
+    -- 1 - Usuário não verificado/suspenso - (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    -- 2 - Usuário verificado - (2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0)
+    -- 3 - Moderador - (3, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0)
+    -- 4 - Admin - (4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
 
-    PRIMARY KEY (id_permissao)
+CREATE TABLE Nivel_Usuario(
+    codigo_nivel INT,
+    nome_nivel VARCHAR(40),
+    pode_vender BOOLEAN,
+    pode_comprar BOOLEAN,
+    pode_avaliar BOOLEAN,
+    pode_enviar_mensagens BOOLEAN,
+    pode_denunciar BOOLEAN,
+    pode_ver_denuncias BOOLEAN,
+    pode_operar_em_itens BOOLEAN,
+    pode_operar_em_mensagens BOOLEAN,
+    pode_operar_em_avaliacoes BOOLEAN,
+    pode_operar_em_usuarios BOOLEAN, 
+    pode_operar_em_denuncias BOOLEAN,
+    pode_operar_no_sistema BOOLEAN,
+
+    PRIMARY KEY codigo_nivel
 );
 
 -- 5. Tabela de concessões de permissão
@@ -267,27 +283,3 @@ CREATE TABLE Denuncia (
     PRIMARY KEY denuncia_id
 )
 
--- 20. Tabela de Permissões (RBAC)
-
--- 1 - Usuário não verificado/suspenso - (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
--- 2 - Usuário verificado - (2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0)
--- 3 - Moderador - (3, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0)
--- 4 - Admin - (4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
-
-CREATE TABLE Nivel_Usuario(
-    codigo_nivel INT,
-    pode_vender BOOLEAN,
-    pode_comprar BOOLEAN,
-    pode_avaliar BOOLEAN,
-    pode_enviar_mensagens BOOLEAN,
-    pode_denunciar BOOLEAN,
-    pode_ver_denuncias BOOLEAN,
-    pode_operar_em_itens BOOLEAN,
-    pode_operar_em_mensagens BOOLEAN,
-    pode_operar_em_avaliacoes BOOLEAN,
-    pode_operar_em_usuarios BOOLEAN, 
-    pode_operar_em_denuncias BOOLEAN,
-    pode_operar_no_sistema BOOLEAN,
-
-    PRIMARY KEY codigo_nivel
-);
