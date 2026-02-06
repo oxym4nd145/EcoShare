@@ -262,17 +262,52 @@ CREATE TABLE Avaliacao (
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
+-- 19. Catálogo de Estado de Denúncias
+CREATE TABLE Denuncia_estado(
+    id_denuncia_estado INT,
+    denuncia_estado VARCHAR(40)
 
--- 19. Registro de Denúncias
+    PRIMARY KEY (id_denuncia_estado)
+
+);
+
+-- 20. Catálogo de Tipo de Objeto
+CREATE TABLE Objeto_tipo(
+    id_objeto_tipo INT,
+    objeto_tipo VARCHAR(40)
+
+    PRIMARY KEY (id_objeto_tipo)
+
+);
+
+-- 21. Registro de Denúncias
 CREATE TABLE Denuncia (
-    denuncia_id INT AUTO_INCREMENT,
-    denuncia_tipo CHAR(1),
+    id_denuncia INT AUTO_INCREMENT,
     denuncia_denunciador_id INT,
     denuncia_alvo_id INT,
+    denuncia_alvo_tipo INT,
     denuncia_conteudo TINYTEXT,
     denuncia_data DATE,
+    denuncia_estado INT,
+    denuncia_responsavel INT,
 
-    PRIMARY KEY denuncia_id
-)
+    PRIMARY KEY (id_denuncia),
+
+    FOREIGN KEY (denuncia_denunciador_id) REFERENCES Usuario(id_usuario)
+        ON UPDATE CASCADE ON DELETE CASCADE,
+
+    FOREIGN KEY (denuncia_alvo_id) REFERENCES Usuario(id_usuario)
+        ON UPDATE CASCADE ON DELETE NO ACTION,
+
+    FOREIGN KEY (denuncia_alvo_tipo) REFERENCES Objeto_tipo(id_objeto_tipo)
+        ON UPDATE CASCADE ON DELETE NO ACTION,
+    
+    FOREIGN KEY (denuncia_estado) REFERENCES Denuncia_estado(id_denuncia_estado)
+        ON UPDATE CASCADE ON DELETE NO ACTION,
+
+    FOREIGN KEY (denuncia_responsavel) REFERENCES Usuario(id_usuario)
+        ON UPDATE CASCADE ON DELETE SET NULL
+
+);
 
 
