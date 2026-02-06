@@ -9,7 +9,7 @@ pode_ver_denuncias, pode_operar_em_itens, pode_operar_em_mensagens,
 pode_operar_em_avaliacoes, pode_operar_em_usuarios,
 pode_operar_em_denuncias, pode_operar_no_sistema) VALUES
 (1, 'Conta suspensa', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-(2, 'Conta ativa', 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0),
+(2, 'Conta ativa', 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0),
 (3,'Conta de moderação', 0 ,0 ,0 ,1 ,1 ,1 ,0 ,1 ,1 ,0 ,0 ,0),
 (4,'Conta de administração', 1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1);
 
@@ -24,6 +24,19 @@ INSERT INTO Disponibilidade_tipo (id_disponibilidade, tipo_disponibilidade) VALU
 (3, 'Em uso'),
 (4, 'Em manutenção');
 
+INSERT INTO Denuncia_estado (id_denuncia_estado, denuncia_estado) VALUES
+(1, 'Aberta'),
+(2, 'Tramitando'),
+(3, 'Cancelada - errada'),
+(4, 'Cancelada - falsa'),
+(0, 'Fechada');
+
+INSERT INTO Objeto_tipo (id_objeto_tipo, objeto_tipo) VALUES
+(1, 'Usuário'),
+(2, 'Item'),
+(3, 'Avaliação'),
+(4, 'Mensagem'),
+(5, 'Transação');
 
 CREATE ROLE admin;
 CREATE ROLE moderador;
