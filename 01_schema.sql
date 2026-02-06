@@ -62,7 +62,7 @@ CREATE TABLE Permissao (
     pode_operar_em_denuncias BOOLEAN,
     pode_operar_no_sistema BOOLEAN,
 
-    PRIMARY KEY (codigo_nivel)
+    PRIMARY KEY (id_permissao)
 );
 
 -- 5. Tabela de concessões de permissão
