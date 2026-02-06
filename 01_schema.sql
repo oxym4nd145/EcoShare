@@ -22,6 +22,7 @@ CREATE TABLE Usuario (
     data_nascimento DATE NOT NULL,
     endereco VARCHAR(255),
     cep CHAR(9),
+    nivel_permissao INT,
 
     PRIMARY KEY (id_usuario),
 
@@ -49,10 +50,10 @@ CREATE TABLE Foto_perfil (
 );
 
 -- 4. Tabela de Permissões (RBAC)
-    -- 1 - Usuário não verificado/suspenso - (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-    -- 2 - Usuário verificado - (2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0)
-    -- 3 - Moderador - (3, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0)
-    -- 4 - Admin - (4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+    -- 1 - Usuário não verificado/suspenso - (1, 'Conta suspensa', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    -- 2 - Usuário verificado - (2, 'Conta ativa', 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0)
+    -- 3 - Moderador - (3, 'Conta de moderação', 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0)
+    -- 4 - Admin - (4, , 'Conta de administração', 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
 
 CREATE TABLE Nivel_Usuario(
     codigo_nivel INT,
@@ -282,4 +283,5 @@ CREATE TABLE Denuncia (
 
     PRIMARY KEY denuncia_id
 )
+
 
