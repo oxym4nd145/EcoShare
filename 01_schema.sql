@@ -22,14 +22,10 @@ CREATE TABLE Usuario (
     data_nascimento DATE NOT NULL,
     endereco VARCHAR(255),
     cep CHAR(9),
-    nivel_permissao INT,
 
     PRIMARY KEY (id_usuario),
 
     FOREIGN KEY (mensalidade_id) REFERENCES Mensalidade_tipo(id_mensalidade)
-        ON UPDATE CASCADE ON DELETE NO ACTION,
-
-    FOREIGN KEY (nivel_permissao) REFERENCES Nivel_Usuario(codigo_nivel)
         ON UPDATE CASCADE ON DELETE NO ACTION,
 
     CONSTRAINT usuario_com_cpf_e_cnpj CHECK (
@@ -50,14 +46,9 @@ CREATE TABLE Foto_perfil (
 );
 
 -- 4. Tabela de Permissões (RBAC)
-    -- 1 - Usuário não verificado/suspenso - (1, 'Conta suspensa', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-    -- 2 - Usuário verificado - (2, 'Conta ativa', 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0)
-    -- 3 - Moderador - (3, 'Conta de moderação', 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0)
-    -- 4 - Admin - (4, , 'Conta de administração', 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
-
-CREATE TABLE Nivel_Usuario(
-    codigo_nivel INT,
-    nome_nivel VARCHAR(40),
+CREATE TABLE Permissao (
+    id_permissao INT,
+    nome_permissao VARCHAR(40),
     pode_vender BOOLEAN,
     pode_comprar BOOLEAN,
     pode_avaliar BOOLEAN,
@@ -71,7 +62,7 @@ CREATE TABLE Nivel_Usuario(
     pode_operar_em_denuncias BOOLEAN,
     pode_operar_no_sistema BOOLEAN,
 
-    PRIMARY KEY codigo_nivel
+    PRIMARY KEY (codigo_nivel)
 );
 
 -- 5. Tabela de concessões de permissão
