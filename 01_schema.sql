@@ -265,7 +265,7 @@ CREATE TABLE Avaliacao (
 -- 19. Catálogo de Estado de Denúncias
 CREATE TABLE Denuncia_estado(
     id_denuncia_estado INT,
-    denuncia_estado VARCHAR(40)
+    denuncia_estado VARCHAR(40),
 
     PRIMARY KEY (id_denuncia_estado)
 
@@ -274,7 +274,7 @@ CREATE TABLE Denuncia_estado(
 -- 20. Catálogo de Tipo de Objeto
 CREATE TABLE Objeto_tipo(
     id_objeto_tipo INT,
-    objeto_tipo VARCHAR(40)
+    objeto_tipo VARCHAR(40),
 
     PRIMARY KEY (id_objeto_tipo)
 
@@ -309,5 +309,6 @@ CREATE TABLE Denuncia (
         ON UPDATE CASCADE ON DELETE SET NULL
 
 );
+
 
 
