@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoShare - Meu Carrinho</title>
+    <link rel="stylesheet" href="./src/styles/header.css">
+    <link rel="icon" href="./src/imgs/recycle-sign.svg">
+</head>
+<body>
+
+    <header>
+        <div class="header-main">
+            <div class="logo">
+                <a href="index.html"><img src="src/imgs/ecoshare-logo-white.svg" alt="EcoShare"></a>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Buscar itens...">
+                <button class="search-btn"><img src="./src/imgs/search.svg" alt="Buscar" class="search-icon"></button>
+            </div>
+            <div class="nav-links">
+                <a href="perfil.html" class="nav-item">
+                    <img src="./src/imgs/user.svg" alt="Perfil">
+                    <span class="nav-item-text">Meu perfil</span>
+                </a>
+                <a href="mensagens.html" class="nav-item">
+                    <img src="./src/imgs/chat.svg" alt="Mensagens">
+                </a>
+                <a href="carrinho.html" class="nav-item" title="Meu Carrinho">
+                    <img src="./src/imgs/cart.svg" alt="Meu Carrinho">
+                    <span class="nav-item-text"></span>
+                </a>
+            </div>
+        </div>
+        
+        <nav class="subheader">
+            <div class="sub-nav-group">
+                <span class="sub-nav-label">Categorias:</span>
+                <a href="index.html?cat=ferramentas">Ferramentas</a>
+                <a href="index.html?cat=eletronicos">Eletrônicos</a>
+                <a href="index.html?cat=casa">Casa</a>
+                <a href="index.html?cat=lazer">Lazer</a>
+            </div>
+            <div class="sub-nav-divider"></div>
+            <div class="sub-nav-group">
+                <span class="sub-nav-label">Transações:</span>
+                <a href="index.html?tipo=doacao" class="link-doacao">Doações</a>
+                <a href="index.html?tipo=aluguel" class="link-aluguel">Aluguéis</a>
+                <a href="index.html?tipo=emprestimo" class="link-emprestimo">Empréstimos</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="section-header">
+            <h2>Meu Carrinho</h2>
+        </div>
+
+        <div class="cart-container" style="display: grid; grid-template-columns: 1fr 350px; gap: 2rem;">
+            
+            <section class="cart-items" style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: var(--shadow);">
+                <div class="cart-item" style="display: flex; gap: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #eee; margin-bottom: 1.5rem;">
+                    <img src="https://via.placeholder.com/120" alt="Item" style="border-radius: 8px; width: 120px; height: 120px; object-fit: cover;">
+                    <div class="item-details" style="flex: 1;">
+                        <span class="badge type-aluguel">Aluguel</span>
+                        <h3 style="margin: 0.5rem 0;">Furadeira de Impacto Bosch</h3>
+                        <p style="color: #666; font-size: 0.9rem;">Dono: João Silva</p>
+                        <p style="color: var(--primary-green); font-weight: bold; margin-top: 0.5rem;">R$ 15,00 / dia</p>
+                    </div>
+                    <button class="btn-remove" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-weight: bold;">Remover</button>
+                </div>
+
+                <div class="cart-item" style="display: flex; gap: 1.5rem;">
+                    <img src="https://via.placeholder.com/120" alt="Item" style="border-radius: 8px; width: 120px; height: 120px; object-fit: cover;">
+                    <div class="item-details" style="flex: 1;">
+                        <span class="badge" style="background: #e9ecef; color: #495057;">Doação</span>
+                        <h3 style="margin: 0.5rem 0;">Kit de Chaves de Fenda</h3>
+                        <p style="color: #666; font-size: 0.9rem;">Dono: Maria Souza</p>
+                        <p style="color: var(--primary-green); font-weight: bold; margin-top: 0.5rem;">Grátis</p>
+                    </div>
+                    <button class="btn-remove" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-weight: bold;">Remover</button>
+                </div>
+            </section>
+
+            <aside class="cart-summary" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); height: fit-content;">
+                <h3 style="margin-bottom: 1.5rem; border-bottom: 2px solid var(--light-green); padding-bottom: 0.5rem;">Resumo</h3>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <span>Itens para aluguel:</span>
+                    <span>R$ 15,00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <span>Itens para doação:</span>
+                    <span>R$ 0,00</span>
+                </div>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 1rem 0;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; font-weight: bold; font-size: 1.2rem; color: var(--primary-green);">
+                    <span>Total estimado:</span>
+                    <span>R$ 15,00</span>
+                </div>
+                
+                <button class="btn-primary" style="width: 100%; padding: 1rem;">Finalizar Solicitação</button>
+                <a href="index.html" style="display: block; text-align: center; margin-top: 1rem; color: #666; text-decoration: none; font-size: 0.9rem;">Continuar Explorando</a>
+            </aside>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 EcoShare - Sistema de Economia Circular</p>
+    </footer>
+
+</body>
+</html>

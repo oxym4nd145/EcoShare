@@ -2,10 +2,8 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoShare - Home</title>
+    <title>EcoShare - Mensagens</title>
     <link rel="stylesheet" href="./src/styles/header.css">
-    <link rel="icon" href="./src/imgs/recycle-sign.svg">
 </head>
 <body>
     <header>
@@ -51,18 +49,23 @@
     </header>
 
     <main>
-        <div class="section-header">
-            <h2>Explorar Itens</h2>
-        </div>
-        <div class="product-grid" id="items-container">
-            <a href="item.html" class="product-card" style="text-decoration: none; color: inherit;">
-                <img src="https://via.placeholder.com/250x180" alt="Item">
-                <div class="card-info">
-                    <span class="badge type-aluguel">Aluguel</span>
-                    <h3>Equipamento de Jardinagem</h3>
-                    <p class="item-status">Estado: Seminovo</p>
+        <div class="chat-wrapper">
+            <aside class="chat-sidebar">
+                <div class="chat-preview active">
+                    <strong>João Silva</strong>
+                    <p>Sobre: Furadeira</p>
                 </div>
-            </a>
+            </aside>
+            <section class="chat-box">
+                <div class="chat-messages">
+                    <div class="msg received">Olá! O item está disponível?</div>
+                    <div class="msg sent">Sim, podemos combinar a entrega!</div>
+                </div>
+                <div class="chat-controls">
+                    <input type="text" placeholder="Escreva sua mensagem...">
+                    <button class="btn-send">Enviar</button>
+                </div>
+            </section>
         </div>
     </main>
 

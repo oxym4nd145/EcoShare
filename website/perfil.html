@@ -2,10 +2,8 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoShare - Home</title>
+    <title>EcoShare - Meu Perfil</title>
     <link rel="stylesheet" href="./src/styles/header.css">
-    <link rel="icon" href="./src/imgs/recycle-sign.svg">
 </head>
 <body>
     <header>
@@ -51,19 +49,33 @@
     </header>
 
     <main>
-        <div class="section-header">
-            <h2>Explorar Itens</h2>
+        <div class="profile-box">
+            <h2>Meu Painel</h2>
+            <div class="user-info">
+                <p><strong>Usuário:</strong> João Exemplo</p>
+                <p><strong>Nível:</strong> Mensalidade Plus</p>
+            </div>
         </div>
-        <div class="product-grid" id="items-container">
-            <a href="item.html" class="product-card" style="text-decoration: none; color: inherit;">
-                <img src="https://via.placeholder.com/250x180" alt="Item">
-                <div class="card-info">
-                    <span class="badge type-aluguel">Aluguel</span>
-                    <h3>Equipamento de Jardinagem</h3>
-                    <p class="item-status">Estado: Seminovo</p>
-                </div>
-            </a>
-        </div>
+
+        <h3>Minhas Transações</h3>
+        <table class="transaction-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Tipo</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Furadeira</td>
+                    <td>Empréstimo</td>
+                    <td>07/02/2026</td>
+                    <td>Aguardando Coleta</td>
+                </tr>
+            </tbody>
+        </table>
     </main>
 
     <footer><p>&copy; 2026 EcoShare - Sistema de Economia Circular</p></footer>

@@ -1,105 +1,388 @@
-/* 1. Reset Básico */
+:root {
+    --primary-green: #2d6a4f;
+    --light-green: #d8f3dc;
+    --accent-gold: #ffb703;
+    --text-dark: #1b4332;
+    --bg-light: #f8f9fa;
+    --white: #ffffff;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --border-radius-lg: 12px;
+    --border-radius-sm: 6px;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
-/* 2. O Container Principal (A faixa escura) */
+body {
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+/* Header & Navegação */
 header {
-    background-color: #131921; /* Cor Amazon. Para ML use #fff159 */
-    height: 12vh;
-    display: flex; /* Mágica do alinhamento */
+    background-color: var(--primary-green);
+    /* padding: 0.8rem 5%; */
+    padding: 0;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    padding: 0 20px;
-    color: white;
-    gap: 20px; /* Espaço entre os elementos */
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: var(--shadow);
 }
 
-/* 3. Logo */
-.logo {
-    /* font-size: 1.5rem;
-    font-weight: bold; */
-    cursor: pointer;
-    /* Se for ML, mude a cor do texto para preto ou azul */
+.header-main {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 5%;
+}
+
+/* Estilo da Subheader */
+.subheader {
+    background-color: var(--light-green);
+    width: 100%;
+    padding: 0.5rem 5%;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 0.85rem;
+    border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+.sub-nav-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.sub-nav-label {
+    font-weight: bold;
+    color: var(--primary-green);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.subheader a {
+    text-decoration: none;
+    color: var(--text-dark);
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.subheader a:hover {
+    color: var(--primary-green);
+}
+
+.sub-nav-divider {
+    width: 1px;
+    height: 15px;
+    background-color: rgba(0,0,0,0.1);
+}
+
+/* Destaques específicos para tipos de transação */
+.link-aluguel:hover { color: #f77f00 !important; }
+.link-doacao:hover { color: #d62828 !important; }
+.link-emprestimo:hover { color: #4361ee !important; }
+
+/* Ajuste de responsividade para a subheader */
+@media (max-width: 768px) {
+    .subheader {
+        overflow-x: auto; /* Permite scroll horizontal em telas pequenas */
+        white-space: nowrap;
+    }
+    .sub-nav-label { display: none; } /* Esconde o rótulo para poupar espaço no mobile */
 }
 
 .logo img {
-    width: 8rem;
+    height: 3.5rem;
+    transition: transform 0.3s ease;
 }
 
-/* 4. Barra de Busca (Ocupa o espaço restante) */
+.logo img:hover {
+    transform: scale(1.03);
+}
+
 .search-bar {
-    flex-grow: 1; /* Faz a barra crescer e ocupar o centro */
+    flex: 0 1 500px;
     display: flex;
-    border-radius: 4px;
-    overflow: hidden; /* Garante que as bordas arredondadas funcionem */
+    background: var(--white);
+    border-radius: 25px;
+    padding: 0.2rem 1rem;
+    margin: 0 1.5rem;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .search-bar input {
-    width: 100%;
-    padding: 10px;
     border: none;
+    flex: 1;
+    padding: 10px;
     outline: none;
+    font-size: 1rem;
 }
 
-.search-bar button {
-    /* background-color: #febd69; */
+.search-btn {
+    background: none;
     border: none;
-    padding: 10px 15px;
     cursor: pointer;
-    transition: 0.2s;
+    display: flex;
+    align-items: center;
 }
 
 .search-icon {
-    width: 1rem;
+    width: 1.4rem;
+    opacity: 0.7;
 }
 
-.search-bar button:hover {
-    background-color: #f3a847;
-}
-
-/* 5. Navegação (Direita) */
 .nav-links {
     display: flex;
+    gap: 2rem;
     align-items: center;
-    gap: 20px;
-    font-size: 0.9rem;
 }
 
 .nav-item {
     display: flex;
-    flex-direction: column;
-    cursor: pointer;
-    line-height: 1.2;
+    align-items: center;
+    text-decoration: none;
+    transition: opacity 0.2s;
 }
 
-.nav-item span:first-child {
-    font-size: 0.75rem;
+.nav-item:hover {
     opacity: 0.8;
 }
 
-.nav-item span:last-child {
-    font-weight: bold;
+.nav-item-text {
+    margin-left: 0.6rem;
+    color: var(--white);
+    font-weight: 500;
 }
 
-/* Ícone do carrinho */
-.cart {
+.nav-item img {
+    width: 26px;
+}
+
+/* Conteúdo Principal */
+main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 5%;
+    min-height: 80vh;
+}
+
+/* Grid de Produtos (Home) */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 2rem;
+    padding: 2rem 0;
+}
+
+.product-card {
+    background: var(--white);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(0,0,0,0.05);
+    text-decoration: none;
+    color: inherit;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.product-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.card-info {
+    padding: 1.25rem;
+}
+
+.card-info h3 {
+    margin: 0.5rem 0;
+    font-size: 1.2rem;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: var(--light-green);
+    font-weight: bold;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+/* Página de Detalhes do Item */
+.item-view {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    background: var(--white);
+    padding: 2.5rem;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow);
+}
+
+.item-image-large img {
+    width: 100%;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow);
+}
+
+.item-actions {
     display: flex;
-    align-items: flex-end;
-    gap: 5px;
-    font-size: 1.1rem;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--border-radius-sm);
+    border: none;
     font-weight: bold;
+    cursor: pointer;
+    transition: filter 0.2s;
 }
 
-.shopping-cart, .user-icon {
-    width: 2rem;
+.btn-primary { background: var(--primary-green); color: white; }
+.btn-secondary { background: var(--light-green); color: var(--primary-green); }
+.btn-primary:hover, .btn-secondary:hover { filter: brightness(0.9); }
+
+/* Tabelas (Perfil/Transações) */
+.profile-box {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
 }
 
-/* Responsividade básica: some a busca em telas muito pequenas */
-@media (max-width: 600px) {
-    .search-bar {
-        display: none; 
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 1.5rem;
+    background: var(--white);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+th {
+    background-color: #f8fdfa;
+    color: var(--primary-green);
+    text-align: left;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    border-bottom: 2px solid var(--light-green);
+}
+
+td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+/* Chat e Mensagens */
+.chat-wrapper {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    height: 75vh;
+    background: var(--white);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.chat-sidebar {
+    border-right: 1px solid #eee;
+    background: #fafafa;
+}
+
+.chat-preview {
+    padding: 1.5rem;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.chat-preview.active {
+    background: var(--light-green);
+    border-left: 4px solid var(--primary-green);
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: #ffffff;
+}
+
+.message {
+    max-width: 65%;
+    padding: 0.8rem 1.2rem;
+    border-radius: 18px;
+    font-size: 0.95rem;
+}
+
+.sent {
+    align-self: flex-end;
+    background-color: var(--primary-green);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.received {
+    align-self: flex-start;
+    background-color: #f0f2f0;
+    color: var(--text-dark);
+    border-bottom-left-radius: 4px;
+}
+
+.chat-controls {
+    padding: 1.2rem;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 0.8rem;
+}
+
+.chat-controls input {
+    flex: 1;
+    padding: 0.8rem 1.2rem;
+    border-radius: 25px;
+    border: 1px solid #ddd;
+    outline: none;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Responsividade Básica */
+@media (max-width: 768px) {
+    .item-view, .chat-wrapper {
+        grid-template-columns: 1fr;
     }
+    .chat-sidebar { display: none; }
+    .search-bar { display: none; }
 }
