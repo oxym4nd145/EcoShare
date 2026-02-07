@@ -3,6 +3,10 @@ INSERT INTO Mensalidade_tipo (id_mensalidade, tipo_mensalidade) VALUES
 (2, 'Basica'),
 (3, 'Plus');
 
+INSERT INTO TipoPessoa (tipo) VALUES 
+('PF'), 
+('PJ');
+
 INSERT INTO Permissao (id_permissao, nome_permissao, pode_vender,
 pode_comprar, pode_avaliar, pode_enviar_mensagens, pode_denunciar,
 pode_ver_denuncias, pode_operar_em_itens, pode_operar_em_mensagens,
