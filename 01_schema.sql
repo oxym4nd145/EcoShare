@@ -10,42 +10,7 @@ CREATE TABLE Mensalidade_tipo (
     PRIMARY KEY (id_mensalidade)
 );
 
--- 2. Tabela de Usuários
-CREATE TABLE Usuario (
-    id_usuario INT AUTO_INCREMENT,
-    mensalidade_id INT,
-    nome_usuario VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    cpf CHAR(14) UNIQUE,
-    cnpj CHAR(18) UNIQUE,
-    hash_senha VARCHAR(255) NOT NULL,
-    data_nascimento DATE NOT NULL,
-    endereco VARCHAR(255),
-    cep CHAR(9),
-
-    PRIMARY KEY (id_usuario),
-
-    FOREIGN KEY (mensalidade_id) REFERENCES Mensalidade_tipo(id_mensalidade)
-        ON UPDATE CASCADE ON DELETE NO ACTION,
-
-    CONSTRAINT usuario_com_cpf_e_cnpj CHECK (
-    (cpf IS NOT NULL AND cnpj IS NULL) OR
-    (cpf IS NULL AND cnpj IS NOT NULL))
-);
-
--- 3. Tabela de Fotos de Perfil
-CREATE TABLE Foto_perfil (
-    id_foto_perfil INT AUTO_INCREMENT,
-    usuario_id INT NOT NULL,
-    endereco_cdn VARCHAR(255) NOT NULL,
-
-    PRIMARY KEY (id_foto_perfil),
-
-    FOREIGN KEY (usuario_id) REFERENCES Usuario(id_usuario)
-        ON UPDATE CASCADE ON DELETE CASCADE
-);
-
--- 4. Tabela de Permissões (RBAC)
+-- 2. Tabela de Permissões (RBAC)
 CREATE TABLE Permissao (
     id_permissao INT,
     nome_permissao VARCHAR(40),
@@ -65,18 +30,60 @@ CREATE TABLE Permissao (
     PRIMARY KEY (id_permissao)
 );
 
--- 5. Tabela de concessões de permissão
-CREATE TABLE Permissao_usuario (
-    usuario_id INT,
-    permissao_id INT,
+-- 3. Tabela de Fotos
+CREATE TABLE Foto (
+    id_foto INT AUTO_INCREMENT,
+    endereco_cdn VARCHAR(255) NOT NULL,
 
-    PRIMARY KEY (usuario_id, permissao_id),
+    PRIMARY KEY (id_foto),
+);
 
-    FOREIGN KEY (usuario_id) REFERENCES Usuario(id_usuario)
-        ON UPDATE CASCADE ON DELETE CASCADE,
+-- 4. Tabela de Endereços
+CREATE TABLE Endereco (
+    id_endereco INT AUTO_INCREMENT,
+    cep CHAR(9),
+    logradouro VARCHAR(255),
+    numero VARCHAR(10),
+    complemento VARCHAR(255),
+    bairro VARCHAR(255),
+    cidade VARCHAR(255),
+    estado CHAR(2),
 
-    FOREIGN KEY (permissao_id) REFERENCES Permissao(id_permissao)
-        ON UPDATE CASCADE ON DELETE CASCADE
+    PRIMARY KEY (id_endereco)
+);
+
+-- 5. Tabela de Usuários
+CREATE TABLE Usuario (
+    id_usuario INT AUTO_INCREMENT,
+    mensalidade_id INT,
+    nivel_permissao INT NOT NULL,
+    foto_perfil_id INT,
+    nome_usuario VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    cpf CHAR(11) UNIQUE,
+    cnpj CHAR(14) UNIQUE,
+    hash_senha VARCHAR(255) NOT NULL,
+    data_nascimento DATE NOT NULL,
+    endereco INT,
+    cep CHAR(9),
+
+    PRIMARY KEY (id_usuario),
+
+    FOREIGN KEY (mensalidade_id) REFERENCES Mensalidade_tipo(id_mensalidade)
+        ON UPDATE CASCADE ON DELETE NO ACTION,
+
+    FOREIGN KEY (nivel_permissao) REFERENCES Permissao(id_permissao)
+        ON UPDATE CASCADE ON DELETE NO ACTION,
+
+    FOREIGN KEY (foto_perfil_id) REFERENCES Foto(id_foto)
+        ON UPDATE CASCADE ON DELETE SET NULL,
+
+    FOREIGN KEY (endereco) REFERENCES Endereco(id_endereco)
+        ON UPDATE CASCADE ON DELETE SET NULL,
+
+    CONSTRAINT usuario_com_cpf_e_cnpj CHECK (
+    (cpf IS NOT NULL AND cnpj IS NULL) OR
+    (cpf IS NULL AND cnpj IS NOT NULL))
 );
 
 -- 6. Tabela de Categorias de Itens
@@ -130,11 +137,13 @@ CREATE TABLE Item (
 
 -- 10. Tabela de Fotos de Itens
 CREATE TABLE Foto_item (
-    id_foto_item INT AUTO_INCREMENT,
-    item_id INT NOT NULL,
-    endereco_cdn VARCHAR(255) NOT NULL,
+    foto_id INT,
+    item_id INT,
 
-    PRIMARY KEY (id_foto_item),
+    PRIMARY KEY (foto_id, item_id),
+
+    FOREIGN KEY (foto_id) REFERENCES Foto(id_foto)
+        ON UPDATE CASCADE ON DELETE CASCADE,
 
     FOREIGN KEY (item_id) REFERENCES Item(id_item)
         ON UPDATE CASCADE ON DELETE CASCADE
@@ -178,9 +187,19 @@ CREATE TABLE Mensagem (
 CREATE TABLE Ponto_coleta (
     id_coleta INT AUTO_INCREMENT,
     nome_coleta VARCHAR(100) NOT NULL UNIQUE,
-    endereco_coleta VARCHAR(255),
+    endereco_coleta INT NOT NULL,
 
-    PRIMARY KEY (id_coleta)
+    PRIMARY KEY (id_coleta),
+
+    FOREIGN KEY (endereco_coleta) REFERENCES Endereco(id_endereco)
+        ON UPDATE CASCADE ON DELETE NO ACTION
+);
+
+CREATE TABLE Transacao_tipo (
+    id_transacao_tipo INT,
+    tipo_transacao VARCHAR(40) NOT NULL UNIQUE,
+
+    PRIMARY KEY (id_transacao_tipo)
 );
 
 -- 14. Tabela de Transações
@@ -189,6 +208,7 @@ CREATE TABLE Transacao (
     item_id INT NOT NULL,
     comprador_id INT,
     coleta_id INT,
+    tipo_transacao INT NOT NULL,
     data_transacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_coleta TIMESTAMP,
 
@@ -201,7 +221,10 @@ CREATE TABLE Transacao (
         ON UPDATE CASCADE ON DELETE NO ACTION,
 
     FOREIGN KEY (coleta_id) REFERENCES Ponto_coleta(id_coleta)
-        ON UPDATE CASCADE ON DELETE SET NULL
+        ON UPDATE CASCADE ON DELETE SET NULL,
+
+    FOREIGN KEY (tipo_transacao) REFERENCES Transacao_tipo(id_transacao_tipo)
+        ON UPDATE CASCADE ON DELETE NO ACTION
 );
 
 -- 15. Tabela de Transações de Aluguel
@@ -219,9 +242,12 @@ CREATE TABLE Aluguel (
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
--- 16. Tabela de Transações de Doação
-CREATE TABLE Doacao (
+-- 16. Tabela de Transações de Empréstimo
+CREATE TABLE Emprestimo (
     transacao_id INT,
+    prev_devolucao DATE NOT NULL,
+    update_date DATE, -- Gabriel: caso a previsão de devolução mude
+    data_devolucao DATE,
 
     PRIMARY KEY (transacao_id),
 
@@ -229,12 +255,10 @@ CREATE TABLE Doacao (
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
--- 17. Tabela de Transações de Empréstimo
-CREATE TABLE Emprestimo (
+-- 17. Tabela de Transações de Venda
+CREATE TABLE Venda (
     transacao_id INT,
-    prev_devolucao DATE NOT NULL,
-    update_date DATE, -- Gabriel: caso a previsão de devolução mude
-    data_devolucao DATE,
+    preco DECIMAL(10, 2) NOT NULL,
 
     PRIMARY KEY (transacao_id),
 
@@ -307,8 +331,4 @@ CREATE TABLE Denuncia (
 
     FOREIGN KEY (denuncia_responsavel) REFERENCES Usuario(id_usuario)
         ON UPDATE CASCADE ON DELETE SET NULL
-
 );
-
-
-
