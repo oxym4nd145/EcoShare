@@ -60,6 +60,7 @@ CREATE TABLE Usuario (
     tipo_pessoa INT,
     hash_senha VARCHAR(255) NOT NULL,
     data_nascimento DATE NOT NULL,
+    saldo DECIMAL(10, 2) DEFAULT 0.00,
     endereco INT,
     cep CHAR(9),
 
@@ -303,25 +304,61 @@ CREATE TABLE Avaliacao (
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
--- 22. Catálogo de Estado de Denúncias
+-- 22. Tabela de Métodos de Pagamento
+CREATE TABLE Metodo_pagamento_tipo (
+    id_metodo_pagamento INT,
+    nome_metodo_pagamento VARCHAR(40) NOT NULL UNIQUE,
+
+    PRIMARY KEY (id_metodo_pagamento)
+);
+
+-- 23. Tabela de Status de Pagamento
+CREATE TABLE Status_pagamento_tipo (
+    id_status_pagamento INT,
+    nome_status_pagamento VARCHAR(40) NOT NULL UNIQUE,
+
+    PRIMARY KEY (id_status_pagamento)
+);
+
+-- 24. Tabela de Pagamentos
+CREATE TABLE Pagamento (
+    id_pagamento INT,
+    transacao_id INT NOT NULL,
+    metodo_pagamento INT NOT NULL,
+    valor DECIMAL(10,2) NOT NULL,
+    status_pagamento INT,
+    data_pagamento TIMESTAMP,
+    id_gateway_externo VARCHAR(100),
+
+    PRIMARY KEY (id_pagamento),
+
+    FOREIGN KEY (transacao_id) REFERENCES Transacao(id_transacao)
+        ON UPDATE CASCADE ON DELETE NO ACTION,
+
+    FOREIGN KEY (metodo_pagamento) REFERENCES Metodo_pagamento_tipo(id_metodo_pagamento)
+        ON UPDATE CASCADE ON DELETE NO ACTION,
+
+    FOREIGN KEY (status_pagamento) REFERENCES Status_pagamento_tipo(id_status_pagamento)
+        ON UPDATE CASCADE ON DELETE NO ACTION
+);
+
+-- 25. Tabela de Estados de Denúncia
 CREATE TABLE Denuncia_estado(
     id_denuncia_estado INT,
     denuncia_estado VARCHAR(40),
 
     PRIMARY KEY (id_denuncia_estado)
-
 );
 
--- 23. Catálogo de Tipo de Objeto
+-- 26. Tabela de Tipos de Objeto
 CREATE TABLE Objeto_tipo(
     id_objeto_tipo INT,
     objeto_tipo VARCHAR(40),
 
     PRIMARY KEY (id_objeto_tipo)
-
 );
 
--- 24. Registro de Denúncias
+-- 27. Tabela de de Denúncias
 CREATE TABLE Denuncia (
     id_denuncia INT AUTO_INCREMENT,
     denuncia_denunciador_id INT,

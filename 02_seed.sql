@@ -24,6 +24,19 @@ INSERT INTO Disponibilidade_tipo (id_disponibilidade, tipo_disponibilidade) VALU
 (3, 'Em uso'),
 (4, 'Em manutenção');
 
+INSERT INTO Metodo_pagamento_tipo (id_metodo_pagamento, metodo_pagamento) VALUES
+(1, 'Cartão de Crédito'),
+(2, 'Cartão de Débito'),
+(3, 'Boleto Bancário'),
+(4, 'Pix'),
+(5, 'Transferência Bancária');
+
+INSERT INTO Status_pagamento_tipo (id_status_pagamento, nome_status_pagamento) VALUES
+(1, 'Pendente'),
+(2, 'Pago'),
+(3, 'Cancelado'),
+(4, 'Reembolsado');
+
 INSERT INTO Denuncia_estado (id_denuncia_estado, denuncia_estado) VALUES
 (1, 'Aberta'),
 (2, 'Tramitando'),
