@@ -23,7 +23,7 @@ CREATE TABLE Foto (
     id_foto INT AUTO_INCREMENT,
     endereco_cdn VARCHAR(255) NOT NULL,
 
-    PRIMARY KEY (id_foto),
+    PRIMARY KEY (id_foto)
 );
 
 -- 4. Tabela de Endereços

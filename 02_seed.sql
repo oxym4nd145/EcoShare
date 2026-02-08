@@ -24,7 +24,7 @@ INSERT INTO Disponibilidade_tipo (id_disponibilidade, tipo_disponibilidade) VALU
 (3, 'Em uso'),
 (4, 'Em manutenção');
 
-INSERT INTO Metodo_pagamento_tipo (id_metodo_pagamento, metodo_pagamento) VALUES
+INSERT INTO Metodo_pagamento_tipo (id_metodo_pagamento, nome_metodo_pagamento) VALUES
 (1, 'Cartão de Crédito'),
 (2, 'Cartão de Débito'),
 (3, 'Boleto Bancário'),

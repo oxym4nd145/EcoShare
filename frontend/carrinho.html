@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoShare - Meu Carrinho</title>
+    <link rel="stylesheet" href="./src/styles/header.css">
+    <link rel="icon" href="./src/imgs/recycle-sign.svg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="header-main">
+            <div class="logo">
+                <a href="index.html"><img src="src/imgs/ecoshare-logo-white.svg" alt="EcoShare"></a>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Buscar itens...">
+                <button class="search-btn"><img src="./src/imgs/search.svg" alt="Buscar" class="icon search-icon"></button>
+            </div>
+            <div class="nav-links">
+                <a href="perfil.html" class="nav-item">
+                    <img src="./src/imgs/user.svg" alt="Perfil">
+                    <span class="nav-item-text">Meu perfil</span>
+                </a>
+                <a href="mensagens.html" class="nav-item">
+                    <img src="./src/imgs/chat.svg" alt="Mensagens">
+                </a>
+                <a href="carrinho.html" class="nav-item" title="Meu Carrinho">
+                    <img src="./src/imgs/cart.svg" alt="Meu Carrinho">
+                    <span class="nav-item-text"></span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="section-header">
+            <h2>Meu Carrinho</h2>
+        </div>
+
+        <div class="cart-container">
+            
+            <section class="cart-items" id="cart-list">
+                <p>Carregando itens do seu carrinho...</p>
+            </section>
+
+            <div class="summary-total">
+                <span>Total estimado:</span>
+                <span id="total-valor">R$ 0,00</span>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 EcoShare - Sistema de Economia Circular</p>
+    </footer>
+
+    <script src="./src/scripts/load-cart.js"></script>
+    <script src="./src/scripts/load-header.js"></script>
+
+</body>
+</html>
