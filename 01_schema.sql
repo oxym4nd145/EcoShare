@@ -14,18 +14,6 @@ CREATE TABLE Mensalidade_tipo (
 CREATE TABLE Permissao (
     id_permissao INT,
     nome_permissao VARCHAR(40),
-    pode_vender BOOLEAN,
-    pode_comprar BOOLEAN,
-    pode_avaliar BOOLEAN,
-    pode_enviar_mensagens BOOLEAN,
-    pode_denunciar BOOLEAN,
-    pode_ver_denuncias BOOLEAN,
-    pode_operar_em_itens BOOLEAN,
-    pode_operar_em_mensagens BOOLEAN,
-    pode_operar_em_avaliacoes BOOLEAN,
-    pode_operar_em_usuarios BOOLEAN, 
-    pode_operar_em_denuncias BOOLEAN,
-    pode_operar_no_sistema BOOLEAN,
 
     PRIMARY KEY (id_permissao)
 );
@@ -54,7 +42,11 @@ CREATE TABLE Endereco (
 
 -- 5. Tabela de CPF e CNPJ
 CREATE TABLE TipoPessoa (
-  tipo CHAR(2) PRIMARY KEY
+    id_tipo_pessoa INT,
+    tipo CHAR(2) NOT NULL UNIQUE, -- PF/PJ
+    nome_tipo VARCHAR(50) NOT NULL UNIQUE,
+
+    PRIMARY KEY (id_tipo_pessoa)
 );
 
 -- 6. Tabela de Usuários
@@ -65,7 +57,7 @@ CREATE TABLE Usuario (
     foto_perfil_id INT,
     nome_usuario VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
-    tipo_pessoa CHAR(2),
+    tipo_pessoa INT,
     hash_senha VARCHAR(255) NOT NULL,
     data_nascimento DATE NOT NULL,
     endereco INT,
@@ -82,30 +74,32 @@ CREATE TABLE Usuario (
     FOREIGN KEY (foto_perfil_id) REFERENCES Foto(id_foto)
         ON UPDATE CASCADE ON DELETE SET NULL,
 
-    FOREIGN KEY (endereco) REFERENCES Endereco(id_endereco)
-        ON UPDATE CASCADE ON DELETE SET NULL,
-
-    FOREIGN KEY (tipo_pessoa) REFERENCES TipoPessoa(tipo)
+    FOREIGN KEY (tipo_pessoa) REFERENCES TipoPessoa(id_tipo_pessoa)
         ON UPDATE CASCADE ON DELETE NO ACTION,
 
-    CONSTRAINT usuario_com_cpf_e_cnpj CHECK (
-    (cpf IS NOT NULL AND cnpj IS NULL) OR
-    (cpf IS NULL AND cnpj IS NOT NULL))
+    FOREIGN KEY (endereco) REFERENCES Endereco(id_endereco)
+        ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 -- 7. Tabela de CPF 
 CREATE TABLE Cpf (
-    id_usuario INT PRIMARY KEY,
+    usuario_id INT,
     cpf CHAR(11) NOT NULL UNIQUE,
-    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+
+    PRIMARY KEY (usuario_id),
+
+    FOREIGN KEY (usuario_id) REFERENCES Usuario(id_usuario)
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 -- 8. Tabela de CNPJ
 CREATE TABLE Cnpj (
-    id_usuario INT PRIMARY KEY,
+    usuario_id INT,
     cnpj CHAR(14) NOT NULL UNIQUE,
-    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+
+    PRIMARY KEY (usuario_id),
+
+    FOREIGN KEY (usuario_id) REFERENCES Usuario(id_usuario)
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
