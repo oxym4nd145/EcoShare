@@ -16,7 +16,6 @@ CREATE TRIGGER trg_fim_manutencao
 AFTER UPDATE ON Manutencao
 FOR EACH ROW
 BEGIN
-    -- Se a data fim foi preenchida agora
     IF OLD.data_fim_manutencao IS NULL AND NEW.data_fim_manutencao IS NOT NULL THEN
         UPDATE Item
         SET disponibilidade = 1
@@ -25,122 +24,96 @@ BEGIN
 END;
 //
 
--- 3. Mudança de estado ao confirmar um Aluguel (Muda item para 3 - Em uso)
-CREATE TRIGGER trg_novo_aluguel
-AFTER INSERT ON Aluguel
-FOR EACH ROW
-BEGIN
-    -- Busca o item_id através da tabela pai Transacao
-    UPDATE Item
-    SET disponibilidade = 3
-    WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
-END;
-//
-
--- 4. Mudança de estado ao confirmar um Empréstimo (Muda item para 3 - Em uso)
-CREATE TRIGGER trg_novo_emprestimo
-AFTER INSERT ON Emprestimo
-FOR EACH ROW
-BEGIN
-    UPDATE Item
-    SET disponibilidade = 3
-    WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
-END;
-//
-
--- 5. Mudança de estado em caso de doação (Muda item para 2 - Indisponível)
-CREATE TRIGGER trg_nova_doacao
-AFTER INSERT ON Doacao
-FOR EACH ROW
-BEGIN
-    UPDATE Item
-    SET disponibilidade = 2
-    WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
-END;
-//
-
--- 6. Verifica disponibilidade antes de criar Transação
-CREATE TRIGGER trg_valida_disponibilidade_item
+-- 3. Valida disponibilidade e impede autonegociação
+CREATE TRIGGER trg_valida_transacao
 BEFORE INSERT ON Transacao
 FOR EACH ROW
 BEGIN
     DECLARE estado_atual INT;
+    DECLARE id_dono INT;
     
-    SELECT disponibilidade INTO estado_atual 
+    SELECT disponibilidade, dono_id INTO estado_atual, id_dono 
     FROM Item 
     WHERE id_item = NEW.item_id;
     
-    -- Se NÃO for 1 (Disponível), cancela a operação
+    -- Verifica se o item está Disponível (1)
     IF estado_atual != 1 THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Operação negada: Este item não está disponível para transação.';
+        SET MESSAGE_TEXT = 'Operação negada: Item indisponível.';
     END IF;
-END;
-//
 
--- 7. Impede autonegociação
-CREATE TRIGGER trg_impede_autonegociacao
-BEFORE INSERT ON Transacao
-FOR EACH ROW
-BEGIN
-    DECLARE id_dono INT;
-
-    -- Busca o dono do item
-    SELECT dono_id INTO id_dono 
-    FROM Item 
-    WHERE id_item = NEW.item_id;
-
+    -- Impede que o dono compre/alugue de si mesmo
     IF id_dono = NEW.comprador_id THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Erro: O proprietário não pode realizar transações com seu próprio item.';
+        SET MESSAGE_TEXT = 'Erro: Proprietário não pode transacionar o próprio item.';
     END IF;
 END;
 //
 
--- 8. Alteração do status após devolução de ALUGUEL
+-- 4. Atualiza estado após confirmação de DOAÇÂO
+CREATE TRIGGER trg_pos_transacao
+AFTER INSERT ON Transacao
+FOR EACH ROW
+BEGIN
+    -- Como Doação não tem tabela filha, atualizamos a disponibilidade aqui
+    -- Doação (1) -> Indisponível (2)
+    IF NEW.tipo_transacao = 1 THEN
+        UPDATE Item SET disponibilidade = 2 WHERE id_item = NEW.item_id;
+    END IF;
+END;
+//
+
+-- 5. Atualiza estado após confirmação de VENDA
+CREATE TRIGGER trg_detalhe_venda
+AFTER INSERT ON Venda
+FOR EACH ROW
+BEGIN
+    UPDATE Item 
+    SET disponibilidade = 2 
+    WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
+END;
+//
+
+-- 6. Atualiza estado após confirmação de ALUGUEL
+CREATE TRIGGER trg_detalhe_aluguel AFTER INSERT ON Aluguel FOR EACH ROW
+BEGIN
+    UPDATE Item SET disponibilidade = 3
+    WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
+END;
+//
+
+-- 5. Atualiza estado após confirmação de EMPRÉSTIMO
+CREATE TRIGGER trg_detalhe_emprestimo AFTER INSERT ON Emprestimo FOR EACH ROW
+BEGIN
+    UPDATE Item SET disponibilidade = 3
+    WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
+END;
+//
+
+-- 6. Alteração do status após devolução de ALUGUEL
 CREATE TRIGGER trg_devolucao_aluguel
 AFTER UPDATE ON Aluguel
 FOR EACH ROW
 BEGIN
-    DECLARE id_do_item INT;
-
-    -- Se a data de devolução foi preenchida
     IF OLD.data_devolucao IS NULL AND NEW.data_devolucao IS NOT NULL THEN
-        
-        -- Descobre o item associado à transação
-        SELECT item_id INTO id_do_item 
-        FROM Transacao 
-        WHERE id_transacao = NEW.transacao_id;
-
-        -- Volta a ser Disponível (1) apenas se estiver Em uso (3)
-        UPDATE Item
-        SET disponibilidade = 1 
-        WHERE id_item = id_do_item 
-        AND disponibilidade = 3;
-        
+        UPDATE Item i
+        JOIN Transacao t ON i.id_item = t.item_id
+        SET i.disponibilidade = 1
+        WHERE t.id_transacao = NEW.transacao_id;
     END IF;
 END;
 //
 
--- 9. Alteração do status após devolução de EMPRÉSTIMO
+-- 8. Alteração do status após devolução de EMPRÉSTIMO
 CREATE TRIGGER trg_devolucao_emprestimo
 AFTER UPDATE ON Emprestimo
 FOR EACH ROW
 BEGIN
-    DECLARE id_do_item INT;
-
-    -- Se a data de devolução foi preenchida
     IF OLD.data_devolucao IS NULL AND NEW.data_devolucao IS NOT NULL THEN
-        
-        SELECT item_id INTO id_do_item 
-        FROM Transacao 
-        WHERE id_transacao = NEW.transacao_id;
-
-        UPDATE Item
-        SET disponibilidade = 1 
-        WHERE id_item = id_do_item 
-        AND disponibilidade = 3;
-        
+        UPDATE Item i
+        JOIN Transacao t ON i.id_item = t.item_id
+        SET i.disponibilidade = 1
+        WHERE t.id_transacao = NEW.transacao_id;
     END IF;
 END;
 //

@@ -67,23 +67,14 @@ GROUP BY
 -- 6. View de Transações por Tipo
 CREATE VIEW Transacao_por_tipo AS
 SELECT
-    CASE
-        WHEN a.transacao_id IS NOT NULL THEN 'Aluguel'
-        WHEN d.transacao_id IS NOT NULL THEN 'Doação'
-        WHEN e.transacao_id IS NOT NULL THEN 'Empréstimo'
-        ELSE 'Outro'
-    END AS tipo_transacao,
+    tt.tipo_transacao AS tipo_transacao,
     COUNT(t.id_transacao) AS total_transacoes
 FROM
     Transacao t
-LEFT JOIN
-    Aluguel a ON t.id_transacao = a.transacao_id
-LEFT JOIN
-    Doacao d ON t.id_transacao = d.transacao_id
-LEFT JOIN
-    Emprestimo e ON t.id_transacao = e.transacao_id
+INNER JOIN 
+    Transacao_tipo tt ON t.tipo_transacao = tt.id_transacao_tipo
 GROUP BY
-    tipo_transacao;
+    tt.tipo_transacao;
 
 -- 7. View de Itens em Manutenção
 CREATE VIEW Item_em_manutencao AS
