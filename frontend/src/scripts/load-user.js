@@ -14,7 +14,7 @@ async function carregarPerfil() {
 
         // Foto de perfil
         const imgElement = document.getElementById('user-foto'); // Verifique o ID no perfil.html
-        if (user.foto) {
+        if (user.endereco_cdn) {
             imgElement.src = user.endereco_cdn; 
         } else {
             imgElement.src = 'src/imgs/user-gray.svg'; // Imagem padrão caso o banco retorne nulo
@@ -65,6 +65,45 @@ async function carregarPerfil() {
     } catch (error) {
         console.error("Erro ao carregar perfil:", error);
 
+    }
+}
+
+
+async function carregarMeusItens() {
+    const container = document.getElementById('meus-itens-container');
+    const usuarioId = localStorage.getItem('usuario_id');
+
+    if (!usuarioId) {
+        container.innerHTML = '<p>Faça login para ver seus itens.</p>';
+        return;
+    }
+
+    try {
+        const resposta = await fetch(`http://localhost:3000/api/usuario/${usuarioId}/itens`);
+        const itens = await resposta.json();
+
+        if (itens.length === 0) {
+            container.innerHTML = '<p>Você ainda não cadastrou nenhum item.</p>';
+            return;
+        }
+
+        container.innerHTML = itens.map(item => `
+            <a href="item.html?id=${item._id}" class="product-card">
+                <div class="img-container">
+                    <img src="${item.foto || './src/imgs/recycle-sign.svg'}" alt="${item.nome}">
+                </div>
+                <div class="card-info">
+                    <span class="badge type-${item.tipo?.toLowerCase().replace(/\s+/g, '-')}">
+                        ${item.tipo}
+                    </span>
+                    <h3>${item.nome}</h3>
+                </div>
+            </a>
+        `).join('');
+
+    } catch (erro) {
+        console.error("Erro:", erro);
+        container.innerHTML = '<p>Erro ao carregar inventário.</p>';
     }
 }
 
@@ -145,5 +184,6 @@ function setElementText(id, text) {
 
 document.addEventListener('DOMContentLoaded', () => {
     carregarPerfil();
+    carregarMeusItens();
     carregarHistoricoTransacoes();
 });

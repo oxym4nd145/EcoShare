@@ -172,6 +172,36 @@ app.get('/api/itens/:id', async (req, res) => {
     }
 });
 
+app.get('/api/usuario/:usuarioId/itens', async (req, res) => {
+    try {
+        // Agora o nome aqui casa com o nome na URL acima
+        const { usuarioId } = req.params; 
+        
+        const query = `
+            SELECT 
+                i.id_item AS _id, 
+                i.nome_item AS nome, 
+                disp.tipo_disponibilidade AS tipo,
+                ANY_VALUE(f.endereco_cdn) AS foto
+            FROM Item i
+            LEFT JOIN Disponibilidade_tipo disp ON i.disponibilidade = disp.id_disponibilidade
+            LEFT JOIN Foto_item fitem ON fitem.item_id = i.id_item
+            LEFT JOIN Foto f ON fitem.foto_id = f.id_foto
+            WHERE i.dono_id = ?
+            GROUP BY i.id_item`;
+
+        const [rows] = await db.execute(query, [usuarioId]);
+        
+        // Correção do console.log (estava com vírgula em vez de ponto)
+        console.log('Itens encontrados para o usuário:', usuarioId); 
+        
+        res.json(rows);
+    } catch (error) {
+        console.error("Erro na rota de itens do usuário:", error);
+        res.status(500).json({ error: 'Erro ao carregar seus itens' });
+    }
+});
+
 // Rota para buscar avaliações filtradas pelo ID do Item
 app.get('/api/itens/:id/avaliacoes', async (req, res) => {
     try {
@@ -192,7 +222,6 @@ app.get('/api/itens/:id/avaliacoes', async (req, res) => {
 
         const [rows] = await db.execute(queryAvaliacoes, [id]);
         res.json(rows);
-        console.log('Busca sucesso');
     } catch (error) {
         console.error("Erro SQL nas avaliações:", error);
         res.status(500).json({ error: 'Erro ao buscar avaliações' });

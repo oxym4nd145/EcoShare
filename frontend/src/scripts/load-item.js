@@ -1,5 +1,5 @@
 // Variável global para armazenar os dados carregados
-let itemDadosCompletos = null;
+let itemCarregado = null;
 
 function formatarClasse(texto) {
     if (!texto) return 'default';
@@ -14,7 +14,6 @@ function formatarClasse(texto) {
 async function carregarDetalhes() {
     const urlParams = new URLSearchParams(window.location.search);
     const itemId = urlParams.get('id');
-    console.log(itemId);
 
     try {
         // Dispara as 3 rotas simultaneamente
@@ -25,6 +24,7 @@ async function carregarDetalhes() {
         ]);
 
         const item = await resItem.json();
+        itemCarregado = item;
         const avaliacoes = await resAvaliacoes.json();
         const manutencoes = await resManutencao.json();
 
@@ -51,7 +51,6 @@ async function carregarDetalhes() {
 }
 
 function renderizarAvaliacoes(avaliacoes) {
-    console.log(avaliacoes);
     const container = document.getElementById('lista-avaliacoes');
     if (!container) return;
 
@@ -98,7 +97,7 @@ function renderizarManutencoes(manutencoes) {
 }
 
 function gerenciarCarrinho() {
-    if (!itemDadosCompletos) {
+    if (!itemCarregado) {
         alert("Aguarde o carregamento dos dados.");
         return;
     }
@@ -106,10 +105,10 @@ function gerenciarCarrinho() {
     let carrinho = JSON.parse(localStorage.getItem('ecoshare_cart')) || [];
     
     // O ID no seu SQL unificado é retornado como _id
-    const jaExiste = carrinho.find(i => i._id === itemDadosCompletos._id);
+    const jaExiste = carrinho.find(i => i._id === itemCarregado._id);
     
     if (!jaExiste) {
-        carrinho.push(itemDadosCompletos);
+        carrinho.push(itemCarregado);
         localStorage.setItem('ecoshare_cart', JSON.stringify(carrinho));
         alert('Item adicionado ao seu carrinho!');
         window.location.href = 'carrinho.html';
