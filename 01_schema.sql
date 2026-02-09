@@ -61,8 +61,7 @@ CREATE TABLE Usuario (
     hash_senha VARCHAR(255) NOT NULL,
     data_nascimento DATE NOT NULL,
     saldo DECIMAL(10, 2) DEFAULT 0.00,
-    endereco INT,
-    cep CHAR(9),
+    endereco_id INT,
 
     PRIMARY KEY (id_usuario),
 
@@ -78,7 +77,7 @@ CREATE TABLE Usuario (
     FOREIGN KEY (tipo_pessoa) REFERENCES TipoPessoa(id_tipo_pessoa)
         ON UPDATE CASCADE ON DELETE NO ACTION,
 
-    FOREIGN KEY (endereco) REFERENCES Endereco(id_endereco)
+    FOREIGN KEY (endereco_id) REFERENCES Endereco(id_endereco)
         ON UPDATE CASCADE ON DELETE SET NULL
 );
 
