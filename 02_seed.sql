@@ -11,7 +11,8 @@ INSERT INTO Permissao (id_permissao, nome_permissao) VALUES
 (1, 'Conta inativa'),
 (2, 'Conta ativa'),
 (3,'Conta de moderação'),
-(4,'Conta de administração');
+(4,'Conta de administração'),
+(5,'Conta banida');
 
 INSERT INTO Estado_tipo (id_estado, tipo_estado) VALUES
 (1, 'Novo'),
