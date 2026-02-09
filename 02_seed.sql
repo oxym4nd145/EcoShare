@@ -18,7 +18,7 @@ INSERT INTO Estado_tipo (id_estado, tipo_estado) VALUES
 (2, 'Seminovo'),
 (3, 'Usado');
 
-INSERT INTO Disponibilidade_tipo (id_disponibilidade, tipo_disponibilidade) VALUES
+INSERT INTO Status_tipo (id_status, tipo_status) VALUES
 (1, 'Disponível'),
 (2, 'Indisponível'),
 (3, 'Em uso'),

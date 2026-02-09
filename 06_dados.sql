@@ -78,7 +78,7 @@ WHERE tipo_pessoa = 2;
 INSERT INTO Categoria_tipo (tipo_categoria) VALUES 
 ('Ferramentas'), ('Eletrônicos'), ('Jardinagem'), ('Esporte e Lazer'), ('Utensílios Domésticos');
 
-INSERT INTO Item (dono_id, nome_item, categoria, disponibilidade, estado_conservacao, descricao) VALUES
+INSERT INTO Item (dono_id, nome_item, categoria, status_item, estado_conservacao, descricao) VALUES
 (1, 'Furadeira Bosch', 1, 1, 1, 'Furadeira de impacto semi-nova, com maleta.'),
 (2, 'Monitor 24 Pol', 2, 1, 2, 'Monitor LED Dell, resolução Full HD.'),
 (3, 'Cortador de Grama', 3, 1, 3, 'Cortador elétrico, ideal para jardins pequenos.'),

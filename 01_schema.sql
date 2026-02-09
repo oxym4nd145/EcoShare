@@ -29,13 +29,13 @@ CREATE TABLE Foto (
 -- 4. Tabela de Endereços
 CREATE TABLE Endereco (
     id_endereco INT AUTO_INCREMENT,
-    cep CHAR(9),
-    logradouro VARCHAR(255),
+    cep CHAR(9) NOT NULL,
+    logradouro VARCHAR(255) NOT NULL,
     numero VARCHAR(10),
     complemento VARCHAR(255),
-    bairro VARCHAR(255),
-    cidade VARCHAR(255),
-    estado CHAR(2),
+    bairro VARCHAR(255) NOT NULL,
+    cidade VARCHAR(255) NOT NULL,
+    estado CHAR(2) NOT NULL,
 
     PRIMARY KEY (id_endereco)
 );
@@ -120,11 +120,11 @@ CREATE TABLE Estado_tipo (
 );
 
 -- 11. Tabela de Disponibilidades de Itens
-CREATE TABLE Disponibilidade_tipo (
-    id_disponibilidade INT AUTO_INCREMENT,
-    tipo_disponibilidade VARCHAR(50) NOT NULL UNIQUE, -- Disponível, Não disponível (doado), Em uso (emprestad/alugado), Em manutenção
+CREATE TABLE Status_tipo (
+    id_status INT AUTO_INCREMENT,
+    tipo_status VARCHAR(50) NOT NULL UNIQUE, -- Disponível, Não disponível (doado), Em uso (emprestado/alugado), Em manutenção
 
-    PRIMARY KEY (id_disponibilidade)
+    PRIMARY KEY (id_status)
 );
 
 -- 12. Tabela de Itens
@@ -133,7 +133,7 @@ CREATE TABLE Item (
     dono_id INT NOT NULL,
     nome_item VARCHAR(100) NOT NULL,
     categoria INT,
-    disponibilidade INT NOT NULL, 
+    status_item INT NOT NULL, 
     descricao TEXT,
     estado_conservacao INT NOT NULL,
 
@@ -145,7 +145,7 @@ CREATE TABLE Item (
     FOREIGN KEY (dono_id) REFERENCES Usuario(id_usuario)
         ON UPDATE CASCADE ON DELETE NO ACTION,
 
-    FOREIGN KEY (disponibilidade) REFERENCES Disponibilidade_tipo(id_disponibilidade)
+    FOREIGN KEY (status_item) REFERENCES Status_tipo(id_status)
         ON UPDATE CASCADE ON DELETE NO ACTION,
 
     FOREIGN KEY (estado_conservacao) REFERENCES Estado_tipo(id_estado)
@@ -350,7 +350,7 @@ CREATE TABLE Denuncia_estado(
     PRIMARY KEY (id_denuncia_estado)
 );
 
--- 27. Tabela de Tipos de Objeto
+-- 27. Tabela de Tipos de Objeto de Denúncia
 CREATE TABLE Objeto_tipo(
     id_objeto_tipo INT,
     objeto_tipo VARCHAR(40),
@@ -358,15 +358,15 @@ CREATE TABLE Objeto_tipo(
     PRIMARY KEY (id_objeto_tipo)
 );
 
--- 28. Tabela de de Denúncias
+-- 28. Tabela de Denúncias
 CREATE TABLE Denuncia (
     id_denuncia INT AUTO_INCREMENT,
-    denuncia_denunciador_id INT,
-    denuncia_alvo_id INT,
-    denuncia_alvo_tipo INT,
-    denuncia_conteudo TINYTEXT,
-    denuncia_data DATE,
-    denuncia_estado INT,
+    denuncia_denunciador_id INT NOT NULL,
+    denuncia_alvo_id INT NOT NULL,
+    denuncia_alvo_tipo INT NOT NULL,
+    denuncia_conteudo TINYTEXT NOT NULL,
+    denuncia_data DATE NOT NULL,
+    denuncia_estado INT NOT NULL,
     denuncia_responsavel INT,
 
     PRIMARY KEY (id_denuncia),

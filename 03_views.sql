@@ -26,7 +26,7 @@ JOIN
 JOIN
     Categoria_tipo c ON i.categoria = c.id_categoria
 WHERE   
-    disponibilidade = (SELECT id_disponibilidade FROM Disponibilidade_tipo WHERE tipo_disponibilidade = 'Disponível');
+    i.status_item = (SELECT id_status FROM Status_tipo WHERE tipo_status = 'Disponível');
 
 -- 3. View de Itens por Categoria
 CREATE VIEW Item_por_categoria AS
