@@ -52,12 +52,12 @@ CREATE TABLE TipoPessoa (
 -- 6. Tabela de Usuários
 CREATE TABLE Usuario (
     id_usuario INT AUTO_INCREMENT,
-    mensalidade_id INT,
+    mensalidade_id INT NOT NULL,
     nivel_permissao INT NOT NULL,
     foto_perfil_id INT,
     nome_usuario VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
-    tipo_pessoa INT,
+    tipo_pessoa INT NOT NULL,
     hash_senha VARCHAR(255) NOT NULL,
     data_nascimento DATE NOT NULL,
     saldo DECIMAL(10, 2) DEFAULT 0.00,
@@ -133,9 +133,9 @@ CREATE TABLE Item (
     dono_id INT NOT NULL,
     nome_item VARCHAR(100) NOT NULL,
     categoria INT,
-    disponibilidade INT, 
+    disponibilidade INT NOT NULL, 
     descricao TEXT,
-    estado_conservacao INT,
+    estado_conservacao INT NOT NULL,
 
     PRIMARY KEY (id_item),
 
@@ -212,6 +212,7 @@ CREATE TABLE Ponto_coleta (
         ON UPDATE CASCADE ON DELETE NO ACTION
 );
 
+-- 17. Tabela de Tipos de Transação
 CREATE TABLE Transacao_tipo (
     id_transacao_tipo INT,
     tipo_transacao VARCHAR(40) NOT NULL UNIQUE,
@@ -219,7 +220,7 @@ CREATE TABLE Transacao_tipo (
     PRIMARY KEY (id_transacao_tipo)
 );
 
--- 17. Tabela de Transações
+-- 18. Tabela de Transações
 CREATE TABLE Transacao (
     id_transacao INT AUTO_INCREMENT,
     item_id INT NOT NULL,
@@ -244,7 +245,7 @@ CREATE TABLE Transacao (
         ON UPDATE CASCADE ON DELETE NO ACTION
 );
 
--- 18. Tabela de Transações de Aluguel
+-- 19. Tabela de Transações de Aluguel
 CREATE TABLE Aluguel (
     transacao_id INT,
     prev_devolucao DATE NOT NULL,
@@ -259,7 +260,7 @@ CREATE TABLE Aluguel (
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
--- 19. Tabela de Transações de Empréstimo
+-- 20. Tabela de Transações de Empréstimo
 CREATE TABLE Emprestimo (
     transacao_id INT,
     prev_devolucao DATE NOT NULL,
@@ -272,7 +273,7 @@ CREATE TABLE Emprestimo (
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
--- 20. Tabela de Transações de Venda
+-- 21. Tabela de Transações de Venda
 CREATE TABLE Venda (
     transacao_id INT,
     preco DECIMAL(10, 2) NOT NULL,
@@ -283,7 +284,7 @@ CREATE TABLE Venda (
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
--- 21. Tabela de Avaliações
+-- 22. Tabela de Avaliações
 CREATE TABLE Avaliacao (
     transacao_id INT,
     avaliador_id INT,
@@ -303,7 +304,7 @@ CREATE TABLE Avaliacao (
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
--- 22. Tabela de Métodos de Pagamento
+-- 23. Tabela de Métodos de Pagamento
 CREATE TABLE Metodo_pagamento_tipo (
     id_metodo_pagamento INT,
     nome_metodo_pagamento VARCHAR(40) NOT NULL UNIQUE,
@@ -311,7 +312,7 @@ CREATE TABLE Metodo_pagamento_tipo (
     PRIMARY KEY (id_metodo_pagamento)
 );
 
--- 23. Tabela de Status de Pagamento
+-- 24. Tabela de Status de Pagamento
 CREATE TABLE Status_pagamento_tipo (
     id_status_pagamento INT,
     nome_status_pagamento VARCHAR(40) NOT NULL UNIQUE,
@@ -319,7 +320,7 @@ CREATE TABLE Status_pagamento_tipo (
     PRIMARY KEY (id_status_pagamento)
 );
 
--- 24. Tabela de Pagamentos
+-- 25. Tabela de Pagamentos
 CREATE TABLE Pagamento (
     id_pagamento INT,
     transacao_id INT NOT NULL,
@@ -341,7 +342,7 @@ CREATE TABLE Pagamento (
         ON UPDATE CASCADE ON DELETE NO ACTION
 );
 
--- 25. Tabela de Estados de Denúncia
+-- 26. Tabela de Estados de Denúncia
 CREATE TABLE Denuncia_estado(
     id_denuncia_estado INT,
     denuncia_estado VARCHAR(40),
@@ -349,7 +350,7 @@ CREATE TABLE Denuncia_estado(
     PRIMARY KEY (id_denuncia_estado)
 );
 
--- 26. Tabela de Tipos de Objeto
+-- 27. Tabela de Tipos de Objeto
 CREATE TABLE Objeto_tipo(
     id_objeto_tipo INT,
     objeto_tipo VARCHAR(40),
@@ -357,7 +358,7 @@ CREATE TABLE Objeto_tipo(
     PRIMARY KEY (id_objeto_tipo)
 );
 
--- 27. Tabela de de Denúncias
+-- 28. Tabela de de Denúncias
 CREATE TABLE Denuncia (
     id_denuncia INT AUTO_INCREMENT,
     denuncia_denunciador_id INT,
