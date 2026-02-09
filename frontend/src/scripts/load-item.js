@@ -21,7 +21,7 @@ async function carregarDetalhes() {
         document.getElementById('item-nome').innerText = itemCarregado.nome;
         document.getElementById('item-categoria').innerText = itemCarregado.categoria;
         document.getElementById('item-descricao').innerText = itemCarregado.descricao;
-        document.getElementById('item-img').src = itemCarregado.imagem || 'https://via.placeholder.com/500x400';
+        document.getElementById('item-img').src = itemCarregado.imagem || 'src/imgs/recycle-sign.svg';
 
         // Estiliza o badge de acordo com o tipo (opcional)
         const badge = document.getElementById('item-categoria');

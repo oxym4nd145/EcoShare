@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoShare - Login</title>
+    <link rel="icon" href="./src/imgs/recycle-sign.svg">
+    <link rel="stylesheet" href="./src/styles/global.css">
+    <link rel="stylesheet" href="./src/styles/login.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="login-container">
+        <a href="index.html"><img src="./src/imgs/ecoshare-logo-black.svg" alt="EcoShare" class="logo-login"></a>
+        
+        <h2>Acessar Conta</h2>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" required placeholder="seu@email.com">
+            </div>
+
+            <div class="form-group">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" required placeholder="Sua senha">
+            </div>
+
+            <button type="submit" class="btn-entrar">ENTRAR</button>
+        </form>
+
+        <div id="msgErro" class="error-message"></div>
+
+        <div class="footer-links">
+            <p>Ainda não tem conta? <a href="#">Cadastre-se</a></p>
+        </div>
+    </div>
+
+    <script src="./src/scripts/load-login.js"></script>
+    <script src="./src/scripts/load-header.js"></script>
+
+</body>
+</html>

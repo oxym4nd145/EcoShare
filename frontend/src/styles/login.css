@@ -1,0 +1,85 @@
+body {
+    /* Centraliza o login na tela */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-image: url("../imgs/nature-background.jpg") !important;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    height: 100vh;
+}
+
+.login-container {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-container h2 {
+    color: var(--primary-green);
+    margin-bottom: 25px;
+}
+
+.logo-login {
+    width: 15rem;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus { border-color: var(--primary-green); }
+
+.btn-entrar {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--primary-green);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+}
+
+.btn-entrar:hover { background-color: #1b5e20; }
+
+.error-message {
+    color: #d32f2f;
+    background-color: #ffebee;
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 15px;
+    font-size: 0.9rem;
+    display: none;
+}
+
+.footer-links { margin-top: 20px; font-size: 0.85rem; }
+.footer-links a { color: var(--primary-green); text-decoration: none; font-weight: 600; }

@@ -1,6 +1,6 @@
 INSERT INTO Mensalidade_tipo (id_mensalidade, tipo_mensalidade) VALUES
 (1, 'Sem mensalidade'),
-(2, 'Basica'),
+(2, 'Básica'),
 (3, 'Plus');
 
 INSERT INTO TipoPessoa (id_tipo_pessoa, tipo, nome_tipo) VALUES 
@@ -96,16 +96,16 @@ GRANT INSERT ON ECOSHARE.Denuncia TO user_app;
 GRANT UPDATE ON ECOSHARE.Item TO user_app;
 
 -- Criação de usuários e atribuição de papéis
-DROP USER IF EXISTS 'app_admin', 'app_mod', 'app_user';
+DROP USER IF EXISTS 'app_admin'@'localhost', 'app_mod', 'app_user';
 
-CREATE USER 'app_admin' IDENTIFIED BY 'senha1';
+CREATE USER 'app_admin'@'localhost' IDENTIFIED BY 'senha1';
 CREATE USER 'app_mod' IDENTIFIED BY 'senha2';
 CREATE USER 'app_user' IDENTIFIED BY 'senha3';
 
-GRANT admin TO 'app_admin';
+GRANT admin TO 'app_admin'@'localhost';
 GRANT moderador TO 'app_mod';
 GRANT user_app TO 'app_user';
 
-SET DEFAULT ROLE admin TO 'app_admin';
+SET DEFAULT ROLE admin TO 'app_admin'@'localhost';
 SET DEFAULT ROLE moderador TO 'app_mod';
 SET DEFAULT ROLE user_app TO 'app_user';
