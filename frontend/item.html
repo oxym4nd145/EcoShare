@@ -71,31 +71,72 @@
         </nav>
     </header>
 
-    <main>
+    <main class="container">
         <a href="index.html" class="btn-back">
             <img src="./src/imgs/arrow-left.svg" class="icon back-icon">
             <span>Voltar para busca</span>
         </a>
+
         <div class="item-view">
             <div class="item-image-large">
-                <img id="item-img" src="https://via.placeholder.com/500x400" alt="Imagem do Item">
+                <img id="item-img" src="./src/imgs/recycle-sign.svg" alt="Imagem do Item">
             </div>
+
             <div class="item-specs">
                 <h1 id="item-nome">Carregando...</h1>
-                <span id="item-categoria" class="badge">Categoria</span>
-                <p id="item-descricao" class="description">Aguarde...</p>
+                
+                <div class="item-badges">
+                    <span id="item-categoria" class="badge">Categoria</span>
+                    <span id="item-estado" class="badge badge-outline">Estado</span>
+                    <span id="item-disponibilidade" class="badge badge-outline">Disponibilidade</span>
+                </div>
+
+                <p id="item-descricao" class="description">Carregando descrição do item...</p>
+
+                <div class="owner-card">
+                    <p><strong>Dono:</strong> <span id="item-dono">...</span></p>
+                    <p><strong>Local:</strong> <span id="item-localizacao">...</span></p>
+                </div>
+
                 <div class="item-actions">
                     <button class="btn-primary btn-solicitar" id="btn-solicitar">
                         <span>Solicitar Agora</span>
-                        <img src="./src/imgs/add-cart.svg" alt="Shopping cart with plus sign" class="icon">
+                        <img src="./src/imgs/add-cart.svg" alt="Adicionar" class="icon">
                     </button>
                     <a href="mensagens.html" class="btn-secondary btn-chat">
-                        <span>Conversar com Dono</span>
+                        <span>Conversar</span>
                         <img src="./src/imgs/chat-green.svg" class="icon">
                     </a>
                 </div>
             </div>
         </div>
+        <div class="extra-details-grid">
+            
+            <section class="info-section">
+                <h2><img src="./src/imgs/gear.svg" class="icon-small icon"> Histórico de Manutenção</h2>
+                <div class="table-responsive">
+                    <table class="maintenance-table">
+                        <thead>
+                            <tr>
+                                <th>Data Início</th>
+                                <th>Descrição</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-manutencao">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="info-section">
+                <h2><img src="./src/imgs/star.svg" class="icon-small icon"> Avaliações</h2>
+                <div id="lista-avaliacoes" class="reviews-list">
+                    </div>
+            </section>
+
+        </div>
+
     </main>
 
     <footer><p>&copy; 2026 EcoShare - Sistema de Economia Circular</p></footer>

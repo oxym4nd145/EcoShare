@@ -136,7 +136,8 @@ app.get('/api/itens', async (req, res) => {
     }
 });
 
-// 2. ROTA DETALHES: Buscar um item por ID
+// Rota para buscar detalhes completos de um item específico
+// 1. Buscar apenas dados principais do item
 app.get('/api/itens/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -144,30 +145,75 @@ app.get('/api/itens/:id', async (req, res) => {
             SELECT 
                 i.id_item AS _id, 
                 i.nome_item AS nome, 
-                i.descricao, 
-                cat.tipo_categoria AS categoria,
+                i.descricao AS descricao, 
+                cat.tipo_categoria AS categoria, 
                 disp.tipo_disponibilidade AS tipo,
+                est.tipo_estado AS estado,
+                u.nome_usuario AS dono,
+                endr.cidade AS localizacao,
                 f.endereco_cdn AS foto
             FROM Item i 
             LEFT JOIN Categoria_tipo cat ON i.categoria = cat.id_categoria 
             LEFT JOIN Disponibilidade_tipo disp ON i.disponibilidade = disp.id_disponibilidade 
-            -- ADICIONADO OS JOINS ABAIXO PARA PEGAR A FOTO
+            LEFT JOIN Estado_tipo est ON i.estado_conservacao = est.id_estado
+            LEFT JOIN Usuario u ON i.dono_id = u.id_usuario
+            LEFT JOIN Endereco endr ON u.endereco = endr.id_endereco
             LEFT JOIN Foto_item fitem ON fitem.item_id = i.id_item
             LEFT JOIN Foto f ON fitem.foto_id = f.id_foto
-            WHERE i.id_item = ?
-            LIMIT 1`; // Garante que pega apenas uma linha (caso tenha múltiplas fotos, pega a primeira)
-            
-        const [rows] = await db.execute(query, [id]);
-        
-        // Verificação de segurança caso o ID não exista
-        if (rows.length === 0) {
-            return res.status(404).json({ error: 'Item não encontrado' });
-        }
+            WHERE i.id_item = ? 
+            LIMIT 1`;
 
+        const [rows] = await db.execute(query, [id]);
+        if (rows.length === 0) return res.status(404).json({ error: 'Item não encontrado' });
         res.json(rows[0]);
     } catch (error) {
-        console.error(error); // Bom para debugar no console
+        console.error(error);
         res.status(500).json({ error: 'Erro ao buscar item' });
+    }
+});
+
+// Rota para buscar avaliações filtradas pelo ID do Item
+app.get('/api/itens/:id/avaliacoes', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const queryAvaliacoes = `
+            SELECT 
+                a.nota, 
+                a.avaliacao AS comentario, 
+                t.data_transacao AS data, 
+                u.nome_usuario
+            FROM Avaliacao a 
+            INNER JOIN Transacao t ON a.transacao_id = t.id_transacao
+            INNER JOIN Usuario u ON a.avaliador_id = u.id_usuario 
+            WHERE t.item_id = ?
+            ORDER BY t.data_transacao DESC
+        `;
+
+        const [rows] = await db.execute(queryAvaliacoes, [id]);
+        res.json(rows);
+        console.log('Busca sucesso');
+    } catch (error) {
+        console.error("Erro SQL nas avaliações:", error);
+        res.status(500).json({ error: 'Erro ao buscar avaliações' });
+    }
+});
+
+// 3. Buscar histórico de manutenção
+app.get('/api/itens/:id/manutencao', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const query = `
+            SELECT data_inicio_manutencao AS data_inicio, data_fim_manutencao AS data_fim 
+            FROM Manutencao 
+            WHERE item_id = ? 
+            ORDER BY data_inicio_manutencao DESC`;
+
+        const [rows] = await db.execute(query, [id]);
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao buscar manutenção' });
     }
 });
 

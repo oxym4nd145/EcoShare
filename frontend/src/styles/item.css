@@ -28,8 +28,8 @@
     font-size: 0.95rem;
 }
 
-.item-description {
-    margin: 2rem 0;
+.description {
+    margin-top: 1.5rem;
     line-height: 1.8;
 }
 
@@ -37,6 +37,145 @@
     display: flex;
     gap: 1rem;
     margin-top: 2rem;
+}
+
+/* --- Organização dos Novos Detalhes --- */
+
+.extra-details-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr; /* Manutenção um pouco mais larga que avaliações */
+    gap: 2rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+}
+
+.info-section {
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow);
+}
+
+.info-section h2 {
+    font-size: 1.25rem;
+    color: var(--primary-green);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.icon-small {
+    width: 20px;
+    height: 20px;
+}
+
+/* --- Estilização da Tabela de Manutenção --- */
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.maintenance-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.maintenance-table th {
+    text-align: left;
+    background: #f8f9fa;
+    padding: 12px;
+    color: #555;
+    border-bottom: 2px solid var(--primary-green);
+}
+
+.maintenance-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    color: #444;
+}
+
+/* Status Pill (Balão de status) */
+.status-pill {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.status-pill.finished {
+    background: #e1f5fe;
+    color: #0288d1;
+}
+
+.status-pill.ongoing {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+/* --- Estilização dos Cards de Avaliação --- */
+
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.review-card {
+    padding: 1rem;
+    border-left: 3px solid var(--primary-green);
+    background: #fcfcfc;
+    border-radius: 4px;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.stars {
+    color: #ffc107; /* Cor dourada para estrelas */
+    letter-spacing: 2px;
+}
+
+.review-comment {
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+    margin-bottom: 0.5rem;
+}
+
+.review-date {
+    display: block;
+    font-size: 0.75rem;
+    color: #999;
+}
+
+/* --- Owner Card (Dono do Item) --- */
+
+.owner-card {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: #f0fdf4; /* Verde bem claro */
+    border-radius: 8px;
+    border: 1px dashed var(--primary-green);
+}
+
+.owner-card p {
+    margin: 0.2rem 0;
+    font-size: 0.9rem;
+}
+
+/* --- Responsividade --- */
+
+@media (max-width: 992px) {
+    .extra-details-grid {
+        grid-template-columns: 1fr; /* Empilha as seções em telas menores */
+    }
 }
 
 @media (max-width: 768px) {
