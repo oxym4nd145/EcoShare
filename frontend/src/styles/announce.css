@@ -1,0 +1,78 @@
+.anuncio-container {
+    max-width: 960px;
+    margin: 40px auto;
+    padding: 0 20px 40px;
+}
+
+.section-header {
+    margin-bottom: 24px;
+}
+
+.section-subtitle {
+    color: #c9c9c9;
+    margin-top: 8px;
+}
+
+.anuncio-form {
+    background: #1f1f1f;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+    background: #2a2a2a;
+    border: 1px solid #3d3d3d;
+    color: #fff;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.form-field label {
+    font-weight: 600;
+    color: #eaeaea;
+}
+
+.form-msg {
+    min-height: 20px;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.form-msg.error {
+    color: #ff6b6b;
+}
+
+.form-msg.success {
+    color: #78e08f;
+}
+
+.btn-primary {
+    background: #29b17a;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #22a26e;
+}

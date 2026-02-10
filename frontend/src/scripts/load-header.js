@@ -2,14 +2,16 @@ async function gerenciarInterfaceUsuario() {
     const usuarioId = localStorage.getItem('usuario_id');
     const textoBoasVindas = document.getElementById('boas-vindas');
     const btnLogout = document.getElementById('btn-logout');
+    const linkAnunciar = document.getElementById('link-anunciar');
 
     // Se não houver elementos no HTML, para aqui para não dar erro
-    if (!textoBoasVindas || !btnLogout) return;
+    if (!textoBoasVindas || !btnLogout || !linkAnunciar) return;
 
     if (!usuarioId) {
         // Estado: Deslogado
         textoBoasVindas.innerText = 'Olá, visitante';
         btnLogout.style.display = 'none';
+        linkAnunciar.style.display = 'none';
         return; 
     }
 
@@ -20,12 +22,14 @@ async function gerenciarInterfaceUsuario() {
         if (user && user.nome_usuario) {
             textoBoasVindas.innerText = `Olá, ${user.nome_usuario}`;
             btnLogout.style.display = 'flex'; // Certifique-se que o CSS não oculte o botão
+            linkAnunciar.style.display = 'flex';
         }
     } catch (erro) {
         console.error("Erro ao buscar dados do usuário:", erro);
         // Mesmo com erro na API, se tem ID, mostramos o botão de sair
         textoBoasVindas.innerText = 'Olá, Usuário';
         btnLogout.style.display = 'flex';
+        linkAnunciar.style.display = 'flex';
     }
 }
 

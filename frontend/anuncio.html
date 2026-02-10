@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoShare - Home</title>
+    <title>EcoShare - Anunciar Item</title>
     <link rel="icon" href="./src/imgs/recycle-sign.svg">
     <link rel="stylesheet" href="./src/styles/global.css">
-    <link rel="stylesheet" href="./src/styles/home.css">
+    <link rel="stylesheet" href="./src/styles/anuncio.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    
 </head>
 <body>
     <header>
@@ -28,7 +27,7 @@
                     <img src="./src/imgs/user.svg" alt="Perfil">
                     <span id="boas-vindas" class="nav-item-text">Meu perfil</span>
                 </a>
-                <a href="announce.html" id="link-anunciar" class="nav-item" style="display: none;" title="Anunciar item">
+                <a href="anuncio.html" id="link-anunciar" class="nav-item" style="display: none;" title="Anunciar item">
                     <img src="./src/imgs/cart-check.svg" alt="Anunciar">
                 </a>
                 <button id="btn-logout" onclick="fazerLogout()" class="btn-sair" style="display: none;">
@@ -43,53 +42,57 @@
                 </a>
             </div>
         </div>
-        
-        <nav class="subheader">
-            <nav class="sub-nav">
-                <div class="sub-nav-group filter-group">
-                    <select id="filtro-categoria" class="filter-select" onchange="aplicarFiltros()">
-                        <option value="all">Todas Categorias</option>
-                    </select>
+    </header>
 
-                    <select id="filtro-transacao" class="filter-select" onchange="aplicarFiltros()">
-                        <option value="all">Todas Transações</option>
-                    </select>
+    <main class="anuncio-container">
+        <div class="section-header">
+            <h2>Anunciar Item</h2>
+            <p class="section-subtitle">Preencha os dados do item conforme o cadastro do sistema.</p>
+        </div>
 
-                    <select id="filtro-estado" class="filter-select" onchange="aplicarFiltros()">
-                        <option value="all">Todos Estados</option>
-                    </select>
+        <form id="form-anuncio" class="anuncio-form">
+            <div class="form-grid">
+                <div class="form-field">
+                    <label for="nome_item">Nome do item *</label>
+                    <input type="text" id="nome_item" name="nome_item" placeholder="Ex.: Furadeira Bosch" required>
+                </div>
 
-                    <select id="filtro-uf" class="filter-select" onchange="aplicarFiltros()">
-                        <option value="all">Todas UFs</option>
-                    </select>
-
-                    <select id="filtro-disponibilidade" class="filter-select" onchange="aplicarFiltros()">
-                        <option value="all">Todas Disponibilidades</option>
+                <div class="form-field">
+                    <label for="categoria">Categoria</label>
+                    <select id="categoria" name="categoria">
+                        <option value="">Selecione</option>
                     </select>
                 </div>
 
-            </nav>
-            <a href="index.html" class="btn-limpar-link">
-                <button class="btn-limpar">
-                    <img src="./src/imgs/filter.svg" alt="Filter Icon" class="icon limpar-icon">
-                    <span>Limpar Filtros</span>
-                </button>
-            </a>
-        </nav>
-    </header>
+                <div class="form-field">
+                    <label for="status_item">Status *</label>
+                    <select id="status_item" name="status_item" required>
+                        <option value="">Selecione</option>
+                    </select>
+                </div>
 
-    <main>
-        <div class="section-header">
-            <h2>Explorar Itens</h2>
-        </div>
-        <div class="product-grid" id="items-container">
-            <p>Carregando itens ecológicos...</p>
-        </div>
+                <div class="form-field">
+                    <label for="estado_conservacao">Estado de conservação *</label>
+                    <select id="estado_conservacao" name="estado_conservacao" required>
+                        <option value="">Selecione</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label for="descricao">Descrição</label>
+                <textarea id="descricao" name="descricao" rows="4" placeholder="Descreva o item, condições e observações..."></textarea>
+            </div>
+
+            <div id="form-msg" class="form-msg" aria-live="polite"></div>
+
+            <button type="submit" class="btn-primary">Anunciar</button>
+        </form>
     </main>
 
     <footer><p>&copy; 2026 EcoShare - Sistema de Economia Circular</p></footer>
 
-    <script src="./src/scripts/load-itens.js"></script>
+    <script src="./src/scripts/anunciar-item.js"></script>
     <script src="./src/scripts/load-header.js"></script>
 </body>
 </html>
