@@ -50,6 +50,25 @@
     margin-top: 20px;
 }
 
+.meus-itens-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-icon {
+    width: 1.8rem;
+}
+
+.meus-itens-btns {
+    display: flex;
+    gap: 1rem;
+}
+
+.meus-itens-btns a {
+    text-decoration: none;
+}
+
 @media (max-width: 768px) {
     .profile-grid { grid-template-columns: 1fr; }
 }

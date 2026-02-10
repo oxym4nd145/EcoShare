@@ -1,3 +1,13 @@
+function formatarClasse(texto) {
+    if (!texto) return 'default';
+    return texto
+        .toLowerCase()               // 1. Tudo minúsculo
+        .normalize('NFD')            // 2. Separa os acentos das letras
+        .replace(/[\u0300-\u036f]/g, "") // 3. Remove os acentos
+        .replace(/\s+/g, '-')        // 4. Troca ESPAÇOS por TRAÇOS
+        .trim();                     // 5. Remove espaços extras nas pontas
+}
+
 async function carregarPerfil() {
     // --- PEGAR ID DO LOGIN ---
     const USUARIO_ID = localStorage.getItem('usuario_id');
@@ -93,7 +103,7 @@ async function carregarMeusItens() {
                     <img src="${item.foto || './src/imgs/recycle-sign.svg'}" alt="${item.nome}">
                 </div>
                 <div class="card-info">
-                    <span class="badge type-${item.tipo?.toLowerCase().replace(/\s+/g, '-')}">
+                    <span class="badge type-${formatarClasse(item.tipo)}">
                         ${item.tipo}
                     </span>
                     <h3>${item.nome}</h3>

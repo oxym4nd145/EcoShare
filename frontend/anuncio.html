@@ -15,33 +15,33 @@
 <body>
     <header>
         <div class="header-main">
-            <div class="logo">
-                <a href="index.html"><img src="src/imgs/ecoshare-logo-white.svg" alt="EcoShare"></a>
+                <div class="logo">
+                    <a href="index.html"><img src="src/imgs/ecoshare-logo-white.svg" alt="EcoShare"></a>
+                </div>
+                <div class="search-bar">
+                    <input type="text" placeholder="Buscar itens...">
+                    <button class="search-btn"><img src="./src/imgs/search.svg" alt="Buscar" class="icon search-icon"></button>
+                </div>
+                <div class="nav-links">
+                    <a href="perfil.html" class="nav-item">
+                        <img src="./src/imgs/user.svg" alt="Perfil">
+                        <span id="boas-vindas" class="nav-item-text">Meu perfil</span>
+                    </a>
+                    <button id="btn-logout" onclick="fazerLogout()" class="btn-sair" style="display: none;">
+                        <img src="./src/imgs/out.svg" alt="Sair" class="icon">
+                    </button>
+                    <a href="announce.html" id="link-anunciar" class="nav-item" style="display: none;" title="Anunciar item">
+                        <img src="./src/imgs/add-circle.svg" alt="Anunciar" class="icon">
+                    </a>
+                    <a href="mensagens.html" class="nav-item">
+                        <img src="./src/imgs/chat.svg" alt="Mensagens">
+                    </a>
+                    <a href="carrinho.html" class="nav-item" title="Meu Carrinho">
+                        <img src="./src/imgs/cart.svg" alt="Meu Carrinho">
+                        <span class="nav-item-text"></span>
+                    </a>
+                </div>
             </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Buscar itens...">
-                <button class="search-btn"><img src="./src/imgs/search.svg" alt="Buscar" class="icon search-icon"></button>
-            </div>
-            <div class="nav-links">
-                <a href="perfil.html" class="nav-item">
-                    <img src="./src/imgs/user.svg" alt="Perfil">
-                    <span id="boas-vindas" class="nav-item-text">Meu perfil</span>
-                </a>
-                <a href="anuncio.html" id="link-anunciar" class="nav-item" style="display: none;" title="Anunciar item">
-                    <img src="./src/imgs/cart-check.svg" alt="Anunciar">
-                </a>
-                <button id="btn-logout" onclick="fazerLogout()" class="btn-sair" style="display: none;">
-                    <img src="./src/imgs/out.svg" alt="Sair" class="icon">
-                </button>
-                <a href="mensagens.html" class="nav-item">
-                    <img src="./src/imgs/chat.svg" alt="Mensagens">
-                </a>
-                <a href="carrinho.html" class="nav-item" title="Meu Carrinho">
-                    <img src="./src/imgs/cart.svg" alt="Meu Carrinho">
-                    <span class="nav-item-text"></span>
-                </a>
-            </div>
-        </div>
     </header>
 
     <main class="anuncio-container">

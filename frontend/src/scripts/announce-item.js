@@ -114,6 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setMessage('Item anunciado com sucesso!', 'success');
             form.reset();
+            setTimeout(() => {
+                window.location.href = 'perfil.html';
+            }, 2000);
         } catch (err) {
             console.error(err);
             setMessage(err.message || 'Erro ao anunciar item', 'error');
