@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Rota de Login
+// --- Rota de Login ---
 app.post('/api/login', async (req, res) => {
     const { email, senha } = req.body;
 
@@ -15,9 +15,8 @@ app.post('/api/login', async (req, res) => {
     }
 
     try {
-        // CORREÇÃO: Usando 'hash_senha' conforme seu esquema
+        // Busca o usuário. Nota: Em produção, use bcrypt para comparar o hash_senha
         const query = 'SELECT id_usuario, nome_usuario FROM Usuario WHERE email = ? AND hash_senha = ?';
-        
         const [rows] = await db.execute(query, [email, senha]);
 
         if (rows.length > 0) {
@@ -36,7 +35,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Rota para buscar as categorias dinâmicas
+// --- Rotas Auxiliares (Categorias, Status, etc) ---
 app.get('/api/categorias', async (req, res) => {
     try {
         const [rows] = await db.execute('SELECT * FROM Categoria_tipo');
@@ -46,7 +45,6 @@ app.get('/api/categorias', async (req, res) => {
     }
 });
 
-// Buscar Tipos de Transação
 app.get('/api/transacoes', async (req, res) => {
     try {
         const [rows] = await db.execute('SELECT * FROM Transacao_tipo');
@@ -56,10 +54,140 @@ app.get('/api/transacoes', async (req, res) => {
     }
 });
 
+// --- Listagem de Itens (Home com Filtros) ---
+app.get('/api/itens', async (req, res) => {
+    try {
+        const { cat, disp, est, busca } = req.query; 
+        
+        let query = `
+            SELECT 
+                i.id_item AS _id, 
+                i.nome_item AS nome, 
+                i.descricao, 
+                cat.tipo_categoria AS categoria, 
+                est.tipo_estado AS condicao, 
+                disp.tipo_status AS tipo,
+                MAX(f.endereco_cdn) AS foto
+            FROM Item i 
+            LEFT JOIN Categoria_tipo cat ON i.categoria = cat.id_categoria 
+            LEFT JOIN Estado_tipo est ON i.estado_conservacao = est.id_estado 
+            LEFT JOIN Status_tipo disp ON i.status_item = disp.id_status
+            LEFT JOIN Foto_item fitem ON fitem.item_id = i.id_item
+            LEFT JOIN Foto f ON fitem.foto_id = f.id_foto
+            WHERE 1=1
+        `;
+
+        const params = [];
+
+        if (cat) { query += ` AND i.categoria = ?`; params.push(cat); }
+        if (disp) { query += ` AND i.status_item = ?`; params.push(disp); }
+        if (est) { query += ` AND i.estado_conservacao = ?`; params.push(est); }
+        if (busca) {
+            query += ` AND (i.nome_item LIKE ? OR i.descricao LIKE ?)`;
+            params.push(`%${busca}%`, `%${busca}%`);
+        }
+
+        query += ` GROUP BY i.id_item`;
+
+        const [rows] = await db.execute(query, params);
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao buscar itens' });
+    }
+});
+
+// --- Detalhes de um Item ---
+app.get('/api/itens/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const query = `
+            SELECT 
+                i.id_item AS _id, 
+                i.nome_item AS nome, 
+                i.descricao AS descricao, 
+                cat.tipo_categoria AS categoria, 
+                disp.tipo_status AS tipo,
+                est.tipo_estado AS estado,
+                u.nome_usuario AS dono,
+                endr.cidade AS localizacao,
+                f.endereco_cdn AS foto
+            FROM Item i 
+            LEFT JOIN Categoria_tipo cat ON i.categoria = cat.id_categoria 
+            LEFT JOIN Status_tipo disp ON i.status_item = disp.id_status 
+            LEFT JOIN Estado_tipo est ON i.estado_conservacao = est.id_estado
+            LEFT JOIN Usuario u ON i.dono_id = u.id_usuario
+            LEFT JOIN Endereco endr ON u.endereco_id = endr.id_endereco
+            LEFT JOIN Foto_item fitem ON fitem.item_id = i.id_item
+            LEFT JOIN Foto f ON fitem.foto_id = f.id_foto
+            WHERE i.id_item = ? 
+            LIMIT 1`;
+
+        const [rows] = await db.execute(query, [id]);
+        if (rows.length === 0) return res.status(404).json({ error: 'Item não encontrado' });
+        res.json(rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao buscar item' });
+    }
+});
+
+// --- Perfil Completo do Usuário ---
+app.get('/api/usuario/completo/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const query = `
+            SELECT 
+                u.nome_usuario, u.email, u.saldo, u.data_nascimento,
+                m.tipo_mensalidade,
+                tp.nome_tipo AS nome_tipo_pessoa,
+                e.cep, e.logradouro, e.numero, e.bairro, e.cidade, e.estado, 
+                f.endereco_cdn AS foto_perfil
+            FROM Usuario u
+            LEFT JOIN Mensalidade_tipo m ON u.mensalidade_id = m.id_mensalidade
+            LEFT JOIN TipoPessoa tp ON u.tipo_pessoa = tp.id_tipo_pessoa
+            LEFT JOIN Endereco e ON u.endereco_id = e.id_endereco -- Alterado para endereco_id
+            LEFT JOIN Foto f ON f.id_foto = u.foto_perfil_id
+            WHERE u.id_usuario = ?
+        `;
+        const [rows] = await db.execute(query, [id]);
+        res.json(rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: "Erro ao buscar dados" });
+    }
+});
+
+// --- Cadastro de Usuário ---
+app.post('/api/cadastrar', async (req, res) => {
+    const { nome, email, senha, data_nascimento, nivel_permissao, mensalidade_id } = req.body;
+
+    try {
+        const sql = `
+            INSERT INTO Usuario 
+            (nome_usuario, email, hash_senha, data_nascimento, nivel_permissao, mensalidade_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+        
+        // Usando await db.execute para consistência com o restante do arquivo
+        await db.execute(sql, [
+            nome, 
+            email, 
+            senha, 
+            data_nascimento, 
+            nivel_permissao || 2, // Default: Conta Ativa
+            mensalidade_id || 1,   // Default: Sem mensalidade
+        ]);
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error("ERRO NO CADASTRO:", err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // Buscar Tipos de Disponibilidade
 app.get('/api/disponibilidades', async (req, res) => {
     try {
-        const [rows] = await db.execute('SELECT * FROM Disponibilidade_tipo');
+        const [rows] = await db.execute('SELECT * FROM Status_tipo');
         res.json(rows);
     } catch (error) {
         res.status(500).json({ error: 'Erro ao buscar tipos de disponibilidades' });
@@ -76,102 +204,6 @@ app.get('/api/estados', async (req, res) => {
     }
 });
 
-// 1. ROTA HOME: Listar todos os itens
-
-app.get('/api/itens', async (req, res) => {
-    try {
-        // Captura os novos parâmetros da URL
-        const { cat, disp, est, busca } = req.query; 
-        
-        let query = `
-            SELECT 
-                i.id_item AS _id, 
-                i.nome_item AS nome, 
-                i.descricao, 
-                cat.tipo_categoria AS categoria, 
-                est.tipo_estado AS condicao, 
-                disp.tipo_disponibilidade AS tipo,
-                MAX(f.endereco_cdn) AS foto
-            FROM Item i 
-            LEFT JOIN Categoria_tipo cat ON i.categoria = cat.id_categoria 
-            LEFT JOIN Estado_tipo est ON i.estado_conservacao = est.id_estado 
-            LEFT JOIN Disponibilidade_tipo disp ON i.disponibilidade = disp.id_disponibilidade
-            LEFT JOIN Foto_item fitem ON fitem.item_id = i.id_item
-            LEFT JOIN Foto f ON fitem.foto_id = f.id_foto
-            WHERE i.disponibilidade IS NOT NULL
-        `;
-
-        const params = [];
-
-        // Filtro de Categoria
-        if (cat) {
-            query += ` AND i.categoria = ?`;
-            params.push(cat);
-        }
-
-        // NOVO: Filtro de Disponibilidade (Transação)
-        if (disp) {
-            query += ` AND i.disponibilidade = ?`;
-            params.push(disp);
-        }
-
-        // NOVO: Filtro de Estado de Conservação
-        if (est) {
-            query += ` AND i.estado_conservacao = ?`;
-            params.push(est);
-        }
-
-        if (busca) {
-            query += ` AND (i.nome_item LIKE ? OR i.descricao LIKE ?)`;
-            params.push(`%${busca}%`, `%${busca}%`);
-        }
-
-        query += ` GROUP BY i.id_item`;
-
-        const [rows] = await db.execute(query, params);
-        res.json(rows);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Erro ao buscar itens' });
-    }
-});
-
-// Rota para buscar detalhes completos de um item específico
-// 1. Buscar apenas dados principais do item
-app.get('/api/itens/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const query = `
-            SELECT 
-                i.id_item AS _id, 
-                i.nome_item AS nome, 
-                i.descricao AS descricao, 
-                cat.tipo_categoria AS categoria, 
-                disp.tipo_disponibilidade AS tipo,
-                est.tipo_estado AS estado,
-                u.nome_usuario AS dono,
-                endr.cidade AS localizacao,
-                f.endereco_cdn AS foto
-            FROM Item i 
-            LEFT JOIN Categoria_tipo cat ON i.categoria = cat.id_categoria 
-            LEFT JOIN Disponibilidade_tipo disp ON i.disponibilidade = disp.id_disponibilidade 
-            LEFT JOIN Estado_tipo est ON i.estado_conservacao = est.id_estado
-            LEFT JOIN Usuario u ON i.dono_id = u.id_usuario
-            LEFT JOIN Endereco endr ON u.endereco = endr.id_endereco
-            LEFT JOIN Foto_item fitem ON fitem.item_id = i.id_item
-            LEFT JOIN Foto f ON fitem.foto_id = f.id_foto
-            WHERE i.id_item = ? 
-            LIMIT 1`;
-
-        const [rows] = await db.execute(query, [id]);
-        if (rows.length === 0) return res.status(404).json({ error: 'Item não encontrado' });
-        res.json(rows[0]);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Erro ao buscar item' });
-    }
-});
-
 app.get('/api/usuario/:usuarioId/itens', async (req, res) => {
     try {
         // Agora o nome aqui casa com o nome na URL acima
@@ -181,10 +213,10 @@ app.get('/api/usuario/:usuarioId/itens', async (req, res) => {
             SELECT 
                 i.id_item AS _id, 
                 i.nome_item AS nome, 
-                disp.tipo_disponibilidade AS tipo,
+                disp.tipo_status AS tipo,
                 ANY_VALUE(f.endereco_cdn) AS foto
             FROM Item i
-            LEFT JOIN Disponibilidade_tipo disp ON i.disponibilidade = disp.id_disponibilidade
+            LEFT JOIN Status_tipo disp ON i.status_item = disp.id_status
             LEFT JOIN Foto_item fitem ON fitem.item_id = i.id_item
             LEFT JOIN Foto f ON fitem.foto_id = f.id_foto
             WHERE i.dono_id = ?
@@ -319,29 +351,6 @@ app.post('/api/mensagens', async (req, res) => {
         res.status(201).json({ message: "Mensagem enviada!" });
     } catch (error) {
         res.status(500).json({ error: "Erro ao enviar mensagem" });
-    }
-});
-
-app.get('/api/usuario/completo/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const query = `
-            SELECT 
-                u.nome_usuario, u.email, u.saldo, u.data_nascimento, u.cep,
-                m.tipo_mensalidade,
-                tp.nome_tipo AS nome_tipo_pessoa,
-                e.logradouro, e.numero, e.bairro, e.cidade, e.estado, f.endereco_cdn
-            FROM Usuario u
-            LEFT JOIN Mensalidade_tipo m ON u.mensalidade_id = m.id_mensalidade
-            LEFT JOIN TipoPessoa tp ON u.tipo_pessoa = tp.id_tipo_pessoa
-            LEFT JOIN Endereco e ON u.endereco = e.id_endereco
-            LEFT JOIN FOTO f ON f.id_foto = u.foto_perfil_id
-            WHERE u.id_usuario = ?
-        `;
-        const [rows] = await db.execute(query, [id]);
-        res.json(rows[0]);
-    } catch (error) {
-        res.status(500).json({ error: "Erro ao buscar dados do perfil" });
     }
 });
 

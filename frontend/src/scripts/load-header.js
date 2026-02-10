@@ -30,96 +30,148 @@ async function gerenciarInterfaceUsuario() {
 }
 
 async function carregarCategoriasHeader() {
-    const navGroup = document.getElementById('categorias-nav');
-    if (!navGroup) return; 
+    const selectCategoria = document.getElementById('filtro-categoria');
+    if (!selectCategoria) return;
 
-    // 1. Obtém o ID da categoria que está na URL atual
     const urlParams = new URLSearchParams(window.location.search);
-    const categoriaAtiva = urlParams.get('cat');
+    const catAtiva = urlParams.get('cat');
 
     try {
         const resposta = await fetch('http://localhost:3000/api/categorias');
         const categorias = await resposta.json();
 
-        navGroup.innerHTML = '<span class="sub-nav-label">Categorias:</span>';
+        // Limpa as opções existentes (exceto a primeira "Todas")
+        selectCategoria.innerHTML = '<option value="">Todas Categorias</option>';
 
         categorias.forEach(cat => {
-            const link = document.createElement('a');
-            link.classList.add('categoria-text');
-            link.href = `index.html?cat=${cat.id_categoria}`;
-            link.textContent = cat.tipo_categoria;
-
-            // 2. Compara o ID do link com o ID da URL
-            // Usamos == (dois iguais) porque um pode ser string e outro número
-            if (categoriaAtiva == cat.id_categoria) {
-                link.style.fontWeight = 'bold';
-                link.style.textDecoration = 'underline'; // Opcional: ajuda a destacar mais
-                link.style.color = 'var(--primary-green)'; // Garante que fique visível
+            const option = document.createElement('option');
+            option.value = cat.id_categoria; // Use o nome da coluna do seu banco (id_categoria)
+            option.textContent = cat.tipo_categoria;
+            
+            if (catAtiva == cat.id_categoria) {
+                option.selected = true;
             }
-
-            navGroup.appendChild(link);
+            selectCategoria.appendChild(option);
         });
-
     } catch (erro) {
-        console.error("Erro ao carregar categorias:", erro);
+        console.error("Erro ao carregar categorias no select:", erro);
     }
 }
 
 async function carregarFiltrosSelect() {
-    const selectDisponibilidade = document.getElementById('filtro-disponibilidade');
-    if (!selectDisponibilidade) return;
-
+    // 1. Pega os valores atuais da URL
     const urlParams = new URLSearchParams(window.location.search);
-    const buscaTermo = urlParams.get('busca');
-    
-    // REGRA DE OURO: Só é '1' se não houver NENHUM parâmetro na URL
-    let disponibilidadeAtiva = urlParams.get('disp');
-    if (disponibilidadeAtiva === null && urlParams.toString() === "") {
-        disponibilidadeAtiva = '1';
-    }
+    const catAtiva = urlParams.get('cat');
+    const dispAtiva = urlParams.get('disp');
+    const estAtivo = urlParams.get('est');
+    const transAtiva = urlParams.get('trans');
+
+    const selectDisponibilidade = document.getElementById('filtro-disponibilidade');
+    const selectEstado = document.getElementById('filtro-estado');
+    const selectTransacao = document.getElementById('filtro-transacao');
 
     try {
-        const resposta = await fetch('http://localhost:3000/api/disponibilidades');
-        const disponibilidades = await resposta.json();
+        // --- Disponibilidades (Status_tipo) ---
+        const resDisp = await fetch('http://localhost:3000/api/disponibilidades');
+        const disponibilidades = await resDisp.json();
+
+        selectDisponibilidade.innerHTML = '<option value="all">Todas Disponibilidades</option>';
+
+        const temParametros = window.location.search.length > 0;
 
         disponibilidades.forEach(d => {
             const option = document.createElement('option');
-            option.value = d.id_disponibilidade; 
-            option.textContent = d.tipo_disponibilidade; 
+            option.value = d.id_status;
+            option.textContent = d.tipo_status;
             
-            // Compara com a regra que definimos acima
-            if (d.id_disponibilidade == disponibilidadeAtiva) {
+            // Se o ID está na URL, marca como selecionado
+            if (dispAtiva == d.id_status) {
                 option.selected = true;
             }
+            
+            // SÓ entra aqui se o usuário digitou o endereço do site puro, sem clicar em nada
+            if (!temParametros && d.id_status == 1) {
+                option.selected = true;
+            }
+
             selectDisponibilidade.appendChild(option);
         });
+
+        // --- Estados (Estado_tipo) ---
+        const resEst = await fetch('http://localhost:3000/api/estados');
+        const estados = await resEst.json();
+
+        estados.forEach(e => {
+            const option = document.createElement('option');
+            option.value = e.id_estado;
+            option.textContent = e.tipo_estado;
+
+            // CORREÇÃO: Mantém selecionado se for o ID da URL
+            if (estAtivo == e.id_estado) {
+                option.selected = true;
+            }
+            selectEstado.appendChild(option);
+        });
+
+        const resTrans = await fetch('http://localhost:3000/api/transacoes');
+        const trans = await resTrans.json();
+
+        trans.forEach(t => {
+            const option = document.createElement('option');
+            
+            // CORREÇÃO: O nome da coluna no seu SQL é id_transacao_tipo
+            option.value = t.id_transacao_tipo; 
+            option.textContent = t.tipo_transacao;
+
+            // Comparação com o parâmetro da URL
+            if (transAtiva == t.id_transacao_tipo) {
+                option.selected = true;
+            }
+            selectTransacao.appendChild(option);
+        });
+
+
     } catch (err) {
-        console.error("Erro ao carregar selects:", err);
+        console.error("Erro ao carregar filtros:", err);
     }
 }
 
 function aplicarFiltros() {
     const urlParams = new URLSearchParams(window.location.search);
-    const dispVal = document.getElementById('filtro-disponibilidade').value;
+    
+    const catVal = document.getElementById('filtro-categoria').value;
     const transVal = document.getElementById('filtro-transacao').value;
     const estVal = document.getElementById('filtro-estado').value;
+    const dispVal = document.getElementById('filtro-disponibilidade').value;
 
-    // Se selecionar "Todas", removemos o parâmetro da URL completamente
-    if (dispVal) {
-        urlParams.set('disp', dispVal); // Se for "all", vai aparecer ?disp=all
+    // Lógica para Categoria, Transação e Estado:
+    // Se estiver vazio ou for "all", removemos da URL para mantê-la limpa
+    if (catVal && catVal !== "all") urlParams.set('cat', catVal);
+    else urlParams.delete('cat');
+
+    if (transVal && transVal !== "all") urlParams.set('trans', transVal);
+    else urlParams.delete('trans');
+
+    if (estVal && estVal !== "all") urlParams.set('est', estVal);
+    else urlParams.delete('est');
+
+    // Lógica para Disponibilidade:
+    // Mantemos o "all" na URL apenas se o usuário escolheu "Todas" 
+    // para evitar o gatilho de "primeiro acesso" que força o ID 1
+    if (dispVal === "all") {
+        urlParams.set('disp', 'all');
+    } else if (dispVal) {
+        urlParams.set('disp', dispVal);
     } else {
         urlParams.delete('disp');
     }
 
-    if (transVal) urlParams.set('trans', transVal);
-    else urlParams.delete('trans');
-
-    if (estVal) urlParams.set('est', estVal);
-    else urlParams.delete('est');
+    // Preserva a busca se existir
+    const busca = urlParams.get('busca');
+    if (busca) urlParams.set('busca', busca);
 
     window.location.href = `index.html?${urlParams.toString()}`;
 }
-
 function configurarBusca() {
     const input = document.querySelector('.search-bar input');
     const btn = document.querySelector('.search-btn');

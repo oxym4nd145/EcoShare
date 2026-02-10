@@ -81,5 +81,57 @@ body {
     display: none;
 }
 
+/* Garante que todos os inputs, incluindo o de data, sigam o mesmo estilo */
+.form-group input[type="date"] {
+    color: #666; /* Mesma cor usada nos labels e placeholders */
+}
+
+/* Ajuste para quando o campo estiver em foco */
+.form-group input:focus {
+    border-color: var(--primary-green);
+    color: #333; /* Fica um pouco mais escuro ao digitar */
+}
+
+/* Container do Modal (fundo escurecido) */
+.modal-container {
+    display: none; /* Escondido por padrão */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Caixa branca do Modal */
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    animation: scaleUp 0.3s ease-out;
+}
+
+/* Círculo com o "Confere" */
+.icon-check {
+    width: 60px;
+    height: 60px;
+    background: #28a745;
+    color: white;
+    font-size: 30px;
+    line-height: 60px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+}
+
+@keyframes scaleUp {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
 .footer-links { margin-top: 20px; font-size: 0.85rem; }
 .footer-links a { color: var(--primary-green); text-decoration: none; font-weight: 600; }

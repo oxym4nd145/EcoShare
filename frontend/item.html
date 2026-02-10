@@ -40,28 +40,26 @@
         </div>
         
         <nav class="subheader">
-            <div class="sub-nav-group" id="categorias-nav">
-                <span class="sub-nav-label">Categorias:</span>
+            <nav class="sub-nav">
+                <div class="sub-nav-group filter-group">
+                    <select id="filtro-categoria" class="filter-select" onchange="aplicarFiltros()">
+                        <option value="all">Todas Categorias</option>
+                    </select>
+
+                    <select id="filtro-transacao" class="filter-select" onchange="aplicarFiltros()">
+                        <option value="all">Todas Transações</option>
+                    </select>
+
+                    <select id="filtro-estado" class="filter-select" onchange="aplicarFiltros()">
+                        <option value="all">Todos Estados</option>
+                    </select>
+
+                    <select id="filtro-disponibilidade" class="filter-select" onchange="aplicarFiltros()">
+                        <option value="all">Todas Disponibilidades</option>
+                    </select>
                 </div>
 
-            <div class="sub-nav-divider"></div>
-
-            <div class="sub-nav-group filter-group">
-                
-                <select id="filtro-transacao" class="filter-select" onchange="aplicarFiltros()">
-                    <option value="">Todas Transações</option>
-                </select>
-
-                <select id="filtro-estado" class="filter-select" onchange="aplicarFiltros()">
-                    <option value="">Todos Estados</option>
-                </select>
-
-                <select id="filtro-disponibilidade" class="filter-select" onchange="aplicarFiltros()">
-                    <option value="">Todas Disponibilidades</option>
-                </select>
-
-                </div>
-
+            </nav>
             <a href="index.html" class="btn-limpar-link">
                 <button class="btn-limpar">
                     <img src="./src/imgs/filter.svg" alt="Filter Icon" class="icon limpar-icon">

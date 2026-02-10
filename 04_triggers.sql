@@ -6,7 +6,7 @@ AFTER INSERT ON Manutencao
 FOR EACH ROW
 BEGIN
     UPDATE Item
-    SET disponibilidade = 4
+    SET status_item = 4
     WHERE id_item = NEW.item_id;
 END;
 //
@@ -18,7 +18,7 @@ FOR EACH ROW
 BEGIN
     IF OLD.data_fim_manutencao IS NULL AND NEW.data_fim_manutencao IS NOT NULL THEN
         UPDATE Item
-        SET disponibilidade = 1
+        SET status_item = 1
         WHERE id_item = NEW.item_id;
     END IF;
 END;
@@ -32,7 +32,7 @@ BEGIN
     DECLARE estado_atual INT;
     DECLARE id_dono INT;
     
-    SELECT disponibilidade, dono_id INTO estado_atual, id_dono 
+    SELECT status_item, dono_id INTO estado_atual, id_dono 
     FROM Item 
     WHERE id_item = NEW.item_id;
     
@@ -58,7 +58,7 @@ BEGIN
     -- Como Doação não tem tabela filha, atualizamos a disponibilidade aqui
     -- Doação (1) -> Indisponível (2)
     IF NEW.tipo_transacao = 1 THEN
-        UPDATE Item SET disponibilidade = 2 WHERE id_item = NEW.item_id;
+        UPDATE Item SET status_item = 2 WHERE id_item = NEW.item_id;
     END IF;
 END;
 //
@@ -69,7 +69,7 @@ AFTER INSERT ON Venda
 FOR EACH ROW
 BEGIN
     UPDATE Item 
-    SET disponibilidade = 2 
+    SET status_item = 2 
     WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
 END;
 //
@@ -77,7 +77,7 @@ END;
 -- 6. Atualiza estado após confirmação de ALUGUEL
 CREATE TRIGGER trg_detalhe_aluguel AFTER INSERT ON Aluguel FOR EACH ROW
 BEGIN
-    UPDATE Item SET disponibilidade = 3
+    UPDATE Item SET status_item = 3
     WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
 END;
 //
@@ -85,7 +85,7 @@ END;
 -- 5. Atualiza estado após confirmação de EMPRÉSTIMO
 CREATE TRIGGER trg_detalhe_emprestimo AFTER INSERT ON Emprestimo FOR EACH ROW
 BEGIN
-    UPDATE Item SET disponibilidade = 3
+    UPDATE Item SET status_item = 3
     WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
 END;
 //
@@ -98,7 +98,7 @@ BEGIN
     IF OLD.data_devolucao IS NULL AND NEW.data_devolucao IS NOT NULL THEN
         UPDATE Item i
         JOIN Transacao t ON i.id_item = t.item_id
-        SET i.disponibilidade = 1
+        SET i.status_item = 1
         WHERE t.id_transacao = NEW.transacao_id;
     END IF;
 END;
@@ -112,7 +112,7 @@ BEGIN
     IF OLD.data_devolucao IS NULL AND NEW.data_devolucao IS NOT NULL THEN
         UPDATE Item i
         JOIN Transacao t ON i.id_item = t.item_id
-        SET i.disponibilidade = 1
+        SET i.status_item = 1
         WHERE t.id_transacao = NEW.transacao_id;
     END IF;
 END;

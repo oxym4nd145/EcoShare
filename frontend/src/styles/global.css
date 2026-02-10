@@ -133,10 +133,6 @@ header {
     align-items: center; 
 }
 
-.sub-nav-group.filter-group {
-    gap:.3rem;
-}
-
 .sub-nav-label {
     font-weight: bold;
     color: var(--primary-green);
@@ -145,20 +141,31 @@ header {
     letter-spacing: 0.5px;
 }
 
-.categoria-text {
-    text-decoration: none;
-    color: var(--text-dark);
-    font-weight: 500;
-    transition: color 0.2s;
-    cursor: pointer;
+.filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
 }
 
-.categoria-text:hover { color: var(--primary-green); }
+.filter-select {
+    padding: 8px 12px;
+    border: 1px solid var(--light-green);
+    border-radius: var(--border-radius-sm);
+    background-color: white;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    cursor: pointer;
+    outline: none;
+    min-width: 160px; /* Garante um tamanho bom para leitura */
+}
 
-.sub-nav-divider {
-    width: 1px;
-    height: 15px;
-    background-color: rgba(0,0,0,0.1);
+.filter-select:focus {
+    border-color: var(--primary-green);
+}
+
+.filter-select option:hover {
+    background-color: var(--white);
 }
 
 /* Selects do Filtro */
@@ -194,7 +201,7 @@ header {
     margin-left: 15px;
     display: flex;
     align-items: center;
-    gap: .1rem;
+    gap: .5rem;
 
 }
 
