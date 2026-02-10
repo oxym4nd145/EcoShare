@@ -50,6 +50,28 @@
     margin-top: 20px;
 }
 
+a.btn-edit-perfil {
+    text-decoration: none;
+    padding: 8px 12px;
+    display: flex;
+    gap: .5rem;
+    justify-self: center;
+    margin-top: 1rem;
+
+    border-style: solid;
+    border-width: 1px;
+    border-color: var(--primary-green);
+    border-radius: 50px;
+
+    color: var(--primary-green);
+    font-weight: 500;
+}
+
+a.btn-edit-perfil:hover {
+    background-color: var(--light-green);
+    transition: all 1s;
+}
+
 .meus-itens-header {
     display: flex;
     justify-content: space-between;

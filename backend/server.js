@@ -160,18 +160,36 @@ app.get('/api/usuario/completo/:id', async (req, res) => {
                 u.nome_usuario, u.email, u.saldo, u.data_nascimento,
                 m.tipo_mensalidade,
                 tp.nome_tipo AS nome_tipo_pessoa,
+                tp.tipo AS tipo_pessoa_abrev, -- Adicionado para verificar PF/PJ
                 e.cep, e.logradouro, e.numero, e.bairro, e.cidade, e.estado, 
-                f.endereco_cdn AS foto_perfil
+                f.endereco_cdn AS foto_perfil,
+                -- Busca CPF ou CNPJ baseado no tipo de pessoa
+                CASE 
+                    WHEN tp.tipo = 'PF' THEN cpf.cpf
+                    WHEN tp.tipo = 'PJ' THEN cnpj.cnpj
+                    ELSE NULL
+                END AS documento,
+                -- Retorna qual tipo de documento foi encontrado
+                CASE 
+                    WHEN tp.tipo = 'PF' THEN 'CPF'
+                    WHEN tp.tipo = 'PJ' THEN 'CNPJ'
+                    ELSE NULL
+                END AS tipo_documento
             FROM Usuario u
             LEFT JOIN Mensalidade_tipo m ON u.mensalidade_id = m.id_mensalidade
             LEFT JOIN TipoPessoa tp ON u.tipo_pessoa = tp.id_tipo_pessoa
-            LEFT JOIN Endereco e ON u.endereco_id = e.id_endereco -- Alterado para endereco_id
+            LEFT JOIN Endereco e ON u.endereco_id = e.id_endereco
             LEFT JOIN Foto f ON f.id_foto = u.foto_perfil_id
+            -- LEFT JOIN condicional para CPF
+            LEFT JOIN Cpf cpf ON u.id_usuario = cpf.usuario_id AND tp.tipo = 'PF'
+            -- LEFT JOIN condicional para CNPJ
+            LEFT JOIN Cnpj cnpj ON u.id_usuario = cnpj.usuario_id AND tp.tipo = 'PJ'
             WHERE u.id_usuario = ?
         `;
         const [rows] = await db.execute(query, [id]);
         res.json(rows[0]);
     } catch (error) {
+        console.error("Erro ao buscar dados do usuário:", error);
         res.status(500).json({ error: "Erro ao buscar dados" });
     }
 });

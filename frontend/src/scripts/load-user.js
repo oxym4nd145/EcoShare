@@ -59,6 +59,8 @@ async function carregarPerfil() {
         }
 
         setElementText('user-tipo-pessoa', user.nome_tipo_pessoa);
+        setElementText('user-tipo-documento', `${user.tipo_documento}:`);
+        setElementText('user-documento', user.documento);
         setElementText('user-cep', user.cep || 'Não informado');
 
         // 5. Endereço
