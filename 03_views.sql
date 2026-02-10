@@ -112,3 +112,55 @@ GROUP BY
 ORDER BY
     "Total de Transações" DESC
 LIMIT 10;
+
+-- 9. Denuncias mais recentes
+CREATE VIEW Ultimas_Denuncias AS
+SELECT
+    d.id_denuncia AS "ID da denúncia",
+    d.denuncia_data AS "Data da denúncia",
+    d.denuncia_denunciador_id AS "ID do denunciador",
+    d.denuncia_alvo_id AS "ID do objeto denunciado",
+    cat_tipo.objeto_tipo AS "Tipo do objeto denunciado",
+    d.denuncia_conteudo AS "Texto da denúncia",
+    de.denuncia_estado AS "Estado da denuncia"
+FROM
+    Denuncia as d
+JOIN
+    Denuncia_estado as de
+        ON d.denuncia_estado = de.id_denuncia_estado
+ORDER BY 
+    "Data da denúncia" DESC;
+
+-- 10. Denúncias mais antigas ainda em aberto 
+CREATE VIEW Denuncias_abertas_mais_antigas AS
+SELECT
+    d.id_denuncia AS "ID da denúncia",
+    d.denuncia_data AS "Data da denúncia",
+    d.denuncia_alvo_id AS "ID do objeto denunciado",
+    cat_tipo.objeto_tipo AS "Tipo do objeto denunciado",
+    d.denuncia_conteudo AS "Texto da denúncia"
+FROM
+    Denuncia AS d
+JOIN 
+    Objeto_tipo AS cat_tipo 
+        ON d.denuncia_alvo_tipo = cat_tipo.id_objeto_tipo
+JOIN
+    Denuncia_estado AS de 
+        ON d.denuncia_estado = de.id_denuncia_estado
+WHERE
+    de.denuncia_estado = 'Aberto'
+ORDER BY
+    "Data da denúnica" ASC;
+
+-- 11. Contagem de denúncias por estado
+CREATE VIEW "Denuncias_Por_Estado" AS
+SELECT
+    de.denuncia_estado AS "Estado da denúncia",
+    COUNT(*) AS "Número de denúncias"
+FROM
+    Denuncia AS d
+JOIN
+    Denuncia_estado AS de
+        ON d.denuncia_estado = de.id_denuncia_estado
+GROUP BY
+    de.denuncia_estado

@@ -49,48 +49,59 @@ CREATE TABLE TipoPessoa (
     PRIMARY KEY (id_tipo_pessoa)
 );
 
-// --- Perfil Completo do Usuário ---
-app.get('/api/usuario/completo/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const query = `
-            SELECT 
-                u.nome_usuario, u.email, u.saldo, u.data_nascimento,
-                m.tipo_mensalidade,
-                tp.nome_tipo AS nome_tipo_pessoa,
-                tp.tipo AS tipo_pessoa_abrev, -- Adicionado para verificar PF/PJ
-                e.cep, e.logradouro, e.numero, e.bairro, e.cidade, e.estado, 
-                f.endereco_cdn AS foto_perfil,
-                -- Busca CPF ou CNPJ baseado no tipo de pessoa
-                CASE 
-                    WHEN tp.tipo = 'PF' THEN cpf.cpf
-                    WHEN tp.tipo = 'PJ' THEN cnpj.cnpj
-                    ELSE NULL
-                END AS documento,
-                -- Retorna qual tipo de documento foi encontrado
-                CASE 
-                    WHEN tp.tipo = 'PF' THEN 'CPF'
-                    WHEN tp.tipo = 'PJ' THEN 'CNPJ'
-                    ELSE NULL
-                END AS tipo_documento
-            FROM Usuario u
-            LEFT JOIN Mensalidade_tipo m ON u.mensalidade_id = m.id_mensalidade
-            LEFT JOIN TipoPessoa tp ON u.tipo_pessoa = tp.id_tipo_pessoa
-            LEFT JOIN Endereco e ON u.endereco_id = e.id_endereco
-            LEFT JOIN Foto f ON f.id_foto = u.foto_perfil_id
-            -- LEFT JOIN condicional para CPF
-            LEFT JOIN Cpf cpf ON u.id_usuario = cpf.usuario_id AND tp.tipo = 'PF'
-            -- LEFT JOIN condicional para CNPJ
-            LEFT JOIN Cnpj cnpj ON u.id_usuario = cnpj.usuario_id AND tp.tipo = 'PJ'
-            WHERE u.id_usuario = ?
-        `;
-        const [rows] = await db.execute(query, [id]);
-        res.json(rows[0]);
-    } catch (error) {
-        console.error("Erro ao buscar dados do usuário:", error);
-        res.status(500).json({ error: "Erro ao buscar dados" });
-    }
-});
+-- 6. Tabela de Usuários
+CREATE TABLE Usuario (
+    id_usuario INT AUTO_INCREMENT,
+    mensalidade_id INT NOT NULL,
+    nivel_permissao INT NOT NULL,
+    foto_perfil_id INT,
+    nome_usuario VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    tipo_pessoa INT NOT NULL,
+    hash_senha VARCHAR(255) NOT NULL,
+    data_nascimento DATE NOT NULL,
+    saldo DECIMAL(10, 2) DEFAULT 0.00,
+    endereco_id INT,
+
+    PRIMARY KEY (id_usuario),
+
+    FOREIGN KEY (mensalidade_id) REFERENCES Mensalidade_tipo(id_mensalidade)
+        ON UPDATE CASCADE ON DELETE NO ACTION,
+
+    FOREIGN KEY (nivel_permissao) REFERENCES Permissao(id_permissao)
+        ON UPDATE CASCADE ON DELETE NO ACTION,
+
+    FOREIGN KEY (foto_perfil_id) REFERENCES Foto(id_foto)
+        ON UPDATE CASCADE ON DELETE SET NULL,
+
+    FOREIGN KEY (tipo_pessoa) REFERENCES TipoPessoa(id_tipo_pessoa)
+        ON UPDATE CASCADE ON DELETE NO ACTION,
+
+    FOREIGN KEY (endereco_id) REFERENCES Endereco(id_endereco)
+        ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+-- 7. Tabela de CPF 
+CREATE TABLE Cpf (
+    usuario_id INT,
+    cpf CHAR(11) NOT NULL UNIQUE,
+
+    PRIMARY KEY (usuario_id),
+
+    FOREIGN KEY (usuario_id) REFERENCES Usuario(id_usuario)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- 8. Tabela de CNPJ
+CREATE TABLE Cnpj (
+    usuario_id INT,
+    cnpj CHAR(14) NOT NULL UNIQUE,
+
+    PRIMARY KEY (usuario_id),
+
+    FOREIGN KEY (usuario_id) REFERENCES Usuario(id_usuario)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
 
 -- 9. Tabela de Categorias de Itens
 CREATE TABLE Categoria_tipo (
