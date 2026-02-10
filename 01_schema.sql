@@ -57,7 +57,7 @@ CREATE TABLE Usuario (
     foto_perfil_id INT,
     nome_usuario VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
-    tipo_pessoa INT NOT NULL,
+    tipo_pessoa INT,
     hash_senha VARCHAR(255) NOT NULL,
     data_nascimento DATE NOT NULL,
     saldo DECIMAL(10, 2) DEFAULT 0.00,
