@@ -1,17 +1,22 @@
 DELIMITER //
 
 -- 1. Ao iniciar manutenção -> Muda item para 4 (Em manutenção)
+-- MODIFICAÇÃO: Só altera status se data_fim_manutencao for NULL
 CREATE TRIGGER trg_inicio_manutencao
 AFTER INSERT ON Manutencao
 FOR EACH ROW
 BEGIN
-    UPDATE Item
-    SET status_item = 4
-    WHERE id_item = NEW.item_id;
+    -- Verifica se data_fim_manutencao está NULL antes de mudar o status
+    IF NEW.data_fim_manutencao IS NULL THEN
+        UPDATE Item
+        SET status_item = 4
+        WHERE id_item = NEW.item_id;
+    END IF;
 END;
 //
 
 -- 2. Ao finalizar manutenção (data_fim preenchida) -> Muda item para 1 (Disponível)
+-- Este trigger já está correto
 CREATE TRIGGER trg_fim_manutencao
 AFTER UPDATE ON Manutencao
 FOR EACH ROW
@@ -82,7 +87,7 @@ BEGIN
 END;
 //
 
--- 5. Atualiza estado após confirmação de EMPRÉSTIMO
+-- 7. Atualiza estado após confirmação de EMPRÉSTIMO
 CREATE TRIGGER trg_detalhe_emprestimo AFTER INSERT ON Emprestimo FOR EACH ROW
 BEGIN
     UPDATE Item SET status_item = 3
@@ -90,7 +95,7 @@ BEGIN
 END;
 //
 
--- 6. Alteração do status após devolução de ALUGUEL
+-- 8. Alteração do status após devolução de ALUGUEL
 CREATE TRIGGER trg_devolucao_aluguel
 AFTER UPDATE ON Aluguel
 FOR EACH ROW
@@ -104,7 +109,7 @@ BEGIN
 END;
 //
 
--- 8. Alteração do status após devolução de EMPRÉSTIMO
+-- 9. Alteração do status após devolução de EMPRÉSTIMO
 CREATE TRIGGER trg_devolucao_emprestimo
 AFTER UPDATE ON Emprestimo
 FOR EACH ROW

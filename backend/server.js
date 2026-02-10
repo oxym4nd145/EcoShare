@@ -244,19 +244,21 @@ app.get('/api/itens/:id/avaliacoes', async (req, res) => {
                 a.nota, 
                 a.avaliacao AS comentario, 
                 t.data_transacao AS data, 
-                u.nome_usuario
+                u_avaliador.nome_usuario
             FROM Avaliacao a 
             INNER JOIN Transacao t ON a.transacao_id = t.id_transacao
-            INNER JOIN Usuario u ON a.avaliador_id = u.id_usuario 
-            WHERE t.item_id = ?
+            INNER JOIN Item i ON t.item_id = i.id_item
+            INNER JOIN Usuario u_avaliador ON a.avaliador_id = u_avaliador.id_usuario 
+            WHERE t.item_id = ? 
+              AND a.avaliador_id <> i.dono_id  -- Garante que pegamos apenas avaliações de quem NÃO é o dono
             ORDER BY t.data_transacao DESC
         `;
 
         const [rows] = await db.execute(queryAvaliacoes, [id]);
         res.json(rows);
     } catch (error) {
-        console.error("Erro SQL nas avaliações:", error);
-        res.status(500).json({ error: 'Erro ao buscar avaliações' });
+        console.error("Erro ao buscar avaliações:", error);
+        res.status(500).json({ error: 'Erro ao buscar avaliações do comprador' });
     }
 });
 
