@@ -72,6 +72,8 @@ app.get('/api/itens', async (req, res) => {
             LEFT JOIN Categoria_tipo cat ON i.categoria = cat.id_categoria 
             LEFT JOIN Estado_tipo est ON i.estado_conservacao = est.id_estado 
             LEFT JOIN Status_tipo disp ON i.status_item = disp.id_status
+            LEFT JOIN Usuario u ON i.dono_id = u.id_usuario
+            LEFT JOIN Endereco endr ON u.endereco_id = endr.id_endereco
             LEFT JOIN Foto_item fitem ON fitem.item_id = i.id_item
             LEFT JOIN Foto f ON fitem.foto_id = f.id_foto
             WHERE 1=1
@@ -81,7 +83,20 @@ app.get('/api/itens', async (req, res) => {
 
         if (cat) { query += ` AND i.categoria = ?`; params.push(cat); }
         if (disp) { query += ` AND i.status_item = ?`; params.push(disp); }
-        if (est) { query += ` AND i.estado_conservacao = ?`; params.push(est); }
+
+        // `est` pode ser:
+        // - um id numérico (estado de conservação) -> filtra i.estado_conservacao
+        // - uma sigla UF (ex: 'SP') -> filtra pelo estado do endereço do dono (endr.estado)
+        if (est) {
+            const estIsId = /^\d+$/.test(est);
+            if (estIsId) {
+                query += ` AND i.estado_conservacao = ?`;
+                params.push(est);
+            } else {
+                query += ` AND endr.estado = ?`;
+                params.push(est);
+            }
+        }
         if (busca) {
             query += ` AND (i.nome_item LIKE ? OR i.descricao LIKE ?)`;
             params.push(`%${busca}%`, `%${busca}%`);
@@ -158,6 +173,100 @@ app.get('/api/usuario/completo/:id', async (req, res) => {
     }
 });
 
+// Atualizar campos mutáveis do usuário (não permite alterar id_usuario)
+app.put('/api/usuario/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Proteger id_usuario: se enviado no body e diferente, rejeita
+        if (req.body.id_usuario && String(req.body.id_usuario) !== String(id)) {
+            return res.status(400).json({ error: 'Não é permitido alterar id_usuario' });
+        }
+
+        // Validação de formato de email: sem espaços e no formato local@dominio.tld
+        if (req.body.email) {
+            const email = String(req.body.email);
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                return res.status(400).json({ error: 'Email em formato inválido' });
+            }
+        }
+
+        // Validação de senha: maior que 6 caracteres e sem espaços
+        if (req.body.hash_senha) {
+            const senha = String(req.body.hash_senha);
+            if (senha.length <= 6) {
+                return res.status(400).json({ error: 'Senha deve ter mais de 6 caracteres' });
+            }
+            if (/\s/.test(senha)) {
+                return res.status(400).json({ error: 'Senha não pode conter espaços' });
+            }
+        }
+
+        // Campos permitidos para atualização
+        const allowed = [
+            'nome_usuario',
+            'email',
+            'foto_perfil_id',
+            'tipo_pessoa',
+            'hash_senha',
+            'data_nascimento',
+            'endereco_id'
+        ];
+
+        const updates = [];
+        const params = [];
+
+        for (const key of allowed) {
+            if (Object.prototype.hasOwnProperty.call(req.body, key)) {
+                updates.push(`${key} = ?`);
+                params.push(req.body[key]);
+            }
+        }
+
+        if (updates.length === 0) {
+            return res.status(400).json({ error: 'Nenhum campo válido para atualizar foi enviado' });
+        }
+
+        // Se email foi enviado, garantir que não exista para outro usuário
+        if (req.body.email) {
+            const [rows] = await db.execute('SELECT id_usuario FROM Usuario WHERE email = ? AND id_usuario <> ?', [req.body.email, id]);
+            if (rows.length > 0) {
+                return res.status(409).json({ error: 'Email já está em uso por outro usuário' });
+            }
+        }
+
+        const sql = `UPDATE Usuario SET ${updates.join(', ')} WHERE id_usuario = ?`;
+        params.push(id);
+
+        await db.execute(sql, params);
+
+        const [updated] = await db.execute('SELECT id_usuario, nome_usuario, email, foto_perfil_id, tipo_pessoa, data_nascimento, endereco_id FROM Usuario WHERE id_usuario = ?', [id]);
+        res.json({ success: true, usuario: updated[0] });
+    } catch (err) {
+        console.error('Erro ao atualizar usuário:', err);
+        res.status(500).json({ error: 'Erro ao atualizar usuário' });
+    }
+});
+
+// Excluir conta do usuário
+app.delete('/api/usuario/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const [result] = await db.execute('DELETE FROM Usuario WHERE id_usuario = ?', [id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Erro ao excluir usuário:', err);
+        res.status(409).json({ error: 'Não foi possível excluir o usuário. Verifique dependências vinculadas.' });
+    }
+});
+
 // --- Cadastro de Usuário ---
 app.post('/api/cadastrar', async (req, res) => {
     const { nome, email, senha, data_nascimento, nivel_permissao, mensalidade_id } = req.body;
@@ -183,6 +292,120 @@ app.post('/api/cadastrar', async (req, res) => {
     } catch (err) {
         console.error("ERRO NO CADASTRO:", err);
         res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Adicionar item
+app.post('/api/itens', async (req, res) => {
+    try {
+        const { dono_id, nome_item, categoria, status_item, descricao, estado_conservacao } = req.body;
+
+        if (!dono_id || !nome_item || !status_item || !estado_conservacao) {
+            return res.status(400).json({ error: 'Campos obrigatórios: dono_id, nome_item, status_item, estado_conservacao' });
+        }
+
+        const sql = `
+            INSERT INTO Item (dono_id, nome_item, categoria, status_item, descricao, estado_conservacao)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+
+        const [result] = await db.execute(sql, [
+            dono_id,
+            nome_item,
+            categoria || null,
+            status_item,
+            descricao || null,
+            estado_conservacao
+        ]);
+
+        res.status(201).json({ success: true, id_item: result.insertId });
+    } catch (err) {
+        console.error('Erro ao inserir item:', err);
+        res.status(500).json({ error: 'Erro ao inserir item' });
+    }
+});
+
+// Editar informações do item e/ou registrar manutenção
+app.put('/api/itens/:id', async (req, res) => {
+    const conn = await db.getConnection();
+    try {
+        const { id } = req.params;
+        const {
+            nome_item,
+            categoria,
+            status_item,
+            descricao,
+            estado_conservacao,
+            manutencao
+        } = req.body;
+
+        const updates = [];
+        const params = [];
+
+        if (nome_item !== undefined) { updates.push('nome_item = ?'); params.push(nome_item); }
+        if (categoria !== undefined) { updates.push('categoria = ?'); params.push(categoria); }
+        if (status_item !== undefined) { updates.push('status_item = ?'); params.push(status_item); }
+        if (descricao !== undefined) { updates.push('descricao = ?'); params.push(descricao); }
+        if (estado_conservacao !== undefined) { updates.push('estado_conservacao = ?'); params.push(estado_conservacao); }
+
+        const hasManutencao = manutencao && (manutencao.data_inicio_manutencao || manutencao.data_fim_manutencao);
+
+        if (updates.length === 0 && !hasManutencao) {
+            return res.status(400).json({ error: 'Nenhum campo válido para atualizar foi enviado' });
+        }
+
+        await conn.beginTransaction();
+
+        if (updates.length > 0) {
+            const sql = `UPDATE Item SET ${updates.join(', ')} WHERE id_item = ?`;
+            params.push(id);
+            const [result] = await conn.execute(sql, params);
+            if (result.affectedRows === 0) {
+                await conn.rollback();
+                return res.status(404).json({ error: 'Item não encontrado' });
+            }
+        }
+
+        if (hasManutencao) {
+            if (!manutencao.data_inicio_manutencao) {
+                await conn.rollback();
+                return res.status(400).json({ error: 'data_inicio_manutencao é obrigatória para manutenção' });
+            }
+
+            await conn.execute(
+                `INSERT INTO Manutencao (item_id, data_inicio_manutencao, data_fim_manutencao)
+                 VALUES (?, ?, ?)`
+                , [id, manutencao.data_inicio_manutencao, manutencao.data_fim_manutencao || null]
+            );
+        }
+
+        await conn.commit();
+
+        res.json({ success: true });
+    } catch (err) {
+        await conn.rollback();
+        console.error('Erro ao atualizar item/manutenção:', err);
+        res.status(500).json({ error: 'Erro ao atualizar item/manutenção' });
+    } finally {
+        conn.release();
+    }
+});
+
+// Excluir item
+app.delete('/api/itens/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const [result] = await db.execute('DELETE FROM Item WHERE id_item = ?', [id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Item não encontrado' });
+        }
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Erro ao excluir item:', err);
+        res.status(409).json({ error: 'Não foi possível excluir o item. Verifique dependências vinculadas.' });
     }
 });
 

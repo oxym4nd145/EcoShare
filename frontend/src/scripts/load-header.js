@@ -100,19 +100,58 @@ async function carregarFiltrosSelect() {
         });
 
         // --- Estados (Estado_tipo) ---
-        const resEst = await fetch('http://localhost:3000/api/estados');
-        const estados = await resEst.json();
+        // Mantém a opção padrão "Todos Estados" antes de popular via API
+        selectEstado.innerHTML = '<option value="all">Todos Estados</option>';
+
+        // Fallback estático caso a API falhe ou retorne vazio
+        const fallbackEstados = [
+            { id_estado: '1', tipo_estado: 'Novo' },
+            { id_estado: '2', tipo_estado: 'Usado' },
+            { id_estado: '3', tipo_estado: 'Reformado' }
+        ];
+
+        let estados = [];
+        try {
+            const resEst = await fetch('http://localhost:3000/api/estados');
+            estados = await resEst.json();
+        } catch (e) {
+            console.warn('Não foi possível carregar estados da API, usando fallback estático.', e);
+            estados = fallbackEstados;
+        }
+
+        if (!estados || estados.length === 0) estados = fallbackEstados;
 
         estados.forEach(e => {
             const option = document.createElement('option');
             option.value = e.id_estado;
             option.textContent = e.tipo_estado;
 
-            // CORREÇÃO: Mantém selecionado se for o ID da URL
+            // Mantém selecionado se for o ID da URL
             if (estAtivo == e.id_estado) {
                 option.selected = true;
             }
             selectEstado.appendChild(option);
+        });
+
+        // --- UFs (Estados brasileiros) ---
+        // Adiciona as 27 UFs ao mesmo select de "estados" (filtro-estado)
+        const ufs = [
+            { sigla: 'AC', nome: 'Acre' },{ sigla: 'AL', nome: 'Alagoas' },{ sigla: 'AP', nome: 'Amapá' },
+            { sigla: 'AM', nome: 'Amazonas' },{ sigla: 'BA', nome: 'Bahia' },{ sigla: 'CE', nome: 'Ceará' },
+            { sigla: 'DF', nome: 'Distrito Federal' },{ sigla: 'ES', nome: 'Espírito Santo' },{ sigla: 'GO', nome: 'Goiás' },
+            { sigla: 'MA', nome: 'Maranhão' },{ sigla: 'MT', nome: 'Mato Grosso' },{ sigla: 'MS', nome: 'Mato Grosso do Sul' },
+            { sigla: 'MG', nome: 'Minas Gerais' },{ sigla: 'PA', nome: 'Pará' },{ sigla: 'PB', nome: 'Paraíba' },
+            { sigla: 'PR', nome: 'Paraná' },{ sigla: 'PE', nome: 'Pernambuco' },{ sigla: 'PI', nome: 'Piauí' },
+            { sigla: 'RJ', nome: 'Rio de Janeiro' },{ sigla: 'RN', nome: 'Rio Grande do Norte' },{ sigla: 'RS', nome: 'Rio Grande do Sul' },
+            { sigla: 'RO', nome: 'Rondônia' },{ sigla: 'RR', nome: 'Roraima' },{ sigla: 'SC', nome: 'Santa Catarina' },
+            { sigla: 'SP', nome: 'São Paulo' },{ sigla: 'SE', nome: 'Sergipe' },{ sigla: 'TO', nome: 'Tocantins' }
+        ];
+
+        ufs.forEach(u => {
+            const opt = document.createElement('option');
+            opt.value = u.sigla;
+            opt.textContent = `${u.nome} (${u.sigla})`;
+            selectEstado.appendChild(opt);
         });
 
         const resTrans = await fetch('http://localhost:3000/api/transacoes');
