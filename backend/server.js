@@ -1,10 +1,79 @@
 const express = require('express');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
 const db = require('./db'); 
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+function isNonEmptyString(value) {
+    return typeof value === 'string' && value.trim() !== '';
+}
+
+async function upsertEndereco(conn, enderecoId, enderecoData) {
+    const { cep, logradouro, numero, complemento, bairro, cidade, estado } = enderecoData;
+    const hasEnderecoPayload = [cep, logradouro, bairro, cidade, estado, numero, complemento]
+        .some((value) => value !== undefined);
+
+    if (!hasEnderecoPayload) return enderecoId || null;
+
+    if (!enderecoId) {
+        if (!isNonEmptyString(cep) || !isNonEmptyString(logradouro) || !isNonEmptyString(bairro) || !isNonEmptyString(cidade) || !isNonEmptyString(estado)) {
+            throw new Error('Dados de endereço incompletos');
+        }
+
+        const [result] = await conn.execute(
+            'INSERT INTO Endereco (cep, logradouro, numero, complemento, bairro, cidade, estado) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [cep, logradouro, numero || null, complemento || null, bairro, cidade, estado]
+        );
+
+        return result.insertId;
+    }
+
+    const [rows] = await conn.execute('SELECT * FROM Endereco WHERE id_endereco = ?', [enderecoId]);
+    if (rows.length === 0) {
+        throw new Error('Endereço não encontrado');
+    }
+
+    const atual = rows[0];
+    const novoEndereco = {
+        cep: isNonEmptyString(cep) ? cep : atual.cep,
+        logradouro: isNonEmptyString(logradouro) ? logradouro : atual.logradouro,
+        numero: numero !== undefined ? numero : atual.numero,
+        complemento: complemento !== undefined ? complemento : atual.complemento,
+        bairro: isNonEmptyString(bairro) ? bairro : atual.bairro,
+        cidade: isNonEmptyString(cidade) ? cidade : atual.cidade,
+        estado: isNonEmptyString(estado) ? estado : atual.estado
+    };
+
+    await conn.execute(
+        'UPDATE Endereco SET cep = ?, logradouro = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ? WHERE id_endereco = ?',
+        [
+            novoEndereco.cep,
+            novoEndereco.logradouro,
+            novoEndereco.numero,
+            novoEndereco.complemento,
+            novoEndereco.bairro,
+            novoEndereco.cidade,
+            novoEndereco.estado,
+            enderecoId
+        ]
+    );
+
+    return enderecoId;
+}
+
+async function inserirFoto(conn, enderecoCdn) {
+    if (!isNonEmptyString(enderecoCdn)) return null;
+
+    const [result] = await conn.execute(
+        'INSERT INTO Foto (endereco_cdn) VALUES (?)',
+        [enderecoCdn]
+    );
+
+    return result.insertId;
+}
 
 // Rota de Login
 app.post('/api/login', async (req, res) => {
@@ -15,21 +84,26 @@ app.post('/api/login', async (req, res) => {
     }
 
     try {
-        // CORREÇÃO: Usando 'hash_senha' conforme seu esquema
-        const query = 'SELECT id_usuario, nome_usuario FROM Usuario WHERE email = ? AND hash_senha = ?';
-        
-        const [rows] = await db.execute(query, [email, senha]);
+        const query = 'SELECT id_usuario, nome_usuario, hash_senha FROM Usuario WHERE email = ?';
 
-        if (rows.length > 0) {
-            const user = rows[0];
-            res.json({ 
-                success: true, 
-                id: user.id_usuario, 
-                nome: user.nome_usuario 
-            });
-        } else {
-            res.status(401).json({ success: false, error: 'Email ou senha incorretos' });
+        const [rows] = await db.execute(query, [email]);
+
+        if (rows.length === 0) {
+            return res.status(401).json({ success: false, error: 'Email ou senha incorretos' });
         }
+
+        const user = rows[0];
+        const senhaOk = await bcrypt.compare(senha, user.hash_senha || '');
+
+        if (!senhaOk) {
+            return res.status(401).json({ success: false, error: 'Email ou senha incorretos' });
+        }
+
+        res.json({ 
+            success: true, 
+            id: user.id_usuario, 
+            nome: user.nome_usuario 
+        });
     } catch (error) {
         console.error("Erro no login:", error);
         res.status(500).json({ error: 'Erro interno no servidor' });
@@ -342,6 +416,217 @@ app.get('/api/usuario/completo/:id', async (req, res) => {
         res.json(rows[0]);
     } catch (error) {
         res.status(500).json({ error: "Erro ao buscar dados do perfil" });
+    }
+});
+
+// Atualizar perfil do usuário
+app.put('/api/usuario/:id', async (req, res) => {
+    const { id } = req.params;
+    const {
+        nome_usuario,
+        email,
+        senha,
+        data_nascimento,
+        cep,
+        logradouro,
+        numero,
+        complemento,
+        bairro,
+        cidade,
+        estado,
+        foto_url
+    } = req.body || {};
+
+    const conn = await db.getConnection();
+
+    try {
+        await conn.beginTransaction();
+
+        const [usuarios] = await conn.execute('SELECT endereco, foto_perfil_id FROM Usuario WHERE id_usuario = ?', [id]);
+        if (usuarios.length === 0) {
+            await conn.rollback();
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        const usuarioAtual = usuarios[0];
+        const enderecoId = await upsertEndereco(conn, usuarioAtual.endereco, {
+            cep,
+            logradouro,
+            numero,
+            complemento,
+            bairro,
+            cidade,
+            estado
+        });
+
+        let fotoId = null;
+        if (isNonEmptyString(foto_url)) {
+            fotoId = await inserirFoto(conn, foto_url);
+        }
+
+        const updates = [];
+        const params = [];
+
+        if (isNonEmptyString(nome_usuario)) {
+            updates.push('nome_usuario = ?');
+            params.push(nome_usuario);
+        }
+        if (isNonEmptyString(email)) {
+            updates.push('email = ?');
+            params.push(email);
+        }
+        if (isNonEmptyString(data_nascimento)) {
+            updates.push('data_nascimento = ?');
+            params.push(data_nascimento);
+        }
+        if (cep !== undefined) {
+            updates.push('cep = ?');
+            params.push(cep || null);
+        }
+        if (enderecoId) {
+            updates.push('endereco = ?');
+            params.push(enderecoId);
+        }
+        if (fotoId) {
+            updates.push('foto_perfil_id = ?');
+            params.push(fotoId);
+        }
+        if (isNonEmptyString(senha)) {
+            const hash = await bcrypt.hash(senha, 10);
+            updates.push('hash_senha = ?');
+            params.push(hash);
+        }
+
+        if (updates.length === 0) {
+            await conn.rollback();
+            return res.status(400).json({ error: 'Nenhum campo para atualizar' });
+        }
+
+        params.push(id);
+        await conn.execute(`UPDATE Usuario SET ${updates.join(', ')} WHERE id_usuario = ?`, params);
+
+        await conn.commit();
+        res.json({ success: true });
+    } catch (error) {
+        await conn.rollback();
+        console.error('Erro ao atualizar perfil:', error);
+        if (error.message === 'Dados de endereço incompletos') {
+            return res.status(400).json({ error: 'Dados de endereço incompletos' });
+        }
+        if (error.message === 'Endereço não encontrado') {
+            return res.status(404).json({ error: 'Endereço não encontrado' });
+        }
+        res.status(500).json({ error: 'Erro ao atualizar perfil' });
+    } finally {
+        conn.release();
+    }
+});
+
+// Adicionar item
+app.post('/api/itens', async (req, res) => {
+    const { dono_id, nome_item, categoria, disponibilidade, estado_conservacao, descricao, foto_url } = req.body || {};
+
+    if (!dono_id || !isNonEmptyString(nome_item) || !disponibilidade || !estado_conservacao) {
+        return res.status(400).json({ error: 'Campos obrigatórios: dono_id, nome_item, disponibilidade, estado_conservacao' });
+    }
+
+    const conn = await db.getConnection();
+
+    try {
+        await conn.beginTransaction();
+
+        const [result] = await conn.execute(
+            `INSERT INTO Item (dono_id, nome_item, categoria, disponibilidade, descricao, estado_conservacao)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [dono_id, nome_item, categoria || null, disponibilidade, descricao || null, estado_conservacao]
+        );
+
+        const itemId = result.insertId;
+
+        if (isNonEmptyString(foto_url)) {
+            const fotoId = await inserirFoto(conn, foto_url);
+            await conn.execute('INSERT INTO Foto_item (foto_id, item_id) VALUES (?, ?)', [fotoId, itemId]);
+        }
+
+        await conn.commit();
+        res.status(201).json({ success: true, id_item: itemId });
+    } catch (error) {
+        await conn.rollback();
+        console.error('Erro ao adicionar item:', error);
+        res.status(500).json({ error: 'Erro ao adicionar item' });
+    } finally {
+        conn.release();
+    }
+});
+
+// Editar item
+app.put('/api/itens/:id', async (req, res) => {
+    const { id } = req.params;
+    const { dono_id, nome_item, categoria, disponibilidade, estado_conservacao, descricao, foto_url } = req.body || {};
+
+    const conn = await db.getConnection();
+
+    try {
+        await conn.beginTransaction();
+
+        const [itens] = await conn.execute('SELECT dono_id FROM Item WHERE id_item = ?', [id]);
+        if (itens.length === 0) {
+            await conn.rollback();
+            return res.status(404).json({ error: 'Item não encontrado' });
+        }
+
+        if (dono_id && itens[0].dono_id !== Number(dono_id)) {
+            await conn.rollback();
+            return res.status(403).json({ error: 'Sem permissão para editar este item' });
+        }
+
+        const updates = [];
+        const params = [];
+
+        if (isNonEmptyString(nome_item)) {
+            updates.push('nome_item = ?');
+            params.push(nome_item);
+        }
+        if (categoria !== undefined) {
+            updates.push('categoria = ?');
+            params.push(categoria || null);
+        }
+        if (disponibilidade !== undefined) {
+            updates.push('disponibilidade = ?');
+            params.push(disponibilidade);
+        }
+        if (estado_conservacao !== undefined) {
+            updates.push('estado_conservacao = ?');
+            params.push(estado_conservacao);
+        }
+        if (descricao !== undefined) {
+            updates.push('descricao = ?');
+            params.push(descricao || null);
+        }
+
+        if (updates.length === 0 && !isNonEmptyString(foto_url)) {
+            await conn.rollback();
+            return res.status(400).json({ error: 'Nenhum campo para atualizar' });
+        }
+
+        if (updates.length > 0) {
+            params.push(id);
+            await conn.execute(`UPDATE Item SET ${updates.join(', ')} WHERE id_item = ?`, params);
+        }
+
+        if (isNonEmptyString(foto_url)) {
+            const fotoId = await inserirFoto(conn, foto_url);
+            await conn.execute('INSERT INTO Foto_item (foto_id, item_id) VALUES (?, ?)', [fotoId, id]);
+        }
+
+        await conn.commit();
+        res.json({ success: true });
+    } catch (error) {
+        await conn.rollback();
+        console.error('Erro ao editar item:', error);
+        res.status(500).json({ error: 'Erro ao editar item' });
+    } finally {
+        conn.release();
     }
 });
 

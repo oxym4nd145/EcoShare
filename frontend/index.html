@@ -76,15 +76,76 @@
     <main>
         <div class="section-header">
             <h2>Explorar Itens</h2>
+            <div class="items-actions">
+                <button id="btn-open-add" class="btn-primary">Adicionar item</button>
+                <button id="btn-open-edit" class="btn-secondary">Editar item</button>
+            </div>
         </div>
         <div class="product-grid" id="items-container">
             <p>Carregando itens ecológicos...</p>
         </div>
     </main>
 
+    <div id="item-modal" class="modal" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Adicionar item</h3>
+                <button id="btn-close-modal" class="modal-close" aria-label="Fechar">&times;</button>
+            </div>
+            <form id="item-form" class="modal-form">
+                <div id="item-id-group" class="form-group" style="display:none;">
+                    <label for="item-id">ID do Item</label>
+                    <input type="number" id="item-id" placeholder="Ex: 12">
+                </div>
+
+                <div class="form-group">
+                    <label for="item-nome">Nome do item</label>
+                    <input type="text" id="item-nome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="item-categoria">Categoria</label>
+                    <select id="item-categoria">
+                        <option value="">Selecione</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="item-disponibilidade">Disponibilidade</label>
+                    <select id="item-disponibilidade" required>
+                        <option value="">Selecione</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="item-estado">Estado de conservação</label>
+                    <select id="item-estado" required>
+                        <option value="">Selecione</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="item-descricao">Descrição</label>
+                    <textarea id="item-descricao" rows="4"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="item-foto">URL da foto</label>
+                    <input type="text" id="item-foto" placeholder="https://...">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" id="btn-submit-item" class="btn-primary">Salvar</button>
+                    <button type="button" id="btn-cancel-item" class="btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <footer><p>&copy; 2026 EcoShare - Sistema de Economia Circular</p></footer>
 
     <script src="./src/scripts/load-itens.js"></script>
     <script src="./src/scripts/load-header.js"></script>
+    <script src="./src/scripts/item-crud.js"></script>
 </body>
 </html>
