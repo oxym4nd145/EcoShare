@@ -109,6 +109,7 @@ app.get('/api/itens/:id', async (req, res) => {
                 cat.tipo_categoria AS categoria, 
                 disp.tipo_status AS tipo,
                 est.tipo_estado AS estado,
+                i.dono_id AS dono_id, -- AQUI: Adicionei a vírgula que faltava
                 u.nome_usuario AS dono,
                 endr.cidade AS localizacao,
                 f.endereco_cdn AS foto
@@ -127,6 +128,7 @@ app.get('/api/itens/:id', async (req, res) => {
         if (rows.length === 0) return res.status(404).json({ error: 'Item não encontrado' });
         res.json(rows[0]);
     } catch (error) {
+        console.error("Erro no SQL:", error); // Adicionado para debugar
         res.status(500).json({ error: 'Erro ao buscar item' });
     }
 });
@@ -223,9 +225,6 @@ app.get('/api/usuario/:usuarioId/itens', async (req, res) => {
             GROUP BY i.id_item`;
 
         const [rows] = await db.execute(query, [usuarioId]);
-        
-        // Correção do console.log (estava com vírgula em vez de ponto)
-        console.log('Itens encontrados para o usuário:', usuarioId); 
         
         res.json(rows);
     } catch (error) {
@@ -345,6 +344,12 @@ app.get('/api/mensagens/:itemId/:usuarioLogadoId/:outroUsuarioId', async (req, r
 app.post('/api/mensagens', async (req, res) => {
     try {
         const { item_id, remetente_id, destinatario_id, texto_mensagem } = req.body;
+        
+        // Validação simples
+        if(!item_id || !remetente_id || !destinatario_id) {
+            return res.status(400).json({ error: "Campos obrigatórios ausentes" });
+        }
+
         const query = `
             INSERT INTO Mensagem (hash_mensagem, item_id, remetente_id, destinatario_id, texto_mensagem) 
             VALUES (UUID(), ?, ?, ?, ?)
@@ -352,7 +357,8 @@ app.post('/api/mensagens', async (req, res) => {
         await db.execute(query, [item_id, remetente_id, destinatario_id, texto_mensagem]);
         res.status(201).json({ message: "Mensagem enviada!" });
     } catch (error) {
-        res.status(500).json({ error: "Erro ao enviar mensagem" });
+        console.error("Erro SQL no POST:", error);
+        res.status(500).json({ error: "Erro ao inserir no banco" });
     }
 });
 

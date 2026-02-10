@@ -3,9 +3,11 @@ let conversaAtivaId = null;       // ID do Item
 let outroUsuarioAtivoId = null;   // ID da pessoa com quem você fala
 
 // --- AUTENTICAÇÃO ---
-const USUARIO_LOGADO_ID = localStorage.getItem('usuario_id');
+const usuarioLogadoObj = JSON.parse(localStorage.getItem('usuario_logado'));
+const USUARIO_LOGADO_ID = usuarioLogadoObj ? usuarioLogadoObj.id : localStorage.getItem('usuario_id');
 
 if (!USUARIO_LOGADO_ID) {
+    console.error("Usuário não logado!");
     window.location.href = 'login.html';
 }
 
@@ -16,7 +18,9 @@ async function carregarConversas() {
     const sidebar = document.getElementById('lista-conversas');
     const controls = document.querySelector('.chat-controls');
     
-    if (controls) controls.style.display = 'none';
+    if (controls && !conversaAtivaId) {
+        controls.style.display = 'none';
+    }
 
     try {
         const res = await fetch(`http://localhost:3000/api/mensagens/conversas/${USUARIO_LOGADO_ID}`);
@@ -44,7 +48,11 @@ async function carregarConversas() {
             const div = document.createElement('div');
             div.className = 'chat-preview';
             
-            // Lógica para data
+            // Verifica se esta conversa é a que está aberta no momento
+            if (c.item_id == conversaAtivaId && c.id_outro_usuario == outroUsuarioAtivoId) {
+                div.classList.add('active');
+            }
+
             const data = c.ultima_mensagem_data ? new Date(c.ultima_mensagem_data).toLocaleDateString('pt-BR') : '';
 
             div.innerHTML = `
@@ -57,7 +65,6 @@ async function carregarConversas() {
                 </div>
             `;
             
-            // Passa o item_id e o id_outro_usuario para a função de seleção
             div.onclick = () => selecionarConversa(c.item_id, c.id_outro_usuario, div);
             sidebar.appendChild(div);
         });
@@ -71,47 +78,63 @@ async function carregarConversas() {
 /**
  * Carrega as mensagens trocadas entre os dois usuários sobre o item
  */
-async function selecionarConversa(itemId, outroUsuarioId, elemento) {
+async function selecionarConversa(itemId, outroUsuarioId, elemento, ehSilencioso = false) {
     conversaAtivaId = itemId;
     outroUsuarioAtivoId = outroUsuarioId;
 
-    // Interface
+    // Interface: Mostra os controles de input
     const controls = document.querySelector('.chat-controls');
     if (controls) controls.style.display = 'flex';
 
+    // Destaque visual na sidebar
     document.querySelectorAll('.chat-preview').forEach(el => el.classList.remove('active'));
     if (elemento) elemento.classList.add('active');
 
     const container = document.getElementById('container-mensagens');
-    container.innerHTML = '<p style="text-align:center;">Carregando...</p>';
+    container.innerHTML = '<div class="loading">Carregando histórico...</div>';
+
+    if (!ehSilencioso) {
+        container.innerHTML = '<div class="loading">Carregando histórico...</div>';
+    }
 
     try {
-        // Chamada para a rota que criamos no server.js
         const res = await fetch(`http://localhost:3000/api/mensagens/${itemId}/${USUARIO_LOGADO_ID}/${outroUsuarioId}`);
         const mensagens = await res.json();
         
         container.innerHTML = ''; 
 
-        mensagens.forEach(m => {
-            const div = document.createElement('div');
-            
-            // IMPORTANTE: Use == em vez de === porque USUARIO_LOGADO_ID é string (do localStorage)
-            // e m.id_remetente é número (do banco).
-            div.className = (m.id_remetente == USUARIO_LOGADO_ID) ? 'msg sent' : 'msg received';
-            
-            const hora = new Date(m.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        if (mensagens.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; margin-top:20px; color:#999;">
+                    <p>Inicie uma conversa sobre este item!</p>
+                </div>`;
+        } else {
+            mensagens.forEach(m => {
+                const div = document.createElement('div');
+                div.className = (m.id_remetente == USUARIO_LOGADO_ID) ? 'msg sent' : 'msg received';
+                
+                const hora = new Date(m.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-            div.innerHTML = `
-                ${m.texto}
-                <span style="display: block; font-size: 0.6em; text-align: right; opacity: 0.7;">${hora}</span>
-            `;
-            container.appendChild(div);
-        });
+                div.innerHTML = `
+                    <div class="bubble">
+                        ${m.texto}
+                        <span style="display: block; font-size: 0.6em; text-align: right; opacity: 0.7; margin-top:4px;">${hora}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
         
-        container.scrollTop = container.scrollHeight;
+        setTimeout(() => {
+            container.scrollTop = container.scrollHeight;
+        }, 100);
+
+        // Opcional: Limpa a URL para não ficar com ?item=... o tempo todo
+        window.history.replaceState({}, document.title, "mensagens.html");
 
     } catch (err) {
         console.error("Erro ao carregar histórico:", err);
+        container.innerHTML = '<p style="color:red; text-align:center;">Erro ao carregar mensagens.</p>';
     }
 }
 
@@ -127,7 +150,7 @@ async function enviarMensagem() {
     const payload = {
         item_id: conversaAtivaId,
         remetente_id: USUARIO_LOGADO_ID,
-        destinatario_id: outroUsuarioAtivoId, // Identifica quem vai receber
+        destinatario_id: outroUsuarioAtivoId,
         texto_mensagem: texto
     };
 
@@ -140,18 +163,66 @@ async function enviarMensagem() {
 
         if (res.ok) {
             input.value = '';
-            // Atualiza o chat imediatamente
-            selecionarConversa(conversaAtivaId, outroUsuarioAtivoId, document.querySelector('.chat-preview.active'));
+            
+            // 1. Atualiza o histórico de forma "silenciosa" (sem apagar a tela)
+            await selecionarConversa(conversaAtivaId, outroUsuarioAtivoId, null, true);
+            
+            // 2. Recarrega a sidebar (que agora não vai mais esconder os botões)
+            await carregarConversas();
         }
     } catch (err) {
         console.error("Erro ao enviar:", err);
     }
 }
 
-// Eventos
+async function carregarChatAutomatico() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const itemId = urlParams.get('item');
+    const donoId = urlParams.get('dono');
+    const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado'));
+
+    if (itemId && donoId && usuarioLogado) {
+        const usuarioLogadoId = usuarioLogado.id_usuario;
+
+        try {
+            const res = await fetch(`http://localhost:3000/api/mensagens/${itemId}/${usuarioLogadoId}/${donoId}`);
+            const historico = await res.json();
+
+            // Chame sua função que desenha as mensagens na tela
+            renderizarMensagens(historico);
+            
+            // Dica: Guarde esses IDs em variáveis globais ou campos ocultos 
+            // para saber para quem enviar o POST depois
+            window.chatAtual = { itemId, donoId };
+        } catch (erro) {
+            console.error("Erro ao carregar chat inicial:", erro);
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const itemIdUrl = urlParams.get('item');
+    const donoIdUrl = urlParams.get('dono');
+
+    await carregarConversas();
+
+    // Valida se os parâmetros da URL existem e não são "undefined" em texto
+    if (itemIdUrl && donoIdUrl && donoIdUrl !== 'undefined') {
+        conversaAtivaId = itemIdUrl;
+        outroUsuarioAtivoId = donoIdUrl;
+
+        console.log("Chat validado:", { conversaAtivaId, outroUsuarioAtivoId });
+
+        // Abre a conversa
+        selecionarConversa(conversaAtivaId, outroUsuarioAtivoId, null);
+    } else {
+        console.warn("Aviso: Parâmetros de chat inválidos ou ausentes na URL.");
+    }
+});
+
+// Eventos de envio
 document.getElementById('btn-enviar').onclick = enviarMensagem;
 document.getElementById('input-mensagem').onkeypress = (e) => {
     if (e.key === 'Enter') enviarMensagem();
 };
-
-window.onload = carregarConversas;

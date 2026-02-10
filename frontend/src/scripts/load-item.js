@@ -42,6 +42,25 @@ async function carregarDetalhes() {
             dispElement.className = `badge badge-outline type-${classeTipo}`;
         }
         
+        const btnChat = document.querySelector('.btn-chat');
+
+        btnChat.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            if (!itemCarregado || !itemCarregado.dono_id) {
+                console.error("Erro: dono_id não está no objeto", itemCarregado);
+                alert("Erro ao identificar o dono do item. Tente atualizar a página.");
+                return;
+            }
+
+            const params = new URLSearchParams({
+                item: itemCarregado._id, 
+                dono: itemCarregado.dono_id 
+            });
+
+            window.location.href = `mensagens.html?${params.toString()}`;
+        });
+
         renderizarAvaliacoes(avaliacoes);
         renderizarManutencoes(manutencoes);
 
@@ -102,9 +121,14 @@ function gerenciarCarrinho() {
         return;
     }
 
+    // Verificamos se o texto do status é diferente de "Disponível"
+    if (itemCarregado.tipo !== 'Disponível') {
+        alert("Desculpe, este item não está disponível para solicitação no momento.");
+        return;
+    }
+
     let carrinho = JSON.parse(localStorage.getItem('ecoshare_cart')) || [];
     
-    // O ID no seu SQL unificado é retornado como _id
     const jaExiste = carrinho.find(i => i._id === itemCarregado._id);
     
     if (!jaExiste) {

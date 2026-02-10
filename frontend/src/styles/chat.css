@@ -26,6 +26,37 @@
     border-left: 4px solid var(--primary-green);
 }
 
+/* Garante que a caixa de chat ocupe toda a altura disponível e se comporte como flex */
+.chat-box {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Ocupa a altura do .chat-wrapper */
+    overflow: hidden; /* Impede que o box inteiro role, apenas as mensagens */
+}
+
+/* O container de mensagens deve crescer para ocupar o espaço, mas ter scroll próprio */
+.chat-messages {
+    flex: 1; /* Faz as mensagens ocuparem todo o espaço acima dos controles */
+    padding: 2rem;
+    overflow-y: auto; /* ATIVA O SCROLL VERTICAL */
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: #ffffff;
+    
+    /* Smooth scroll para uma experiência melhor ao descer automaticamente */
+    scroll-behavior: smooth;
+}
+
+/* Estilização da barra de rolagem para não ficar feia (opcional) */
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+.chat-messages::-webkit-scrollbar-thumb {
+    background-color: #e0e0e0;
+    border-radius: 10px;
+}
+
 .chat-messages {
     flex: 1;
     padding: 2rem;

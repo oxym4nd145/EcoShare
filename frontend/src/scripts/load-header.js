@@ -59,17 +59,19 @@ async function carregarCategoriasHeader() {
 }
 
 async function carregarFiltrosSelect() {
+    const selectDisponibilidade = document.getElementById('filtro-disponibilidade');
+    const selectEstado = document.getElementById('filtro-estado');
+    const selectTransacao = document.getElementById('filtro-transacao');
+    
+    if (!selectDisponibilidade || !selectEstado || !selectTransacao) return;
+    
     // 1. Pega os valores atuais da URL
     const urlParams = new URLSearchParams(window.location.search);
     const catAtiva = urlParams.get('cat');
     const dispAtiva = urlParams.get('disp');
     const estAtivo = urlParams.get('est');
     const transAtiva = urlParams.get('trans');
-
-    const selectDisponibilidade = document.getElementById('filtro-disponibilidade');
-    const selectEstado = document.getElementById('filtro-estado');
-    const selectTransacao = document.getElementById('filtro-transacao');
-
+    
     try {
         // --- Disponibilidades (Status_tipo) ---
         const resDisp = await fetch('http://localhost:3000/api/disponibilidades');
