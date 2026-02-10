@@ -62,8 +62,9 @@ async function carregarFiltrosSelect() {
     const selectDisponibilidade = document.getElementById('filtro-disponibilidade');
     const selectEstado = document.getElementById('filtro-estado');
     const selectTransacao = document.getElementById('filtro-transacao');
+    const selectUf = document.getElementById('filtro-uf');
     
-    if (!selectDisponibilidade || !selectEstado || !selectTransacao) return;
+    if (!selectDisponibilidade || !selectEstado || !selectTransacao || !selectUf) return;
     
     // 1. Pega os valores atuais da URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -71,6 +72,7 @@ async function carregarFiltrosSelect() {
     const dispAtiva = urlParams.get('disp');
     const estAtivo = urlParams.get('est');
     const transAtiva = urlParams.get('trans');
+    const ufAtivo = urlParams.get('uf');
     
     try {
         // --- Disponibilidades (Status_tipo) ---
@@ -134,7 +136,7 @@ async function carregarFiltrosSelect() {
         });
 
         // --- UFs (Estados brasileiros) ---
-        // Adiciona as 27 UFs ao mesmo select de "estados" (filtro-estado)
+        // Popula as 27 UFs no select separado (filtro-uf)
         const ufs = [
             { sigla: 'AC', nome: 'Acre' },{ sigla: 'AL', nome: 'Alagoas' },{ sigla: 'AP', nome: 'Amapá' },
             { sigla: 'AM', nome: 'Amazonas' },{ sigla: 'BA', nome: 'Bahia' },{ sigla: 'CE', nome: 'Ceará' },
@@ -147,11 +149,13 @@ async function carregarFiltrosSelect() {
             { sigla: 'SP', nome: 'São Paulo' },{ sigla: 'SE', nome: 'Sergipe' },{ sigla: 'TO', nome: 'Tocantins' }
         ];
 
+        selectUf.innerHTML = '<option value="all">Todas UFs</option>';
         ufs.forEach(u => {
             const opt = document.createElement('option');
             opt.value = u.sigla;
             opt.textContent = `${u.nome} (${u.sigla})`;
-            selectEstado.appendChild(opt);
+            if (ufAtivo && ufAtivo.toUpperCase() === u.sigla) opt.selected = true;
+            selectUf.appendChild(opt);
         });
 
         const resTrans = await fetch('http://localhost:3000/api/transacoes');
@@ -183,6 +187,7 @@ function aplicarFiltros() {
     const catVal = document.getElementById('filtro-categoria').value;
     const transVal = document.getElementById('filtro-transacao').value;
     const estVal = document.getElementById('filtro-estado').value;
+    const ufVal = document.getElementById('filtro-uf') ? document.getElementById('filtro-uf').value : null;
     const dispVal = document.getElementById('filtro-disponibilidade').value;
 
     // Lógica para Categoria, Transação e Estado:
@@ -195,6 +200,9 @@ function aplicarFiltros() {
 
     if (estVal && estVal !== "all") urlParams.set('est', estVal);
     else urlParams.delete('est');
+
+    if (ufVal && ufVal !== "all") urlParams.set('uf', ufVal);
+    else urlParams.delete('uf');
 
     // Lógica para Disponibilidade:
     // Mantemos o "all" na URL apenas se o usuário escolheu "Todas" 

@@ -56,7 +56,9 @@
                         <option value="all">Todos Estados</option>
                     </select>
 
-                    <!-- filtro-uf removido: UFs agora aparecem dentro de filtro-estado -->
+                    <select id="filtro-uf" class="filter-select" onchange="aplicarFiltros()">
+                        <option value="all">Todas UFs</option>
+                    </select>
 
                     <select id="filtro-disponibilidade" class="filter-select" onchange="aplicarFiltros()">
                         <option value="all">Todas Disponibilidades</option>

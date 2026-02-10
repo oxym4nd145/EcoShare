@@ -17,6 +17,7 @@ async function carregarItens() {
     const categoriaId = urlParams.get('cat');
     const transacaoId = urlParams.get('trans'); // Tipo: Aluguel, Venda...
     const estadoId = urlParams.get('est');      // Condição: Novo, Usado...
+    const ufParam = urlParams.get('uf');        // UF do endereço do usuário
     const buscaTermo = urlParams.get('busca');
     const dispParam = urlParams.get('disp');    // Status: Disponível, Em uso...
 
@@ -26,6 +27,7 @@ async function carregarItens() {
         // 1. Mapeamento correto para os parâmetros que o server.js espera
         if (categoriaId) urlApi.searchParams.append('cat', categoriaId);
         if (estadoId) urlApi.searchParams.append('est', estadoId);
+        if (ufParam) urlApi.searchParams.append('uf', ufParam);
         if (buscaTermo) urlApi.searchParams.append('busca', buscaTermo);
 
         // 2. IMPORTANTE: No seu server.js, o filtro de Status (id_status) 

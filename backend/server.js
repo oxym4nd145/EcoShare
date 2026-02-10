@@ -57,7 +57,7 @@ app.get('/api/transacoes', async (req, res) => {
 // --- Listagem de Itens (Home com Filtros) ---
 app.get('/api/itens', async (req, res) => {
     try {
-        const { cat, disp, est, busca } = req.query; 
+        const { cat, disp, est, busca, uf } = req.query; 
         
         let query = `
             SELECT 
@@ -84,18 +84,21 @@ app.get('/api/itens', async (req, res) => {
         if (cat) { query += ` AND i.categoria = ?`; params.push(cat); }
         if (disp) { query += ` AND i.status_item = ?`; params.push(disp); }
 
-        // `est` pode ser:
-        // - um id numérico (estado de conservação) -> filtra i.estado_conservacao
-        // - uma sigla UF (ex: 'SP') -> filtra pelo estado do endereço do dono (endr.estado)
+        // `est` = estado de conservação (numérico). `uf` = sigla do estado (endereço).
         if (est) {
             const estIsId = /^\d+$/.test(est);
             if (estIsId) {
                 query += ` AND i.estado_conservacao = ?`;
                 params.push(est);
-            } else {
+            } else if (!uf) {
+                // compatibilidade: se mandarem UF em `est` e `uf` estiver vazio
                 query += ` AND endr.estado = ?`;
                 params.push(est);
             }
+        }
+        if (uf) {
+            query += ` AND endr.estado = ?`;
+            params.push(uf);
         }
         if (busca) {
             query += ` AND (i.nome_item LIKE ? OR i.descricao LIKE ?)`;
