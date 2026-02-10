@@ -275,7 +275,7 @@ app.post('/api/cadastrar', async (req, res) => {
         const sql = `
             INSERT INTO Usuario 
             (nome_usuario, email, hash_senha, data_nascimento, nivel_permissao, mensalidade_id) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?)
         `;
         
         // Usando await db.execute para consistência com o restante do arquivo
