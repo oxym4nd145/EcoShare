@@ -100,17 +100,19 @@ async function carregarMeusItens() {
         }
 
         container.innerHTML = itens.map(item => `
-            <a href="item.html?id=${item._id}" class="product-card">
-                <div class="img-container">
-                    <img src="${item.foto || './src/imgs/recycle-sign.svg'}" alt="${item.nome}">
-                </div>
-                <div class="card-info">
-                    <span class="badge type-${formatarClasse(item.tipo)}">
-                        ${item.tipo}
-                    </span>
-                    <h3>${item.nome}</h3>
-                </div>
-            </a>
+            <div class="product-card-wrapper">
+                <a href="item.html?id=${item._id}" class="product-card">
+                    <div class="img-container">
+                        <img src="${item.foto || './src/imgs/recycle-sign.svg'}" alt="${item.nome}">
+                    </div>
+                    <div class="card-info">
+                        <span class="badge type-${formatarClasse(item.tipo)}">
+                            ${item.tipo}
+                        </span>
+                        <h3>${item.nome}</h3>
+                    </div>
+                </a>
+            </div>
         `).join('');
 
     } catch (erro) {
@@ -193,6 +195,38 @@ function setElementText(id, text) {
     const el = document.getElementById(id);
     if (el) el.innerText = text;
 }
+
+async function deletarItem(itemId, itemNome) {
+    if (!confirm(`Tem certeza que deseja deletar "${itemNome}"?\nEsta ação não pode ser desfeita.`)) {
+        return;
+    }
+
+    const usuarioId = localStorage.getItem('usuario_id');
+    if (!usuarioId) {
+        alert('Você precisa estar logado.');
+        return;
+    }
+
+    try {
+        const resposta = await fetch(`http://localhost:3000/api/itens/${itemId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usuario_id: usuarioId })
+        });
+
+        if (!resposta.ok) {
+            const erro = await resposta.json();
+            throw new Error(erro.error || 'Erro ao deletar');
+        }
+
+        alert('Item deletado!');
+        carregarMeusItens();
+    } catch (erro) {
+        console.error('Erro:', erro);
+        alert('Erro: ' + erro.message);
+    }
+}
+window.deletarItem = deletarItem;
 
 document.addEventListener('DOMContentLoaded', () => {
     carregarPerfil();

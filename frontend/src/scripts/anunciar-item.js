@@ -8,8 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('form-anuncio');
     const msg = document.getElementById('form-msg');
     const selectCategoria = document.getElementById('categoria');
-    const selectStatus = document.getElementById('status_item');
     const selectEstado = document.getElementById('estado_conservacao');
+    
+    let statusDisponivel = null;
 
     const setMessage = (text, type = 'error') => {
         msg.textContent = text;
@@ -27,6 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 opt.textContent = cat.tipo_categoria;
                 selectCategoria.appendChild(opt);
             });
+            
+            // Define "Outros" como padrão se existir
+            const outros = categorias.find(c => c.tipo_categoria === 'Outros');
+            if (outros) {
+                selectCategoria.value = outros.id_categoria;
+            }
         } catch (err) {
             console.error('Erro ao carregar categorias:', err);
             setMessage('Não foi possível carregar categorias.', 'error');
@@ -37,13 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch('http://localhost:3000/api/disponibilidades');
             const status = await res.json();
-            selectStatus.innerHTML = '<option value="">Selecione</option>';
-            status.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.id_status;
-                opt.textContent = s.tipo_status;
-                selectStatus.appendChild(opt);
-            });
+            const disponivel = status.find(s => s.tipo_status === 'Disponível');
+            if (disponivel) {
+                statusDisponivel = disponivel.id_status;
+            } else {
+                console.error('Status "Disponível" não encontrado');
+                setMessage('Não foi possível carregar status.', 'error');
+            }
         } catch (err) {
             console.error('Erro ao carregar status:', err);
             setMessage('Não foi possível carregar status.', 'error');
@@ -85,13 +92,17 @@ document.addEventListener('DOMContentLoaded', () => {
         setMessage('');
 
         const nome_item = document.getElementById('nome_item').value.trim();
-        const categoria = selectCategoria.value || null;
-        const status_item = selectStatus.value;
+        const categoria = selectCategoria.value;
         const estado_conservacao = selectEstado.value;
         const descricao = document.getElementById('descricao').value.trim() || null;
 
-        if (!nome_item || !status_item || !estado_conservacao) {
-            setMessage('Preencha os campos obrigatórios.', 'error');
+        if (!nome_item || !categoria || !estado_conservacao) {
+            setMessage('Preencha todos os campos obrigatórios.', 'error');
+            return;
+        }
+
+        if (!statusDisponivel) {
+            setMessage('Erro ao carregar status disponível.', 'error');
             return;
         }
 
@@ -103,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     dono_id: usuarioId,
                     nome_item,
                     categoria,
-                    status_item,
+                    status_item: statusDisponivel,
                     descricao,
                     estado_conservacao
                 })
@@ -114,6 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setMessage('Item anunciado com sucesso!', 'success');
             form.reset();
+            setTimeout(() => {
+                window.location.href = 'perfil.html';
+            }, 2000);
         } catch (err) {
             console.error(err);
             setMessage(err.message || 'Erro ao anunciar item', 'error');

@@ -61,6 +61,50 @@ async function carregarDetalhes() {
             window.location.href = `mensagens.html?${params.toString()}`;
         });
 
+        // Mostrar botão deletar apenas se for o dono
+        const usuarioId = localStorage.getItem('usuario_id');
+        const btnDeletar = document.getElementById('btn-deletar');
+        
+        if (btnDeletar) {
+            // Sempre esconde por padrão
+            btnDeletar.style.display = 'none';
+            
+            // Só mostra se for o dono
+            if (usuarioId && itemCarregado.dono_id === Number(usuarioId)) {
+                btnDeletar.style.display = 'flex';
+                btnDeletar.style.alignItems = 'center';
+                btnDeletar.style.gap = '0.5rem';
+                btnDeletar.style.padding = '12px 16px';
+                btnDeletar.style.border = 'none';
+                btnDeletar.style.borderRadius = '6px';
+                btnDeletar.style.cursor = 'pointer';
+                btnDeletar.style.fontWeight = '500';
+                btnDeletar.style.fontSize = '0.95rem';
+                btnDeletar.style.background = 'linear-gradient(135deg, #ff3b30 0%, #ff5445 100%)';
+                btnDeletar.style.color = 'white';
+                btnDeletar.style.boxShadow = '0 4px 12px rgba(255, 59, 48, 0.25)';
+                
+                btnDeletar.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    await deletarItemAtual();
+                });
+                
+                btnDeletar.addEventListener('mouseenter', function() {
+                    this.style.transition = 'all 0.2s ease';
+                    this.style.background = 'linear-gradient(135deg, #ff2420 0%, #ff4435 100%)';
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 6px 16px rgba(255, 59, 48, 0.35)';
+                });
+                
+                btnDeletar.addEventListener('mouseleave', function() {
+                    this.style.transition = 'all 0.2s ease';
+                    this.style.background = 'linear-gradient(135deg, #ff3b30 0%, #ff5445 100%)';
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 4px 12px rgba(255, 59, 48, 0.25)';
+                });
+            }
+        }
+
         renderizarAvaliacoes(avaliacoes);
         renderizarManutencoes(manutencoes);
 
@@ -156,3 +200,39 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSolicitar.addEventListener('click', gerenciarCarrinho);
     }
 });
+
+async function deletarItemAtual() {
+    if (!itemCarregado) {
+        alert('Erro ao carregar dados do item.');
+        return;
+    }
+
+    if (!confirm(`Tem certeza que deseja deletar "${itemCarregado.nome}"?\nEsta ação não pode ser desfeita.`)) {
+        return;
+    }
+
+    const usuarioId = localStorage.getItem('usuario_id');
+    if (!usuarioId) {
+        alert('Você precisa estar logado.');
+        return;
+    }
+
+    try {
+        const resposta = await fetch(`http://localhost:3000/api/itens/${itemCarregado._id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usuario_id: usuarioId })
+        });
+
+        if (!resposta.ok) {
+            const erro = await resposta.json();
+            throw new Error(erro.error || 'Erro ao deletar');
+        }
+
+        alert('Item deletado com sucesso!');
+        window.location.href = 'perfil.html';
+    } catch (erro) {
+        console.error('Erro:', erro);
+        alert('Erro: ' + erro.message);
+    }
+}

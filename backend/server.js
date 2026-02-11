@@ -321,8 +321,20 @@ app.post('/api/itens', async (req, res) => {
     try {
         const { dono_id, nome_item, categoria, status_item, descricao, estado_conservacao } = req.body;
 
-        if (!dono_id || !nome_item || !status_item || !estado_conservacao) {
-            return res.status(400).json({ error: 'Campos obrigatórios: dono_id, nome_item, status_item, estado_conservacao' });
+        if (!dono_id || !nome_item || !estado_conservacao) {
+            return res.status(400).json({ error: 'Campos obrigatórios: dono_id, nome_item, estado_conservacao' });
+        }
+
+        let final_status_item = status_item;
+        if (!final_status_item) {
+            const [statusRows] = await db.execute(
+                'SELECT id_status FROM Status_tipo WHERE tipo_status = ?',
+                ['Disponível']
+            );
+            if (statusRows.length === 0) {
+                return res.status(400).json({ error: 'Status "Disponível" não encontrado' });
+            }
+            final_status_item = statusRows[0].id_status;
         }
 
         const sql = `
@@ -334,7 +346,7 @@ app.post('/api/itens', async (req, res) => {
             dono_id,
             nome_item,
             categoria || null,
-            status_item,
+            final_status_item,
             descricao || null,
             estado_conservacao
         ]);
@@ -416,6 +428,18 @@ app.put('/api/itens/:id', async (req, res) => {
 app.delete('/api/itens/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        const { usuario_id } = req.body;
+
+        // Verificar se o item existe e pertence ao usuário (opcional, para segurança)
+        if (usuario_id) {
+            const [item] = await db.execute('SELECT dono_id FROM Item WHERE id_item = ?', [id]);
+            if (item.length === 0) {
+                return res.status(404).json({ error: 'Item não encontrado' });
+            }
+            if (item[0].dono_id !== parseInt(usuario_id)) {
+                return res.status(403).json({ error: 'Você não tem permissão para deletar este item' });
+            }
+        }
 
         const [result] = await db.execute('DELETE FROM Item WHERE id_item = ?', [id]);
 

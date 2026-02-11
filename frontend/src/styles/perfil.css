@@ -91,6 +91,11 @@ a.btn-edit-perfil:hover {
     text-decoration: none;
 }
 
+.product-card-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
 @media (max-width: 768px) {
     .profile-grid { grid-template-columns: 1fr; }
 }
