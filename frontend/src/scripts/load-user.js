@@ -1,11 +1,33 @@
 function formatarClasse(texto) {
     if (!texto) return 'default';
     return texto
-        .toLowerCase()               // 1. Tudo minúsculo
-        .normalize('NFD')            // 2. Separa os acentos das letras
-        .replace(/[\u0300-\u036f]/g, "") // 3. Remove os acentos
-        .replace(/\s+/g, '-')        // 4. Troca ESPAÇOS por TRAÇOS
-        .trim();                     // 5. Remove espaços extras nas pontas
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, "") 
+        .replace(/\s+/g, '-')
+        .trim();
+}
+
+// Formata CPF (11 dígitos) para 000.000.000-00
+function formatarDocumento(doc) {
+    if (!doc) return '';
+    const numeros = doc.replace(/\D/g, '');
+    
+    if (numeros.length === 11) {
+        // CPF
+        return numeros.slice(0, 3) + '.' + numeros.slice(3, 6) + '.' + numeros.slice(6, 9) + '-' + numeros.slice(9);
+    } else if (numeros.length === 14) {
+        // CNPJ
+        return numeros.slice(0, 2) + '.' + numeros.slice(2, 5) + '.' + numeros.slice(5, 8) + '/' + numeros.slice(8, 12) + '-' + numeros.slice(12);
+    }
+    return doc;
+}
+
+// Formata CEP para 00000-000
+function formatarCEP(cep) {
+    if (!cep) return '';
+    const numeros = cep.replace(/\D/g, '');
+    return numeros.slice(0, 5) + '-' + numeros.slice(5);
 }
 
 async function carregarPerfil() {
@@ -19,33 +41,44 @@ async function carregarPerfil() {
     }
 
     try {
-        const resposta = await fetch(`http://localhost:3000/api/usuario/completo/${USUARIO_ID}`);
+        console.log('Iniciando carregarPerfil para usuário:', USUARIO_ID);
+        
+        const url = `http://localhost:3000/api/usuario/completo/${USUARIO_ID}`;
+        console.log('Requisição para:', url);
+        
+        const resposta = await fetch(url);
+        
+        console.log('Status da resposta:', resposta.status, resposta.ok);
+        
+        if (!resposta.ok) {
+            const errorText = await resposta.text();
+            console.error('Erro HTTP - Status:', resposta.status);
+            console.error('Erro texto:', errorText);
+            alert('Erro ' + resposta.status + ': ' + errorText);
+            return;
+        }
+        
         const user = await resposta.json();
 
+        console.log('Resposta completa da API:', user);
+
         // Foto de perfil
-        const imgElement = document.getElementById('user-foto'); // Verifique o ID no perfil.html
-        if (user.endereco_cdn) {
-            imgElement.src = user.endereco_cdn; 
-        } else {
-            imgElement.src = 'src/imgs/user-gray.svg'; // Imagem padrão caso o banco retorne nulo
+        const imgElement = document.getElementById('user-foto');
+        if (imgElement) {
+            imgElement.src = 'src/imgs/user-gray.svg';
         }
 
         // 1. Preenchimento de Informações Básicas
-        setElementText('user-nome', user.nome_usuario);
-        setElementText('user-email', user.email);
+        setElementText('user-nome', user.nome_usuario || '...');
+        setElementText('user-email', user.email || '...');
         
-        // 2. Badge de Mensalidade com Estilização Dinâmica
+        // 2. Badge de Mensalidade
         const badgeMensalidade = document.getElementById('user-mensalidade-badge');
         if (badgeMensalidade) {
-            badgeMensalidade.innerText = user.tipo_mensalidade || 'Grátis';
-            
-            if (user.tipo_mensalidade?.toLowerCase() === 'plus') {
-                badgeMensalidade.style.backgroundColor = 'var(--accent-gold)';
-                badgeMensalidade.style.color = 'var(--text-dark)';
-            }
+            badgeMensalidade.innerText = 'Grátis';
         }
 
-        // 3. Dados Financeiros (Formatação de Moeda)
+        // 3. Dados Financeiros
         const saldoFormatado = (user.saldo || 0).toLocaleString('pt-BR', { 
             style: 'currency', 
             currency: 'BRL' 
@@ -58,25 +91,34 @@ async function carregarPerfil() {
             setElementText('user-data-nasc', data.toLocaleDateString('pt-BR'));
         }
 
-        setElementText('user-tipo-pessoa', user.nome_tipo_pessoa);
-        setElementText('user-tipo-documento', `${user.tipo_documento}:`);
-        setElementText('user-documento', user.documento);
-        setElementText('user-cep', user.cep || 'Não informado');
+        // Tipo de Pessoa
+        setElementText('user-tipo-pessoa', 'Pessoa Física');
+        
+        // Documento
+        if (user.documento) {
+            const tipoDoc = user.documento.length === 11 ? 'CPF' : 'Documento';
+            setElementText('user-tipo-documento', `${tipoDoc}:`);
+            const docFormatado = formatarDocumento(user.documento);
+            setElementText('user-documento', docFormatado);
+        } else {
+            setElementText('user-tipo-documento', 'Documento:');
+            setElementText('user-documento', 'Não informado');
+        }
 
-        // 5. Endereço
+        // Endereço - dados do banco
+        setElementText('user-cep', user.cep ? formatarCEP(user.cep) : 'Não informado');
         setElementText('user-logradouro', user.logradouro || '...');
         setElementText('user-numero', user.numero || 'S/N');
         setElementText('user-bairro', user.bairro || '...');
         setElementText('user-cidade', user.cidade || '...');
         setElementText('user-uf', user.estado || '..');
 
-        // 6. RENDERIZAÇÃO DAS TRANSAÇÕES
-        // Passamos o array de transações que vem da API (ou um array vazio se não existir)
+        // Renderizar transações
         renderizarTransacoes(user.transacoes || []);
 
     } catch (error) {
         console.error("Erro ao carregar perfil:", error);
-
+        alert('Erro: ' + error.message);
     }
 }
 

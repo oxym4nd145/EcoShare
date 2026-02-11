@@ -61,9 +61,47 @@ async function carregarDetalhes() {
             window.location.href = `mensagens.html?${params.toString()}`;
         });
 
-        // Mostrar botão deletar apenas se for o dono
+        // Mostrar botões de ação apenas se for o dono
         const usuarioId = localStorage.getItem('usuario_id');
         const btnDeletar = document.getElementById('btn-deletar');
+        const btnEditar = document.getElementById('btn-editar');
+        
+        if (usuarioId && itemCarregado.dono_id === Number(usuarioId)) {
+            // Mostrar botão editar
+            if (btnEditar) {
+                btnEditar.style.display = 'flex';
+                btnEditar.style.alignItems = 'center';
+                btnEditar.style.gap = '0.5rem';
+                btnEditar.style.padding = '12px 16px';
+                btnEditar.style.border = 'none';
+                btnEditar.style.borderRadius = '6px';
+                btnEditar.style.cursor = 'pointer';
+                btnEditar.style.fontWeight = '500';
+                btnEditar.style.fontSize = '0.95rem';
+                btnEditar.style.background = 'linear-gradient(135deg, #4b9aff 0%, #3b85dd 100%)';
+                btnEditar.style.color = 'white';
+                btnEditar.style.boxShadow = '0 4px 12px rgba(75, 154, 255, 0.25)';
+                
+                btnEditar.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.location.href = `edit-item.html?id=${itemCarregado._id}`;
+                });
+                
+                btnEditar.addEventListener('mouseenter', function() {
+                    this.style.transition = 'all 0.2s ease';
+                    this.style.background = 'linear-gradient(135deg, #3b85dd 0%, #2b70bb 100%)';
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 6px 16px rgba(75, 154, 255, 0.35)';
+                });
+                
+                btnEditar.addEventListener('mouseleave', function() {
+                    this.style.transition = 'all 0.2s ease';
+                    this.style.background = 'linear-gradient(135deg, #4b9aff 0%, #3b85dd 100%)';
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 4px 12px rgba(75, 154, 255, 0.25)';
+                });
+            }
+        }
         
         if (btnDeletar) {
             // Sempre esconde por padrão

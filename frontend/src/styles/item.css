@@ -100,6 +100,22 @@
     display: none !important;
 }
 
+#btn-editar {
+    display: none !important;
+}
+
+.btn-edit {
+    background: linear-gradient(135deg, #4b9aff 0%, #3b85dd 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(75, 154, 255, 0.25) !important;
+}
+
+.btn-edit:hover {
+    background: linear-gradient(135deg, #3b85dd 0%, #2b70bb 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(75, 154, 255, 0.35) !important;
+}
+
 /* --- Organização dos Novos Detalhes --- */
 
 .extra-details-grid {
