@@ -96,27 +96,45 @@
     filter: brightness(0) invert(1);
 }
 
-#btn-deletar {
-    display: none !important;
+/* Estilos para os botões Editar e Deletar */
+#btn-editar, #btn-deletar {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
 }
 
 #btn-editar {
-    display: none !important;
+    background: linear-gradient(135deg, #4b9aff 0%, #3b85dd 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(75, 154, 255, 0.25);
 }
 
-.btn-edit {
-    background: linear-gradient(135deg, #4b9aff 0%, #3b85dd 100%) !important;
-    color: white !important;
-    box-shadow: 0 4px 12px rgba(75, 154, 255, 0.25) !important;
+#btn-editar:hover {
+    background: linear-gradient(135deg, #3b85dd 0%, #2b70bb 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(75, 154, 255, 0.35);
 }
 
-.btn-edit:hover {
-    background: linear-gradient(135deg, #3b85dd 0%, #2b70bb 100%) !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 16px rgba(75, 154, 255, 0.35) !important;
+#btn-deletar {
+    background: linear-gradient(135deg, #ff3b30 0%, #ff5445 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(255, 59, 48, 0.25);
 }
 
-/* --- Organização dos Novos Detalhes --- */
+#btn-deletar:hover {
+    background: linear-gradient(135deg, #ff2420 0%, #ff4435 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 59, 48, 0.35);
+}
+
+/* Organização dos Novos Detalhes */
 
 .extra-details-grid {
     display: grid;

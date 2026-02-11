@@ -61,86 +61,34 @@ async function carregarDetalhes() {
             window.location.href = `mensagens.html?${params.toString()}`;
         });
 
-        // Mostrar botões de ação apenas se for o dono
+        // ===== Lógica dos Botões Editar e Deletar =====
         const usuarioId = localStorage.getItem('usuario_id');
-        const btnDeletar = document.getElementById('btn-deletar');
         const btnEditar = document.getElementById('btn-editar');
-        
+        const btnDeletar = document.getElementById('btn-deletar');
+
+        // Se o item é do usuário logado, mostra os botões
         if (usuarioId && itemCarregado.dono_id === Number(usuarioId)) {
-            // Mostrar botão editar
+            // Botão Editar
             if (btnEditar) {
-                btnEditar.style.display = 'flex';
-                btnEditar.style.alignItems = 'center';
-                btnEditar.style.gap = '0.5rem';
-                btnEditar.style.padding = '12px 16px';
-                btnEditar.style.border = 'none';
-                btnEditar.style.borderRadius = '6px';
-                btnEditar.style.cursor = 'pointer';
-                btnEditar.style.fontWeight = '500';
-                btnEditar.style.fontSize = '0.95rem';
-                btnEditar.style.background = 'linear-gradient(135deg, #4b9aff 0%, #3b85dd 100%)';
-                btnEditar.style.color = 'white';
-                btnEditar.style.boxShadow = '0 4px 12px rgba(75, 154, 255, 0.25)';
-                
-                btnEditar.addEventListener('click', (e) => {
-                    e.preventDefault();
+                btnEditar.style.display = 'inline-flex';
+                btnEditar.addEventListener('click', () => {
                     window.location.href = `edit-item.html?id=${itemCarregado._id}`;
                 });
-                
-                btnEditar.addEventListener('mouseenter', function() {
-                    this.style.transition = 'all 0.2s ease';
-                    this.style.background = 'linear-gradient(135deg, #3b85dd 0%, #2b70bb 100%)';
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 6px 16px rgba(75, 154, 255, 0.35)';
-                });
-                
-                btnEditar.addEventListener('mouseleave', function() {
-                    this.style.transition = 'all 0.2s ease';
-                    this.style.background = 'linear-gradient(135deg, #4b9aff 0%, #3b85dd 100%)';
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = '0 4px 12px rgba(75, 154, 255, 0.25)';
+            }
+
+            // Botão Deletar
+            if (btnDeletar) {
+                btnDeletar.style.display = 'inline-flex';
+                btnDeletar.addEventListener('click', async () => {
+                    if (confirm(`Tem certeza que deseja deletar "${itemCarregado.nome}"?`)) {
+                        await deletarItemAtual();
+                    }
                 });
             }
-        }
-        
-        if (btnDeletar) {
-            // Sempre esconde por padrão
-            btnDeletar.style.display = 'none';
-            
-            // Só mostra se for o dono
-            if (usuarioId && itemCarregado.dono_id === Number(usuarioId)) {
-                btnDeletar.style.display = 'flex';
-                btnDeletar.style.alignItems = 'center';
-                btnDeletar.style.gap = '0.5rem';
-                btnDeletar.style.padding = '12px 16px';
-                btnDeletar.style.border = 'none';
-                btnDeletar.style.borderRadius = '6px';
-                btnDeletar.style.cursor = 'pointer';
-                btnDeletar.style.fontWeight = '500';
-                btnDeletar.style.fontSize = '0.95rem';
-                btnDeletar.style.background = 'linear-gradient(135deg, #ff3b30 0%, #ff5445 100%)';
-                btnDeletar.style.color = 'white';
-                btnDeletar.style.boxShadow = '0 4px 12px rgba(255, 59, 48, 0.25)';
-                
-                btnDeletar.addEventListener('click', async (e) => {
-                    e.preventDefault();
-                    await deletarItemAtual();
-                });
-                
-                btnDeletar.addEventListener('mouseenter', function() {
-                    this.style.transition = 'all 0.2s ease';
-                    this.style.background = 'linear-gradient(135deg, #ff2420 0%, #ff4435 100%)';
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 6px 16px rgba(255, 59, 48, 0.35)';
-                });
-                
-                btnDeletar.addEventListener('mouseleave', function() {
-                    this.style.transition = 'all 0.2s ease';
-                    this.style.background = 'linear-gradient(135deg, #ff3b30 0%, #ff5445 100%)';
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = '0 4px 12px rgba(255, 59, 48, 0.25)';
-                });
-            }
+        } else {
+            // Esconder botões se o item não é do usuário
+            if (btnEditar) btnEditar.style.display = 'none';
+            if (btnDeletar) btnDeletar.style.display = 'none';
         }
 
         renderizarAvaliacoes(avaliacoes);
