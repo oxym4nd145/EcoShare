@@ -176,38 +176,20 @@ BEGIN
 END;
 //
 
--- Integridade da Avaliação
-CREATE TRIGGER trg_valida_avaliador
-BEFORE INSERT ON Avaliacao
-FOR EACH ROW
-BEGIN
-    DECLARE v_comprador_id INT;
-
-    SELECT comprador_id INTO v_comprador_id
-    FROM Transacao
-    WHERE id_transacao = NEW.transacao_id;
-
-    -- Verifica se quem está tentando avaliar é o comprador real da transação
-    IF NEW.avaliador_id != v_comprador_id THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Erro: Apenas o comprador da transação pode realizar esta avaliação.';
-    END IF;
-END;
-//
-
--- Validação de idade do usuário
-CREATE TRIGGER trg_valida_idade_usuario
-BEFORE INSERT ON Usuario
-FOR EACH ROW
-BEGIN
-    DECLARE idade INT;
-    SET idade = TIMESTAMPDIFF(YEAR, NEW.data_nascimento, CURDATE());
-    
-    IF idade < 18 THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Erro: Usuário deve ter pelo menos 18 anos.';
-    END IF;
-END;
-//
-
 DELIMITER ;
+
+
+-- Validação de idade do usuário (apenas se data_nascimento for um atributo de PF)
+-- CREATE TRIGGER trg_valida_idade_usuario
+-- BEFORE INSERT ON Usuario
+-- FOR EACH ROW
+-- BEGIN
+--     DECLARE idade INT;
+--     SET idade = TIMESTAMPDIFF(YEAR, NEW.data_nascimento, CURDATE());
+    
+--     IF idade < 18 THEN
+--         SIGNAL SQLSTATE '45000'
+--         SET MESSAGE_TEXT = 'Erro: Usuário deve ter pelo menos 18 anos.';
+--     END IF;
+-- END;
+-- //
