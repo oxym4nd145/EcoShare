@@ -127,6 +127,14 @@ function gerenciarCarrinho() {
         return;
     }
 
+    const userLogado = localStorage.getItem('usuario_id');
+    console.log(userLogado);
+    console.log(itemCarregado.dono_id);
+    if (userLogado && itemCarregado.dono_id === Number(userLogado)) {
+        alert('Você é o dono deste item.');
+        return;
+    }
+
     let carrinho = JSON.parse(localStorage.getItem('ecoshare_cart')) || [];
     
     const jaExiste = carrinho.find(i => i._id === itemCarregado._id);

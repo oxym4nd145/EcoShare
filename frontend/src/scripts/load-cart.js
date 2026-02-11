@@ -28,8 +28,9 @@ function renderizarCarrinho() {
             <div style="text-align: center; padding: 40px 20px;">
                 <img src="./src/imgs/cart-green.svg" style="width: 50px; opacity: 0.5; margin-bottom: 15px;">
                 <p style="color: #666; font-weight: 600;">Seu carrinho está vazio.</p>
-                <a href="index.html" style="display: inline-block; margin-top: 20px; color: var(--primary-green); font-weight: bold; text-decoration: none;">
-                    ← Voltar para a busca
+                <a href="index.html" style="display: flex; align-items: center; justify-self: center; gap: .3rem; margin-top: 20px; color: var(--primary-green); font-weight: bold; text-decoration: none;">
+                    <img src="./src/imgs/arrow-left.svg" class="icon" style="filter: invert(1);">
+                    <span>Voltar para a busca</span>
                 </a>
             </div>`;
         

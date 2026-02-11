@@ -123,4 +123,91 @@ BEGIN
 END;
 //
 
+-- Atualiza o saldo automaticamente
+CREATE TRIGGER trg_atualiza_saldo_vendedor
+AFTER UPDATE ON Pagamento
+FOR EACH ROW
+BEGIN
+    DECLARE v_dono_id INT;
+
+    -- Verifica se o status mudou para 'Pago' (2)
+    IF OLD.status_pagamento != 2 AND NEW.status_pagamento = 2 THEN
+        -- Localiza o dono do item através da transação
+        SELECT i.dono_id INTO v_dono_id
+        FROM Transacao t
+        JOIN Item i ON t.item_id = i.id_item
+        WHERE t.id_transacao = NEW.transacao_id;
+
+        -- Adiciona o valor ao saldo do dono
+        UPDATE Usuario
+        SET saldo = saldo + NEW.valor
+        WHERE id_usuario = v_dono_id;
+    END IF;
+END;
+//
+
+-- Validação para CPF
+CREATE TRIGGER trg_valida_insercao_cpf
+BEFORE INSERT ON Cpf
+FOR EACH ROW
+BEGIN
+    DECLARE v_tipo INT;
+    SELECT tipo_pessoa INTO v_tipo FROM Usuario WHERE id_usuario = NEW.usuario_id;
+    
+    IF v_tipo != 1 THEN -- 1 é PF conforme seu seed
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erro: Usuário deve ser Pessoa Física para possuir CPF.';
+    END IF;
+END;
+//
+
+-- Validação para CNPJ
+CREATE TRIGGER trg_valida_insercao_cnpj
+BEFORE INSERT ON Cnpj
+FOR EACH ROW
+BEGIN
+    DECLARE v_tipo INT;
+    SELECT tipo_pessoa INTO v_tipo FROM Usuario WHERE id_usuario = NEW.usuario_id;
+    
+    IF v_tipo != 2 THEN -- 2 é PJ conforme seu seed
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erro: Usuário deve ser Pessoa Jurídica para possuir CNPJ.';
+    END IF;
+END;
+//
+
+-- Integridade da Avaliação
+CREATE TRIGGER trg_valida_avaliador
+BEFORE INSERT ON Avaliacao
+FOR EACH ROW
+BEGIN
+    DECLARE v_comprador_id INT;
+
+    SELECT comprador_id INTO v_comprador_id
+    FROM Transacao
+    WHERE id_transacao = NEW.transacao_id;
+
+    -- Verifica se quem está tentando avaliar é o comprador real da transação
+    IF NEW.avaliador_id != v_comprador_id THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erro: Apenas o comprador da transação pode realizar esta avaliação.';
+    END IF;
+END;
+//
+
+-- Validação de idade do usuário
+CREATE TRIGGER trg_valida_idade_usuario
+BEFORE INSERT ON Usuario
+FOR EACH ROW
+BEGIN
+    DECLARE idade INT;
+    SET idade = TIMESTAMPDIFF(YEAR, NEW.data_nascimento, CURDATE());
+    
+    IF idade < 18 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erro: Usuário deve ter pelo menos 18 anos.';
+    END IF;
+END;
+//
+
 DELIMITER ;
