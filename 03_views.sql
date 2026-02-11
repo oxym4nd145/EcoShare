@@ -125,6 +125,9 @@ SELECT
     de.denuncia_estado AS "Estado da denuncia"
 FROM
     Denuncia as d
+JOIN 
+    Objeto_tipo AS cat_tipo 
+        ON d.denuncia_alvo_tipo = cat_tipo.id_objeto_tipo    
 JOIN
     Denuncia_estado as de
         ON d.denuncia_estado = de.id_denuncia_estado
@@ -153,7 +156,7 @@ ORDER BY
     "Data da denúnica" ASC;
 
 -- 11. Contagem de denúncias por estado
-CREATE VIEW "Denuncias_Por_Estado" AS
+CREATE VIEW Denuncias_Por_Estado AS
 SELECT
     de.denuncia_estado AS "Estado da denúncia",
     COUNT(*) AS "Número de denúncias"
