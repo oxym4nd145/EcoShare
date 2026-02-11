@@ -155,42 +155,30 @@ app.get('/api/itens/:id', async (req, res) => {
 app.get('/api/usuario/completo/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const query = `
-            SELECT 
-                u.nome_usuario, u.email, u.saldo, u.data_nascimento,
-                m.tipo_mensalidade,
-                tp.nome_tipo AS nome_tipo_pessoa,
-                tp.tipo AS tipo_pessoa_abrev, -- Adicionado para verificar PF/PJ
-                e.cep, e.logradouro, e.numero, e.bairro, e.cidade, e.estado, 
-                f.endereco_cdn AS foto_perfil,
-                -- Busca CPF ou CNPJ baseado no tipo de pessoa
-                CASE 
-                    WHEN tp.tipo = 'PF' THEN cpf.cpf
-                    WHEN tp.tipo = 'PJ' THEN cnpj.cnpj
-                    ELSE NULL
-                END AS documento,
-                -- Retorna qual tipo de documento foi encontrado
-                CASE 
-                    WHEN tp.tipo = 'PF' THEN 'CPF'
-                    WHEN tp.tipo = 'PJ' THEN 'CNPJ'
-                    ELSE NULL
-                END AS tipo_documento
-            FROM Usuario u
-            LEFT JOIN Mensalidade_tipo m ON u.mensalidade_id = m.id_mensalidade
-            LEFT JOIN TipoPessoa tp ON u.tipo_pessoa = tp.id_tipo_pessoa
-            LEFT JOIN Endereco e ON u.endereco_id = e.id_endereco
-            LEFT JOIN Foto f ON f.id_foto = u.foto_perfil_id
-            -- LEFT JOIN condicional para CPF
-            LEFT JOIN Cpf cpf ON u.id_usuario = cpf.usuario_id AND tp.tipo = 'PF'
-            -- LEFT JOIN condicional para CNPJ
-            LEFT JOIN Cnpj cnpj ON u.id_usuario = cnpj.usuario_id AND tp.tipo = 'PJ'
-            WHERE u.id_usuario = ?
-        `;
+        
+        console.log(`[API] Buscando usuário ${id}`);
+        
+        // Query simples que funciona
+        const query = `SELECT * FROM Usuario WHERE id_usuario = ?`;
+        
+        console.log(`[SQL] Executando query para usuário ${id}`);
         const [rows] = await db.execute(query, [id]);
-        res.json(rows[0]);
+        
+        console.log(`[RESULT] Linhas retornadas: ${rows ? rows.length : 0}`);
+        
+        if (!rows || !Array.isArray(rows) || rows.length === 0) {
+            console.warn(`[WARN] Usuário ${id} não encontrado`);
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+        
+        const userData = rows[0];
+        console.log(`[SUCCESS] Usuário ${id} encontrado`);
+        
+        res.json(userData);
     } catch (error) {
-        console.error("Erro ao buscar dados do usuário:", error);
-        res.status(500).json({ error: "Erro ao buscar dados" });
+        console.error("[ERROR] Erro ao buscar usuário:", error.message);
+        console.error("[ERROR] Stack:", error.stack);
+        res.status(500).json({ error: "Erro ao buscar dados", details: error.message });
     }
 });
 
@@ -290,23 +278,121 @@ app.delete('/api/usuario/:id', async (req, res) => {
 
 // --- Cadastro de Usuário ---
 app.post('/api/cadastrar', async (req, res) => {
-    const { nome, email, senha, data_nascimento, nivel_permissao, mensalidade_id } = req.body;
+    const { nome, email, senha, data_nascimento, nivel_permissao, mensalidade_id, documento, cep, logradouro, numero, bairro, cidade, estado } = req.body;
+
+    // === VALIDAÇÕES DE CAMPOS OBRIGATÓRIOS ===
+    if (!nome || !email || !senha || !data_nascimento || !documento) {
+        return res.status(400).json({ success: false, message: 'Campos obrigatórios faltando: nome, email, senha, data_nascimento, documento' });
+    }
+
+    if (!cep || !logradouro || !numero || !bairro || !cidade || !estado) {
+        return res.status(400).json({ success: false, message: 'Campos de endereço obrigatórios faltando' });
+    }
+
+    // === VALIDAÇÕES DE TIPO E FORMATO ===
+    // Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ success: false, message: 'Email inválido' });
+    }
+
+    // Documento (CPF - 11 dígitos)
+    const docNumeros = documento.replace(/\D/g, '');
+    if (docNumeros.length !== 11 || !/^\d{11}$/.test(docNumeros)) {
+        return res.status(400).json({ success: false, message: 'Documento deve conter 11 dígitos' });
+    }
+
+    // CEP (8 dígitos)
+    const cepNumeros = cep.replace(/\D/g, '');
+    if (cepNumeros.length !== 8 || !/^\d{8}$/.test(cepNumeros)) {
+        return res.status(400).json({ success: false, message: 'CEP deve conter 8 dígitos' });
+    }
+
+    // Estado (2 letras)
+    if (!/^[A-Z]{2}$/.test(estado)) {
+        return res.status(400).json({ success: false, message: 'Estado deve ter exatamente 2 letras maiúsculas' });
+    }
+
+    // Data de nascimento (formato YYYY-MM-DD)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(data_nascimento)) {
+        return res.status(400).json({ success: false, message: 'Data de nascimento inválida' });
+    }
+
+    // === VALIDAÇÕES DE COMPRIMENTO ===
+    if (nome.length > 150) {
+        return res.status(400).json({ success: false, message: 'Nome muito longo (máximo 150 caracteres)' });
+    }
+
+    if (email.length > 150) {
+        return res.status(400).json({ success: false, message: 'Email muito longo (máximo 150 caracteres)' });
+    }
+
+    if (senha.length < 6 || senha.length > 100) {
+        return res.status(400).json({ success: false, message: 'Senha deve ter entre 6 e 100 caracteres' });
+    }
+
+    if (logradouro.length > 255) {
+        return res.status(400).json({ success: false, message: 'Logradouro muito longo (máximo 255 caracteres)' });
+    }
+
+    if (numero.length > 20) {
+        return res.status(400).json({ success: false, message: 'Número muito longo (máximo 20 caracteres)' });
+    }
+
+    if (bairro.length > 100) {
+        return res.status(400).json({ success: false, message: 'Bairro muito longo (máximo 100 caracteres)' });
+    }
+
+    if (cidade.length > 100) {
+        return res.status(400).json({ success: false, message: 'Cidade muito longa (máximo 100 caracteres)' });
+    }
 
     try {
+        // 1. Verificar se email ou documento já existem
+        const [usuarioExistente] = await db.execute(
+            'SELECT id_usuario FROM Usuario WHERE email = ? OR documento = ?',
+            [email, docNumeros]
+        );
+
+        if (usuarioExistente.length > 0) {
+            return res.status(400).json({ success: false, message: 'Email ou documento já cadastrado' });
+        }
+
+        // 2. Criar ou verificar endereço
+        const [enderecoExistente] = await db.execute(
+            'SELECT id_endereco FROM Endereco WHERE cep = ? AND logradouro = ? AND numero = ? AND cidade = ? AND estado = ?',
+            [cepNumeros, logradouro, numero, cidade, estado]
+        );
+
+        let endereco_id;
+        if (enderecoExistente.length > 0) {
+            endereco_id = enderecoExistente[0].id_endereco;
+        } else {
+            // Criar novo endereço
+            const sqlEndereco = `
+                INSERT INTO Endereco (cep, logradouro, numero, bairro, cidade, estado)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `;
+            const [resultEndereco] = await db.execute(sqlEndereco, [cepNumeros, logradouro, numero, bairro, cidade, estado]);
+            endereco_id = resultEndereco.insertId;
+        }
+
+        // 3. Criar usuário com documento sem pontuação
         const sql = `
             INSERT INTO Usuario 
-            (nome_usuario, email, hash_senha, data_nascimento, nivel_permissao, mensalidade_id) 
-            VALUES (?, ?, ?, ?, ?, ?)
+            (nome_usuario, email, hash_senha, data_nascimento, documento, endereco_id, nivel_permissao, mensalidade_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
         
-        // Usando await db.execute para consistência com o restante do arquivo
         await db.execute(sql, [
             nome, 
             email, 
             senha, 
             data_nascimento, 
-            nivel_permissao || 2, // Default: Conta Ativa
-            mensalidade_id || 1,   // Default: Sem mensalidade
+            docNumeros,
+            endereco_id,
+            nivel_permissao || 2,
+            mensalidade_id || 1
         ]);
 
         res.json({ success: true });
@@ -321,8 +407,20 @@ app.post('/api/itens', async (req, res) => {
     try {
         const { dono_id, nome_item, categoria, status_item, descricao, estado_conservacao } = req.body;
 
-        if (!dono_id || !nome_item || !status_item || !estado_conservacao) {
-            return res.status(400).json({ error: 'Campos obrigatórios: dono_id, nome_item, status_item, estado_conservacao' });
+        if (!dono_id || !nome_item || !estado_conservacao) {
+            return res.status(400).json({ error: 'Campos obrigatórios: dono_id, nome_item, estado_conservacao' });
+        }
+
+        let final_status_item = status_item;
+        if (!final_status_item) {
+            const [statusRows] = await db.execute(
+                'SELECT id_status FROM Status_tipo WHERE tipo_status = ?',
+                ['Disponível']
+            );
+            if (statusRows.length === 0) {
+                return res.status(400).json({ error: 'Status "Disponível" não encontrado' });
+            }
+            final_status_item = statusRows[0].id_status;
         }
 
         const sql = `
@@ -334,7 +432,7 @@ app.post('/api/itens', async (req, res) => {
             dono_id,
             nome_item,
             categoria || null,
-            status_item,
+            final_status_item,
             descricao || null,
             estado_conservacao
         ]);
@@ -416,6 +514,18 @@ app.put('/api/itens/:id', async (req, res) => {
 app.delete('/api/itens/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        const { usuario_id } = req.body;
+
+        // Verificar se o item existe e pertence ao usuário (opcional, para segurança)
+        if (usuario_id) {
+            const [item] = await db.execute('SELECT dono_id FROM Item WHERE id_item = ?', [id]);
+            if (item.length === 0) {
+                return res.status(404).json({ error: 'Item não encontrado' });
+            }
+            if (item[0].dono_id !== parseInt(usuario_id)) {
+                return res.status(403).json({ error: 'Você não tem permissão para deletar este item' });
+            }
+        }
 
         const [result] = await db.execute('DELETE FROM Item WHERE id_item = ?', [id]);
 
@@ -427,6 +537,76 @@ app.delete('/api/itens/:id', async (req, res) => {
     } catch (err) {
         console.error('Erro ao excluir item:', err);
         res.status(409).json({ error: 'Não foi possível excluir o item. Verifique dependências vinculadas.' });
+    }
+});
+
+// --- Atualizar Item ---
+app.put('/api/itens/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nome_item, categoria, status_item, estado_conservacao, descricao, dono_id } = req.body;
+
+        // Validação de entrada
+        if (!nome_item || nome_item.trim().length === 0) {
+            return res.status(400).json({ error: 'Nome do item é obrigatório' });
+        }
+
+        if (nome_item.length > 100) {
+            return res.status(400).json({ error: 'Nome do item não pode exceder 100 caracteres' });
+        }
+
+        if (!status_item) {
+            return res.status(400).json({ error: 'Status do item é obrigatório' });
+        }
+
+        if (!estado_conservacao) {
+            return res.status(400).json({ error: 'Estado de conservação é obrigatório' });
+        }
+
+        if (descricao && descricao.length > 500) {
+            return res.status(400).json({ error: 'Descrição não pode exceder 500 caracteres' });
+        }
+
+        // Verificar se o item existe e se o usuário é o dono
+        const [item] = await db.execute('SELECT dono_id FROM Item WHERE id_item = ?', [id]);
+        
+        if (item.length === 0) {
+            return res.status(404).json({ error: 'Item não encontrado' });
+        }
+
+        if (item[0].dono_id !== parseInt(dono_id)) {
+            return res.status(403).json({ error: 'Você não tem permissão para editar este item' });
+        }
+
+        // Atualizar item
+        const query = `
+            UPDATE Item 
+            SET 
+                nome_item = ?,
+                categoria = ?,
+                status_item = ?,
+                estado_conservacao = ?,
+                descricao = ?
+            WHERE id_item = ?
+        `;
+
+        const [result] = await db.execute(query, [
+            nome_item,
+            categoria || null,
+            status_item,
+            estado_conservacao,
+            descricao || null,
+            id
+        ]);
+
+        if (result.affectedRows === 0) {
+            return res.status(500).json({ error: 'Falha ao atualizar o item' });
+        }
+
+        res.json({ success: true, message: 'Item atualizado com sucesso' });
+    } catch (err) {
+        console.error('Erro ao atualizar item:', err);
+        res.status(500).json({ error: 'Erro ao atualizar item' });
     }
 });
 

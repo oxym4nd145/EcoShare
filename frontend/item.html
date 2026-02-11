@@ -46,23 +46,15 @@
             <nav class="sub-nav">
                 <div class="sub-nav-group filter-group">
                     <select id="filtro-categoria" class="filter-select" onchange="aplicarFiltros()">
-                        <option value="all">Todas Categorias</option>
-                    </select>
-
-                    <select id="filtro-transacao" class="filter-select" onchange="aplicarFiltros()">
-                        <option value="all">Todas Transações</option>
+                        <option value="">Todas Categorias</option>
                     </select>
 
                     <select id="filtro-estado" class="filter-select" onchange="aplicarFiltros()">
-                        <option value="all">Todos Estados</option>
-                    </select>
-
-                    <select id="filtro-uf" class="filter-select" onchange="aplicarFiltros()">
-                        <option value="all">Todas UFs</option>
+                        <option value="">Todos Estados</option>
                     </select>
 
                     <select id="filtro-disponibilidade" class="filter-select" onchange="aplicarFiltros()">
-                        <option value="all">Todas Disponibilidades</option>
+                        <option value="">Todas Disponibilidades</option>
                     </select>
                 </div>
 
@@ -112,6 +104,14 @@
                         <span>Conversar</span>
                         <img src="./src/imgs/chat-green.svg" class="icon">
                     </a>
+                    <button class="btn-edit btn-editar" id="btn-editar" style="display: none;">
+                        <span>Editar Item</span>
+                        <img src="./src/imgs/edit.svg" alt="Editar" class="icon">
+                    </button>
+                    <button class="btn-danger btn-deletar" id="btn-deletar">
+                        <span>Deletar Item</span>
+                        <img src="./src/imgs/trash.svg" alt="Deletar" class="icon">
+                    </button>
                 </div>
             </div>
         </div>

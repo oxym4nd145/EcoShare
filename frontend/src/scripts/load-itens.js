@@ -15,38 +15,24 @@ async function carregarItens() {
     const urlParams = new URLSearchParams(window.location.search);
     
     const categoriaId = urlParams.get('cat');
-    const transacaoId = urlParams.get('trans'); // Tipo: Aluguel, Venda...
-    const estadoId = urlParams.get('est');      // Condição: Novo, Usado...
-    const ufParam = urlParams.get('uf');        // UF do endereço do usuário
+    const estadoId = urlParams.get('est');
+    const dispId = urlParams.get('disp');
     const buscaTermo = urlParams.get('busca');
-    const dispParam = urlParams.get('disp');    // Status: Disponível, Em uso...
 
     try {
         const urlApi = new URL('http://localhost:3000/api/itens');
         
-        // 1. Mapeamento correto para os parâmetros que o server.js espera
         if (categoriaId) urlApi.searchParams.append('cat', categoriaId);
         if (estadoId) urlApi.searchParams.append('est', estadoId);
-        if (ufParam) urlApi.searchParams.append('uf', ufParam);
+        if (dispId) urlApi.searchParams.append('disp', dispId);
         if (buscaTermo) urlApi.searchParams.append('busca', buscaTermo);
 
-        // 2. IMPORTANTE: No seu server.js, o filtro de Status (id_status) 
-        // costuma ser recebido como 'disp'.
-        if (dispParam && dispParam !== 'all') {
-            urlApi.searchParams.append('disp', dispParam);
-        } else if (!dispParam && !buscaTermo) {
-            // Se quiser manter o padrão de mostrar apenas disponíveis na home:
-            urlApi.searchParams.append('disp', '1'); 
-        }
-
-        // 3. NOVO: Adicionar o filtro de transação (Venda/Aluguel)
-        // Certifique-se que seu server.js tenha: if (req.query.trans) ...
-        if (transacaoId) urlApi.searchParams.append('trans', transacaoId);
+        console.log('Buscando itens com URL:', urlApi.toString());
 
         const resposta = await fetch(urlApi);
         const itens = await resposta.json();
 
-        container.innerHTML = ''; 
+        container.innerHTML = '';
 
         if (itens.length === 0) {
             container.innerHTML = `<p>Nenhum item encontrado.</p>`;
@@ -54,8 +40,6 @@ async function carregarItens() {
         }
 
         itens.forEach(item => {
-            // O mapeamento aqui deve bater com o SELECT do server.js
-            // item._id, item.nome, item.tipo (status), item.condicao (estado)
             const card = document.createElement('a');
             card.href = `item.html?id=${item._id}`;
             card.className = 'product-card';
@@ -79,7 +63,7 @@ async function carregarItens() {
         });
 
     } catch (erro) {
-        console.error("Erro:", erro);
+        console.error("Erro ao carregar itens:", erro);
     }
 }
 

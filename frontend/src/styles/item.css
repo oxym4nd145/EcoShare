@@ -37,6 +37,83 @@
     display: flex;
     gap: 1rem;
     margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.btn-primary, .btn-secondary, .btn-danger {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: var(--primary-green);
+    color: white;
+    box-shadow: 0 2px 8px rgba(26, 127, 74, 0.2);
+}
+
+.btn-primary:hover {
+    background: #1a7f4a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 127, 74, 0.3);
+}
+
+.btn-secondary {
+    background: #e0e7ff;
+    color: var(--primary-green);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+}
+
+.btn-secondary:hover {
+    background: #c7d2ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff3b30 0%, #ff5445 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(255, 59, 48, 0.25);
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #ff2420 0%, #ff4435 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 59, 48, 0.35);
+}
+
+.btn-danger img {
+    width: 18px;
+    height: 18px;
+    filter: brightness(0) invert(1);
+}
+
+#btn-deletar {
+    display: none !important;
+}
+
+#btn-editar {
+    display: none !important;
+}
+
+.btn-edit {
+    background: linear-gradient(135deg, #4b9aff 0%, #3b85dd 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(75, 154, 255, 0.25) !important;
+}
+
+.btn-edit:hover {
+    background: linear-gradient(135deg, #3b85dd 0%, #2b70bb 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(75, 154, 255, 0.35) !important;
 }
 
 /* --- Organização dos Novos Detalhes --- */
