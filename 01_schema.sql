@@ -63,6 +63,8 @@ CREATE TABLE Usuario (
     saldo DECIMAL(10, 2) DEFAULT 0.00,
     endereco_id INT,
 
+    alvo_id INT, -- Para denúncias
+
     PRIMARY KEY (id_usuario),
 
     FOREIGN KEY (mensalidade_id) REFERENCES Mensalidade_tipo(id_mensalidade)
@@ -137,6 +139,8 @@ CREATE TABLE Item (
     descricao TEXT,
     estado_conservacao INT NOT NULL,
 
+    alvo_id INT, -- Para denúncias
+
     PRIMARY KEY (id_item),
 
     FOREIGN KEY (categoria) REFERENCES Categoria_tipo(id_categoria)
@@ -188,6 +192,8 @@ CREATE TABLE Mensagem (
     texto_mensagem TEXT NOT NULL,
     horario_mensagem TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
+    alvo_id INT, -- Para denúncias
+
     PRIMARY KEY (hash_mensagem),
 
     FOREIGN KEY (item_id) REFERENCES Item(id_item)
@@ -229,6 +235,8 @@ CREATE TABLE Transacao (
     tipo_transacao INT NOT NULL,
     data_transacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_coleta TIMESTAMP,
+
+    alvo_id INT, -- Para denúncias
 
     PRIMARY KEY (id_transacao),
 
@@ -292,6 +300,8 @@ CREATE TABLE Avaliacao (
     nota INT CHECK (nota BETWEEN 0 AND 10),
     avaliacao TEXT, -- Gabriel: pode ser nula?
 
+    alvo_id INT, -- Para denúncias
+
     PRIMARY KEY (transacao_id, avaliado_id),
 
     FOREIGN KEY (transacao_id) REFERENCES Transacao(id_transacao)
@@ -322,7 +332,7 @@ CREATE TABLE Status_pagamento_tipo (
 
 -- 25. Tabela de Pagamentos
 CREATE TABLE Pagamento (
-    id_pagamento INT,
+    id_pagamento INT AUTO_INCREMENT,
     transacao_id INT NOT NULL,
     metodo_pagamento INT NOT NULL,
     valor DECIMAL(10,2) NOT NULL,
@@ -343,19 +353,19 @@ CREATE TABLE Pagamento (
 );
 
 -- 26. Tabela de Estados de Denúncia
-CREATE TABLE Denuncia_estado(
+CREATE TABLE Denuncia_estado (
     id_denuncia_estado INT,
     denuncia_estado VARCHAR(40),
 
     PRIMARY KEY (id_denuncia_estado)
 );
 
--- 27. Tabela de Tipos de Objeto de Denúncia
-CREATE TABLE Objeto_tipo(
-    id_objeto_tipo INT,
-    objeto_tipo VARCHAR(40),
+-- 27. Tabela de ID universal de objeto como alvo de denúncia
+CREATE TABLE Alvo_ID (
+    id_alvo INT AUTO_INCREMENT,
+    tipo_objeto VARCHAR(40) NOT NULL,
 
-    PRIMARY KEY (id_objeto_tipo)
+    PRIMARY KEY (id_alvo)
 );
 
 -- 28. Tabela de Denúncias
@@ -363,7 +373,6 @@ CREATE TABLE Denuncia (
     id_denuncia INT AUTO_INCREMENT,
     denuncia_denunciador_id INT NOT NULL,
     denuncia_alvo_id INT NOT NULL,
-    denuncia_alvo_tipo INT NOT NULL,
     denuncia_conteudo TINYTEXT NOT NULL,
     denuncia_data DATE NOT NULL,
     denuncia_estado INT NOT NULL,
@@ -374,12 +383,9 @@ CREATE TABLE Denuncia (
     FOREIGN KEY (denuncia_denunciador_id) REFERENCES Usuario(id_usuario)
         ON UPDATE CASCADE ON DELETE CASCADE,
 
-    FOREIGN KEY (denuncia_alvo_id) REFERENCES Usuario(id_usuario)
+    FOREIGN KEY (denuncia_alvo_id) REFERENCES Alvo_ID(id_alvo)
         ON UPDATE CASCADE ON DELETE NO ACTION,
-
-    FOREIGN KEY (denuncia_alvo_tipo) REFERENCES Objeto_tipo(id_objeto_tipo)
-        ON UPDATE CASCADE ON DELETE NO ACTION,
-    
+   
     FOREIGN KEY (denuncia_estado) REFERENCES Denuncia_estado(id_denuncia_estado)
         ON UPDATE CASCADE ON DELETE NO ACTION,
 

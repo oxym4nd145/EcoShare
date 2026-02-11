@@ -115,6 +115,10 @@ INSERT INTO Usuario (mensalidade_id, nivel_permissao, foto_perfil_id, nome_usuar
 (3, 2, NULL, 'Paulo Ferreira', 'paulo.ferreira@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1984-04-18', 490.75, 37),
 (2, 2, NULL, 'Simone Gomes', 'simone.gomes@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1991-03-06', 82.50, 38),
 (1, 2, NULL, 'Maurício Rodrigues', 'mauricio.rodrigues@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1988-12-24', 310.25, 39),
+(1, 2, NULL, 'Jair Messias Bolsonaro', 'jair.bolsonaro@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1955-03-24', 250.00, 40),
+(1, 2, NULL, 'Luiz Inácio Lula da Silva', 'lula.lula@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1956-10-27', 350.00, 41),
+(1, 2, NULL, 'Dilma Rousseff', 'dilma.rousseff@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1953-06-15', 280.00, 42),
+(1, 2, NULL, 'Fernando Henrique Cardoso', 'fernando.cardoso@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1953-04-22', 320.00, 43),
 (3, 2, NULL, 'Tânia Silva', 'tania.silva@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1995-09-15', 540.00, 40),
 
 -- Pessoas Jurídicas (41-50)
@@ -450,14 +454,14 @@ INSERT INTO Mensagem (hash_mensagem, item_id, remetente_id, destinatario_id, tex
 -- ============================================
 -- 16. INSERIR DENÚNCIAS (10 registros)
 -- ============================================
-INSERT INTO Denuncia (denuncia_denunciador_id, denuncia_alvo_id, denuncia_alvo_tipo, denuncia_conteudo, denuncia_data, denuncia_estado, denuncia_responsavel) VALUES
-(1, 5, 1, 'Usuário não devolveu item combinado', '2024-02-28', 1, NULL),
-(3, 41, 1, 'Anúncio enganoso de produto', '2024-03-01', 2, 50),
-(2, 3, 3, 'Avaliação falsa e difamatória', '2024-03-02', 0, 50),
-(6, 9, 2, 'Item em estado muito pior do que anunciado', '2024-04-10', 1, NULL),
-(8, 12, 1, 'Usuário agressivo nas mensagens', '2024-04-15', 2, 49),
-(10, 15, 1, 'Cobrança indevida por danos', '2024-05-05', 0, 49),
-(14, 19, 1, 'Não compareceu no local combinado', '2024-05-20', 1, NULL),
-(17, 22, 2, 'Produto não funciona como descrito', '2024-06-10', 2, 48),
-(20, 25, 1, 'Múltiplas faltas em compromissos', '2024-06-25', 1, NULL),
-(23, 30, 1, 'Suspeita de conta falsa', '2024-07-01', 2, 48);
+INSERT INTO Denuncia (denuncia_denunciador_id, denuncia_alvo_id, denuncia_conteudo, denuncia_data, denuncia_estado, denuncia_responsavel) VALUES
+(13, 22, 'Usuário não devolveu item combinado', '2024-02-28', 1, NULL),
+(17, 35, 'Anúncio enganoso de produto', '2024-03-01', 2, 50),
+(2, 67, 'Avaliação falsa e difamatória', '2024-03-02', 0, 50),
+(6, 69, 'Item em estado muito pior do que anunciado', '2024-04-10', 1, NULL),
+(8, 9, 'Usuário agressivo nas mensagens', '2024-04-15', 2, 49),
+(10, 90, 'Transação não ocorreu na realidade', '2024-05-05', 0, 49),
+(14, 11, 'Não compareceu no local combinado', '2024-05-20', 1, NULL),
+(12, 61, 'Produto não funciona como descrito', '2024-06-10', 2, 48),
+(13, 22, 'Múltiplas faltas em compromissos', '2024-06-25', 1, NULL),
+(13, 22, 'Suspeita de conta falsa', '2024-07-01', 2, 48);

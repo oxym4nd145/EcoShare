@@ -176,9 +176,6 @@ BEGIN
 END;
 //
 
-DELIMITER ;
-
-
 -- Validação de idade do usuário (apenas se data_nascimento for um atributo de PF)
 -- CREATE TRIGGER trg_valida_idade_usuario
 -- BEFORE INSERT ON Usuario
@@ -193,3 +190,55 @@ DELIMITER ;
 --     END IF;
 -- END;
 -- //
+
+-- Adição de ID de alvo a mensagens
+CREATE TRIGGER add_id_alvo_msg
+BEFORE INSERT ON Mensagem
+FOR EACH ROW
+BEGIN
+    INSERT INTO Alvo_ID (tipo_objeto) VALUES ('Mensagem');
+    SET NEW.alvo_id = LAST_INSERT_ID();
+END; 
+//
+
+-- Adição de ID de alvo a avaliações
+CREATE TRIGGER add_id_alvo_aval
+BEFORE INSERT ON Avaliacao
+FOR EACH ROW
+BEGIN
+    INSERT INTO Alvo_ID (tipo_objeto) VALUES ('Avaliação');
+    SET NEW.alvo_id = LAST_INSERT_ID();
+END;
+//
+
+-- Adição de ID de alvo a transações
+CREATE TRIGGER add_id_alvo_trsc
+BEFORE INSERT ON Transacao
+FOR EACH ROW
+BEGIN
+    INSERT INTO Alvo_ID (tipo_objeto) VALUES ('Transação');
+    SET NEW.alvo_id = LAST_INSERT_ID();
+END;
+//
+
+-- Adição de ID de alvo a itens
+CREATE TRIGGER add_id_alvo_item
+BEFORE INSERT ON Item
+FOR EACH ROW
+BEGIN
+    INSERT INTO Alvo_ID (tipo_objeto) VALUES ('Item');
+    SET NEW.alvo_id = LAST_INSERT_ID();
+END;
+//
+
+-- Adição de ID de alvo a usuários
+CREATE TRIGGER add_id_alvo_user
+BEFORE INSERT ON Usuario
+FOR EACH ROW
+BEGIN
+    INSERT INTO Alvo_ID (tipo_objeto) VALUES ('Usuário');
+    SET NEW.alvo_id = LAST_INSERT_ID();
+END;
+//
+
+DELIMITER ;

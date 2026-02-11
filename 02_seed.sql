@@ -45,13 +45,6 @@ INSERT INTO Denuncia_estado (id_denuncia_estado, denuncia_estado) VALUES
 (4, 'Cancelada - falsa'),
 (0, 'Fechada');
 
-INSERT INTO Objeto_tipo (id_objeto_tipo, objeto_tipo) VALUES
-(1, 'Usuário'),
-(2, 'Item'),
-(3, 'Avaliação'),
-(4, 'Mensagem'),
-(5, 'Transação');
-
 INSERT INTO Transacao_tipo (id_transacao_tipo, tipo_transacao) VALUES
 (1, 'Doação'),
 (2, 'Aluguel'),

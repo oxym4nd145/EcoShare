@@ -120,14 +120,14 @@ SELECT
     d.denuncia_data AS "Data da denúncia",
     d.denuncia_denunciador_id AS "ID do denunciador",
     d.denuncia_alvo_id AS "ID do objeto denunciado",
-    cat_tipo.objeto_tipo AS "Tipo do objeto denunciado",
+    alvo.tipo_objeto AS "Tipo do objeto denunciado",
     d.denuncia_conteudo AS "Texto da denúncia",
     de.denuncia_estado AS "Estado da denuncia"
 FROM
     Denuncia as d
 JOIN 
-    Objeto_tipo AS cat_tipo 
-        ON d.denuncia_alvo_tipo = cat_tipo.id_objeto_tipo    
+    Alvo_ID as alvo
+        ON d.denuncia_alvo_id = alvo.id_alvo  
 JOIN
     Denuncia_estado as de
         ON d.denuncia_estado = de.id_denuncia_estado
@@ -140,20 +140,20 @@ SELECT
     d.id_denuncia AS "ID da denúncia",
     d.denuncia_data AS "Data da denúncia",
     d.denuncia_alvo_id AS "ID do objeto denunciado",
-    cat_tipo.objeto_tipo AS "Tipo do objeto denunciado",
+    alvo.tipo_objeto AS "Tipo do objeto denunciado",
     d.denuncia_conteudo AS "Texto da denúncia"
 FROM
     Denuncia AS d
 JOIN 
-    Objeto_tipo AS cat_tipo 
-        ON d.denuncia_alvo_tipo = cat_tipo.id_objeto_tipo
+    Alvo_ID AS alvo
+        ON d.denuncia_alvo_id = alvo.id_alvo
 JOIN
     Denuncia_estado AS de 
         ON d.denuncia_estado = de.id_denuncia_estado
 WHERE
     de.denuncia_estado = 'Aberto'
 ORDER BY
-    "Data da denúnica" ASC;
+    "Data da denúncia" ASC;
 
 -- 11. Contagem de denúncias por estado
 CREATE VIEW Denuncias_Por_Estado AS
