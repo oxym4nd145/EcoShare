@@ -268,4 +268,104 @@ BEGIN
 END;
 //
 
+-- Trigger de delete em cascata para denúncias relacionadas a um item
+CREATE TRIGGER trg_item_delete
+BEFORE DELETE ON Item
+FOR EACH ROW
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM Denuncia
+        WHERE denuncia_alvo_id = OLD.alvo_id
+          AND denuncia_estado IN (1,2)
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Objeto possui denúncia ativa.';
+    END IF;
+
+    DELETE FROM Alvo_ID
+    WHERE id_alvo = OLD.alvo_id;
+END;
+//
+
+-- Trigger de delete em cascata para denúncias relacionadas a um usuário
+CREATE TRIGGER trg_usuario_delete
+BEFORE DELETE ON Usuario
+FOR EACH ROW
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM Denuncia
+        WHERE denuncia_alvo_id = OLD.alvo_id
+          AND denuncia_estado IN (1,2)
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Objeto possui denúncia ativa.';
+    END IF;
+
+    DELETE FROM Alvo_ID
+    WHERE id_alvo = OLD.alvo_id;
+END;
+//
+
+-- Trigger de delete em cascata para denúncias relacionadas a uma mensagem
+CREATE TRIGGER trg_mensagem_delete
+BEFORE DELETE ON Mensagem
+FOR EACH ROW
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM Denuncia
+        WHERE denuncia_alvo_id = OLD.alvo_id
+          AND denuncia_estado IN (1,2)
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Objeto possui denúncia ativa.';
+    END IF;
+
+    DELETE FROM Alvo_ID
+    WHERE id_alvo = OLD.alvo_id;
+END;
+//
+
+-- Trigger de delete em cascata para denúncias relacionadas a uma transação
+CREATE TRIGGER trg_transacao_delete
+BEFORE DELETE ON Transacao
+FOR EACH ROW
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM Denuncia
+        WHERE denuncia_alvo_id = OLD.alvo_id
+          AND denuncia_estado IN (1,2)
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Objeto possui denúncia ativa.';
+    END IF;
+
+    DELETE FROM Alvo_ID
+    WHERE id_alvo = OLD.alvo_id;
+END;
+//
+
+-- Trigger de delete em cascata para denúncias relacionadas a uma avaliação
+CREATE TRIGGER trg_avaliacao_delete
+BEFORE DELETE ON Avaliacao
+FOR EACH ROW
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM Denuncia
+        WHERE denuncia_alvo_id = OLD.alvo_id
+          AND denuncia_estado IN (1,2)
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Objeto possui denúncia ativa.';
+    END IF;
+
+    DELETE FROM Alvo_ID
+    WHERE id_alvo = OLD.alvo_id;
+END;
+//
+
 DELIMITER ;

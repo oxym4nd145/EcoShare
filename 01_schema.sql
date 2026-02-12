@@ -83,7 +83,7 @@ CREATE TABLE Usuario (
         ON UPDATE CASCADE ON DELETE SET NULL,
 
     FOREIGN KEY (alvo_id) REFERENCES Alvo_ID(id_alvo)
-        ON UPDATE CASCADE ON DELETE RESTRICT
+        ON UPDATE CASCADE ON DELETE NO ACTION
 
 );
 
@@ -160,7 +160,7 @@ CREATE TABLE Item (
         ON UPDATE CASCADE ON DELETE NO ACTION,
 
     FOREIGN KEY (alvo_id) REFERENCES Alvo_ID(id_alvo)
-        ON UPDATE CASCADE ON DELETE RESTRICT
+        ON UPDATE CASCADE ON DELETE NO ACTION
 );
 
 -- 13. Tabela de Fotos de Itens
@@ -213,7 +213,7 @@ CREATE TABLE Mensagem (
         ON UPDATE CASCADE ON DELETE SET NULL,
 
     FOREIGN KEY (alvo_id) REFERENCES Alvo_ID(id_alvo)
-        ON UPDATE CASCADE ON DELETE RESTRICT
+        ON UPDATE CASCADE ON DELETE NO ACTION
 );
 
 -- 16. Tabela de Pontos de Coleta
@@ -263,7 +263,7 @@ CREATE TABLE Transacao (
         ON UPDATE CASCADE ON DELETE NO ACTION,
 
     FOREIGN KEY (alvo_id) REFERENCES Alvo_ID(id_alvo)
-        ON UPDATE CASCADE ON DELETE RESTRICT
+        ON UPDATE CASCADE ON DELETE NO ACTION
 );
 
 -- 19. Tabela de Transações de Aluguel
@@ -327,7 +327,7 @@ CREATE TABLE Avaliacao (
         ON UPDATE CASCADE ON DELETE CASCADE,
 
     FOREIGN KEY (alvo_id) REFERENCES Alvo_ID(id_alvo)
-        ON UPDATE CASCADE ON DELETE RESTRICT
+        ON UPDATE CASCADE ON DELETE NO ACTION
 );
 
 -- 23. Tabela de Métodos de Pagamento
@@ -400,7 +400,7 @@ CREATE TABLE Denuncia (
         ON UPDATE CASCADE ON DELETE CASCADE,
 
     FOREIGN KEY (denuncia_alvo_id) REFERENCES Alvo_ID(id_alvo)
-        ON UPDATE CASCADE ON DELETE NO ACTION,
+        ON UPDATE CASCADE ON DELETE CASCADE,
    
     FOREIGN KEY (denuncia_estado) REFERENCES Denuncia_estado(id_denuncia_estado)
         ON UPDATE CASCADE ON DELETE NO ACTION,
