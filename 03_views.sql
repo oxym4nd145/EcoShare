@@ -77,12 +77,12 @@ WHERE
 -- 5. View de Itens por Categoria
 CREATE VIEW Item_por_categoria AS
 SELECT
-    c.tipo_categoria AS `Categoria`,
-    COUNT(*) AS `Total de Itens`,
-    SUM(s.tipo_status = 'Disponível') AS `Itens Disponíveis`,
-    SUM(s.tipo_status = 'Indisponível') AS `Itens Indisponíveis`,
-    SUM(s.tipo_status = 'Em Uso') AS `Itens em Uso`,
-    SUM(s.tipo_status = 'Em Manutenção') AS `Itens em Manutenção`
+    c.tipo_categoria AS 'Categoria',
+    COUNT(*) AS 'Total de Itens',
+    SUM(s.tipo_status = 'Disponível') AS 'Itens Disponíveis',
+    SUM(s.tipo_status = 'Indisponível') AS 'Itens Indisponíveis',
+    SUM(s.tipo_status = 'Em Uso') AS 'Itens em Uso',
+    SUM(s.tipo_status = 'Em Manutenção') AS 'Itens em Manutenção'
 FROM 
     Item i
 JOIN 
