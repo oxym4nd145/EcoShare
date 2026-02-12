@@ -63,7 +63,7 @@ CREATE TABLE Usuario (
     saldo DECIMAL(10, 2) DEFAULT 0.00,
     endereco_id INT,
 
-    alvo_id INT, -- Para denúncias
+    alvo_id INT NOT NULL UNIQUE, -- Para denúncias
 
     PRIMARY KEY (id_usuario),
 
@@ -80,7 +80,11 @@ CREATE TABLE Usuario (
         ON UPDATE CASCADE ON DELETE NO ACTION,
 
     FOREIGN KEY (endereco_id) REFERENCES Endereco(id_endereco)
-        ON UPDATE CASCADE ON DELETE SET NULL
+        ON UPDATE CASCADE ON DELETE SET NULL,
+
+    FOREIGN KEY (alvo_id) REFERENCES Alvo_ID(id_alvo)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+
 );
 
 -- 7. Tabela de CPF 
@@ -139,7 +143,7 @@ CREATE TABLE Item (
     descricao TEXT,
     estado_conservacao INT NOT NULL,
 
-    alvo_id INT, -- Para denúncias
+    alvo_id INT NOT NULL UNIQUE, -- Para denúncias
 
     PRIMARY KEY (id_item),
 
@@ -153,7 +157,10 @@ CREATE TABLE Item (
         ON UPDATE CASCADE ON DELETE NO ACTION,
 
     FOREIGN KEY (estado_conservacao) REFERENCES Estado_tipo(id_estado)
-        ON UPDATE CASCADE ON DELETE NO ACTION
+        ON UPDATE CASCADE ON DELETE NO ACTION,
+
+    FOREIGN KEY (alvo_id) REFERENCES Alvo_ID(id_alvo)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 -- 13. Tabela de Fotos de Itens
@@ -192,7 +199,7 @@ CREATE TABLE Mensagem (
     texto_mensagem TEXT NOT NULL,
     horario_mensagem TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    alvo_id INT, -- Para denúncias
+    alvo_id INT NOT NULL UNIQUE, -- Para denúncias
 
     PRIMARY KEY (hash_mensagem),
 
@@ -203,7 +210,10 @@ CREATE TABLE Mensagem (
         ON UPDATE CASCADE ON DELETE SET NULL,
 
     FOREIGN KEY (destinatario_id) REFERENCES Usuario(id_usuario)
-        ON UPDATE CASCADE ON DELETE SET NULL
+        ON UPDATE CASCADE ON DELETE SET NULL,
+
+    FOREIGN KEY (alvo_id) REFERENCES Alvo_ID(id_alvo)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 -- 16. Tabela de Pontos de Coleta
@@ -236,7 +246,7 @@ CREATE TABLE Transacao (
     data_transacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_coleta TIMESTAMP,
 
-    alvo_id INT, -- Para denúncias
+    alvo_id INT NOT NULL UNIQUE, -- Para denúncias
 
     PRIMARY KEY (id_transacao),
 
@@ -250,7 +260,10 @@ CREATE TABLE Transacao (
         ON UPDATE CASCADE ON DELETE SET NULL,
 
     FOREIGN KEY (tipo_transacao) REFERENCES Transacao_tipo(id_transacao_tipo)
-        ON UPDATE CASCADE ON DELETE NO ACTION
+        ON UPDATE CASCADE ON DELETE NO ACTION,
+
+    FOREIGN KEY (alvo_id) REFERENCES Alvo_ID(id_alvo)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 -- 19. Tabela de Transações de Aluguel
@@ -300,7 +313,7 @@ CREATE TABLE Avaliacao (
     nota INT CHECK (nota BETWEEN 0 AND 10),
     avaliacao TEXT, -- Gabriel: pode ser nula?
 
-    alvo_id INT, -- Para denúncias
+    alvo_id INT NOT NULL UNIQUE, -- Para denúncias
 
     PRIMARY KEY (transacao_id, avaliado_id),
 
@@ -311,7 +324,10 @@ CREATE TABLE Avaliacao (
         ON UPDATE CASCADE ON DELETE SET NULL,
 
     FOREIGN KEY (avaliado_id) REFERENCES Usuario(id_usuario)
-        ON UPDATE CASCADE ON DELETE CASCADE
+        ON UPDATE CASCADE ON DELETE CASCADE,
+
+    FOREIGN KEY (alvo_id) REFERENCES Alvo_ID(id_alvo)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 -- 23. Tabela de Métodos de Pagamento
@@ -391,4 +407,5 @@ CREATE TABLE Denuncia (
 
     FOREIGN KEY (denuncia_responsavel) REFERENCES Usuario(id_usuario)
         ON UPDATE CASCADE ON DELETE SET NULL
+
 );
