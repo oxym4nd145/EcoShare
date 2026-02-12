@@ -205,21 +205,6 @@ BEGIN
  END;
 //
 
--- Validação de idade do usuário (apenas se data_nascimento for um atributo de PF) - NA APRESENTAÇÃO!
--- CREATE TRIGGER trg_valida_idade_usuario
--- BEFORE INSERT ON Usuario
--- FOR EACH ROW
--- BEGIN
---     DECLARE idade INT;
---     SET idade = TIMESTAMPDIFF(YEAR, NEW.data_nascimento, CURDATE());
-    
---     IF idade < 18 THEN
---         SIGNAL SQLSTATE '45000'
---         SET MESSAGE_TEXT = 'Erro: Usuário deve ter pelo menos 18 anos.';
---     END IF;
--- END;
--- //
-
 -- Adição de ID de alvo a mensagens
 CREATE TRIGGER add_id_alvo_msg
 BEFORE INSERT ON Mensagem
