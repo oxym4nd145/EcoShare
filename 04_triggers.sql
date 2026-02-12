@@ -1,7 +1,6 @@
 DELIMITER //
 
--- 1. Ao iniciar manutenção -> Muda item para 4 (Em manutenção)
--- MODIFICAÇÃO: Só altera status se data_fim_manutencao for NULL
+-- Ao iniciar manutenção -> Muda item para 4 (Em manutenção)
 CREATE TRIGGER trg_inicio_manutencao
 AFTER INSERT ON Manutencao
 FOR EACH ROW
@@ -15,8 +14,7 @@ BEGIN
 END;
 //
 
--- 2. Ao finalizar manutenção (data_fim preenchida) -> Muda item para 1 (Disponível)
--- Este trigger já está correto
+-- Ao finalizar manutenção (data_fim preenchida) -> Muda item para 1 (Disponível)
 CREATE TRIGGER trg_fim_manutencao
 AFTER UPDATE ON Manutencao
 FOR EACH ROW
@@ -29,7 +27,7 @@ BEGIN
 END;
 //
 
--- 3. Valida disponibilidade e impede autonegociação
+-- Valida disponibilidade e impede autonegociação
 CREATE TRIGGER trg_valida_transacao
 BEFORE INSERT ON Transacao
 FOR EACH ROW
@@ -51,86 +49,6 @@ BEGIN
     IF id_dono = NEW.comprador_id THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Erro: Proprietário não pode transacionar o próprio item.';
-    END IF;
-END;
-//
-
--- 4. Atualiza estado após confirmação de DOAÇÂO
-CREATE TRIGGER trg_pos_transacao
-AFTER INSERT ON Transacao
-FOR EACH ROW
-BEGIN
-    -- Como Doação não tem tabela filha, atualizamos a disponibilidade aqui
-    -- Doação (1) -> Indisponível (2)
-    IF NEW.tipo_transacao = 1 THEN
-        SET @skip_trg_item_update_5dias = 1;
-        UPDATE Item SET status_item = 2 WHERE id_item = NEW.item_id;
-        SET @skip_trg_item_update_5dias = NULL;
-    END IF;
-END;
-//
-
--- 5. Atualiza estado após confirmação de VENDA
-CREATE TRIGGER trg_detalhe_venda
-AFTER INSERT ON Venda
-FOR EACH ROW
-BEGIN
-    SET @skip_trg_item_update_5dias = 1;
-    UPDATE Item 
-    SET status_item = 2 
-    WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
-    SET @skip_trg_item_update_5dias = NULL;
-END;
-//
-
--- 6. Atualiza estado após confirmação de ALUGUEL
-CREATE TRIGGER trg_detalhe_aluguel AFTER INSERT ON Aluguel FOR EACH ROW
-BEGIN
-    SET @skip_trg_item_update_5dias = 1;
-    UPDATE Item SET status_item = 3
-    WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
-    SET @skip_trg_item_update_5dias = NULL;
-END;
-//
-
--- 7. Atualiza estado após confirmação de EMPRÉSTIMO
-CREATE TRIGGER trg_detalhe_emprestimo AFTER INSERT ON Emprestimo FOR EACH ROW
-BEGIN
-    SET @skip_trg_item_update_5dias = 1;
-    UPDATE Item SET status_item = 3
-    WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
-    SET @skip_trg_item_update_5dias = NULL;
-END;
-//
-
--- 8. Alteração do status após devolução de ALUGUEL
-CREATE TRIGGER trg_devolucao_aluguel
-AFTER UPDATE ON Aluguel
-FOR EACH ROW
-BEGIN
-    IF OLD.data_devolucao IS NULL AND NEW.data_devolucao IS NOT NULL THEN
-        SET @skip_trg_item_update_5dias = 1;
-        UPDATE Item i
-        JOIN Transacao t ON i.id_item = t.item_id
-        SET i.status_item = 1
-        WHERE t.id_transacao = NEW.transacao_id;
-        SET @skip_trg_item_update_5dias = NULL;
-    END IF;
-END;
-//
-
--- 9. Alteração do status após devolução de EMPRÉSTIMO
-CREATE TRIGGER trg_devolucao_emprestimo
-AFTER UPDATE ON Emprestimo
-FOR EACH ROW
-BEGIN
-    IF OLD.data_devolucao IS NULL AND NEW.data_devolucao IS NOT NULL THEN
-        SET @skip_trg_item_update_5dias = 1;
-        UPDATE Item i
-        JOIN Transacao t ON i.id_item = t.item_id
-        SET i.status_item = 1
-        WHERE t.id_transacao = NEW.transacao_id;
-        SET @skip_trg_item_update_5dias = NULL;
     END IF;
 END;
 //
@@ -166,7 +84,7 @@ BEGIN
     DECLARE v_tipo INT;
     SELECT tipo_pessoa INTO v_tipo FROM Usuario WHERE id_usuario = NEW.usuario_id;
     
-    IF v_tipo != 1 THEN -- 1 é PF conforme seu seed
+    IF v_tipo != 1 THEN -- 1 é PF
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Erro: Usuário deve ser Pessoa Física para possuir CPF.';
     END IF;
@@ -181,7 +99,7 @@ BEGIN
     DECLARE v_tipo INT;
     SELECT tipo_pessoa INTO v_tipo FROM Usuario WHERE id_usuario = NEW.usuario_id;
     
-    IF v_tipo != 2 THEN -- 2 é PJ conforme seu seed
+    IF v_tipo != 2 THEN -- 2 é PJ
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Erro: Usuário deve ser Pessoa Jurídica para possuir CNPJ.';
     END IF;
@@ -207,7 +125,7 @@ BEGIN
  END;
 //
 
--- Validação de idade do usuário (apenas se data_nascimento for um atributo de PF)
+-- Validação de idade do usuário (apenas se data_nascimento for um atributo de PF) - NA APRESENTAÇÃO!
 -- CREATE TRIGGER trg_valida_idade_usuario
 -- BEFORE INSERT ON Usuario
 -- FOR EACH ROW
