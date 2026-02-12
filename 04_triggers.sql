@@ -63,7 +63,9 @@ BEGIN
     -- Como Doação não tem tabela filha, atualizamos a disponibilidade aqui
     -- Doação (1) -> Indisponível (2)
     IF NEW.tipo_transacao = 1 THEN
+        SET @skip_trg_item_update_5dias = 1;
         UPDATE Item SET status_item = 2 WHERE id_item = NEW.item_id;
+        SET @skip_trg_item_update_5dias = NULL;
     END IF;
 END;
 //
@@ -73,25 +75,31 @@ CREATE TRIGGER trg_detalhe_venda
 AFTER INSERT ON Venda
 FOR EACH ROW
 BEGIN
+    SET @skip_trg_item_update_5dias = 1;
     UPDATE Item 
     SET status_item = 2 
     WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
+    SET @skip_trg_item_update_5dias = NULL;
 END;
 //
 
 -- 6. Atualiza estado após confirmação de ALUGUEL
 CREATE TRIGGER trg_detalhe_aluguel AFTER INSERT ON Aluguel FOR EACH ROW
 BEGIN
+    SET @skip_trg_item_update_5dias = 1;
     UPDATE Item SET status_item = 3
     WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
+    SET @skip_trg_item_update_5dias = NULL;
 END;
 //
 
 -- 7. Atualiza estado após confirmação de EMPRÉSTIMO
 CREATE TRIGGER trg_detalhe_emprestimo AFTER INSERT ON Emprestimo FOR EACH ROW
 BEGIN
+    SET @skip_trg_item_update_5dias = 1;
     UPDATE Item SET status_item = 3
     WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
+    SET @skip_trg_item_update_5dias = NULL;
 END;
 //
 
@@ -101,10 +109,12 @@ AFTER UPDATE ON Aluguel
 FOR EACH ROW
 BEGIN
     IF OLD.data_devolucao IS NULL AND NEW.data_devolucao IS NOT NULL THEN
+        SET @skip_trg_item_update_5dias = 1;
         UPDATE Item i
         JOIN Transacao t ON i.id_item = t.item_id
         SET i.status_item = 1
         WHERE t.id_transacao = NEW.transacao_id;
+        SET @skip_trg_item_update_5dias = NULL;
     END IF;
 END;
 //
@@ -115,10 +125,12 @@ AFTER UPDATE ON Emprestimo
 FOR EACH ROW
 BEGIN
     IF OLD.data_devolucao IS NULL AND NEW.data_devolucao IS NOT NULL THEN
+        SET @skip_trg_item_update_5dias = 1;
         UPDATE Item i
         JOIN Transacao t ON i.id_item = t.item_id
         SET i.status_item = 1
         WHERE t.id_transacao = NEW.transacao_id;
+        SET @skip_trg_item_update_5dias = NULL;
     END IF;
 END;
 //
@@ -181,26 +193,18 @@ CREATE TRIGGER trg_valida_update_tipo_pessoa
 BEFORE UPDATE ON Usuario
 FOR EACH ROW
 BEGIN
-    DECLARE tem_cpf INT;
-    DECLARE tem_cnpj INT;
-
-    IF OLD.tipo_pessoa <> NEW.tipo_pessoa THEN
-        SELECT COUNT(*) INTO tem_cpf  FROM Cpf  WHERE usuario_id = NEW.id_usuario;
-        SELECT COUNT(*) INTO tem_cnpj FROM Cnpj WHERE usuario_id = NEW.id_usuario;
-
-        IF NEW.tipo_pessoa = 1 THEN
-            IF tem_cnpj > 0 THEN
-                SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Erro: Usuário PF não pode ter CNPJ.';
-            END IF;
-        ELSEIF NEW.tipo_pessoa = 2 THEN
-            IF tem_cpf > 0 THEN
-                SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Erro: Usuário PJ não pode ter CPF.';
-            END IF;
+    IF OLD.tipo_pessoa != NEW.tipo_pessoa THEN
+       IF EXISTS (SELECT 1 FROM Cpf WHERE usuario_id = NEW.id_usuario) THEN
+            SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = 'Erro: Não é possível alterar tipo de pessoa com CPF associado.';
+        END IF;
+        
+        IF EXISTS (SELECT 1 FROM Cnpj WHERE usuario_id = NEW.id_usuario) THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Erro: Não é possível alterar tipo de pessoa com CNPJ associado.';
         END IF;
     END IF;
-END;
+ END;
 //
 
 -- Validação de idade do usuário (apenas se data_nascimento for um atributo de PF)
@@ -273,16 +277,6 @@ CREATE TRIGGER trg_item_delete
 BEFORE DELETE ON Item
 FOR EACH ROW
 BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM Denuncia
-        WHERE denuncia_alvo_id = OLD.alvo_id
-          AND denuncia_estado IN (1,2)
-    ) THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Objeto possui denúncia ativa.';
-    END IF;
-
     DELETE FROM Alvo_ID
     WHERE id_alvo = OLD.alvo_id;
 END;
@@ -401,14 +395,16 @@ CREATE TRIGGER trg_item_update_5dias
 BEFORE UPDATE ON Item
 FOR EACH ROW
 BEGIN
-    IF EXISTS(
-        SELECT 1
-        FROM TRANSACAO
-        WHERE item_id = OLD.id_item
-          AND DATEDIFF(CURDATE(), data_transacao) < 5
-    ) THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Item possui transação recente (menos de 5 dias).';
+    IF @skip_trg_item_update_5dias IS NULL THEN
+        IF EXISTS(
+            SELECT 1
+            FROM Transacao
+            WHERE item_id = OLD.id_item
+              AND DATEDIFF(CURDATE(), data_transacao) < 5
+        ) THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Item possui transação recente (menos de 5 dias).';
+        END IF;
     END IF;
 END;
 //
@@ -419,7 +415,7 @@ FOR EACH ROW
 BEGIN
     IF EXISTS(
         SELECT 1
-        FROM TRANSACAO
+        FROM Transacao
         WHERE comprador_id = OLD.id_usuario
           AND DATEDIFF(CURDATE(), data_transacao) < 5
     ) THEN
@@ -435,7 +431,7 @@ FOR EACH ROW
 BEGIN
     IF EXISTS(
         SELECT 1
-        FROM TRANSACAO t
+        FROM Transacao t
         JOIN Item i ON t.item_id = i.id_item
         WHERE i.dono_id = OLD.id_usuario
           AND DATEDIFF(CURDATE(), t.data_transacao) < 5
