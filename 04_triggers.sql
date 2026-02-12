@@ -176,6 +176,33 @@ BEGIN
 END;
 //
 
+-- Validação para atualização do tipo de pessoa
+CREATE TRIGGER trg_valida_update_tipo_pessoa
+BEFORE UPDATE ON Usuario
+FOR EACH ROW
+BEGIN
+    DECLARE tem_cpf INT;
+    DECLARE tem_cnpj INT;
+
+    IF OLD.tipo_pessoa <> NEW.tipo_pessoa THEN
+        SELECT COUNT(*) INTO tem_cpf  FROM Cpf  WHERE usuario_id = NEW.id_usuario;
+        SELECT COUNT(*) INTO tem_cnpj FROM Cnpj WHERE usuario_id = NEW.id_usuario;
+
+        IF NEW.tipo_pessoa = 1 THEN
+            IF tem_cnpj > 0 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Erro: Usuário PF não pode ter CNPJ.';
+            END IF;
+        ELSEIF NEW.tipo_pessoa = 2 THEN
+            IF tem_cpf > 0 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Erro: Usuário PJ não pode ter CPF.';
+            END IF;
+        END IF;
+    END IF;
+END;
+//
+
 -- Validação de idade do usuário (apenas se data_nascimento for um atributo de PF)
 -- CREATE TRIGGER trg_valida_idade_usuario
 -- BEFORE INSERT ON Usuario

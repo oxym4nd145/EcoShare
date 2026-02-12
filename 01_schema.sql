@@ -134,7 +134,7 @@ CREATE TABLE Item (
     id_item INT AUTO_INCREMENT,
     dono_id INT NOT NULL,
     nome_item VARCHAR(100) NOT NULL,
-    categoria INT,
+    categoria INT NOT NULL,
     status_item INT NOT NULL, 
     descricao TEXT,
     estado_conservacao INT NOT NULL,
@@ -144,7 +144,7 @@ CREATE TABLE Item (
     PRIMARY KEY (id_item),
 
     FOREIGN KEY (categoria) REFERENCES Categoria_tipo(id_categoria)
-        ON UPDATE CASCADE ON DELETE SET NULL,
+        ON UPDATE CASCADE ON DELETE NO ACTION,
 
     FOREIGN KEY (dono_id) REFERENCES Usuario(id_usuario)
         ON UPDATE CASCADE ON DELETE NO ACTION,
