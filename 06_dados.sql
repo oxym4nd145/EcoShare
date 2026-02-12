@@ -115,10 +115,6 @@ INSERT INTO Usuario (mensalidade_id, nivel_permissao, foto_perfil_id, nome_usuar
 (3, 2, NULL, 'Paulo Ferreira', 'paulo.ferreira@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1984-04-18', 490.75, 37),
 (2, 2, NULL, 'Simone Gomes', 'simone.gomes@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1991-03-06', 82.50, 38),
 (1, 2, NULL, 'Maurício Rodrigues', 'mauricio.rodrigues@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1988-12-24', 310.25, 39),
-(1, 2, NULL, 'Jair Messias Bolsonaro', 'jair.bolsonaro@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1955-03-24', 250.00, 40),
-(1, 2, NULL, 'Luiz Inácio Lula da Silva', 'lula.lula@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1956-10-27', 350.00, 41),
-(1, 2, NULL, 'Dilma Rousseff', 'dilma.rousseff@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1953-06-15', 280.00, 42),
-(1, 2, NULL, 'Fernando Henrique Cardoso', 'fernando.cardoso@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1953-04-22', 320.00, 43),
 (3, 2, NULL, 'Tânia Silva', 'tania.silva@email.com', 1, '$2y$10$N7wY7bL1UQ6V5Z8M9X0pEe', '1995-09-15', 540.00, 40),
 
 -- Pessoas Jurídicas (41-50)
@@ -155,32 +151,7 @@ INSERT INTO Cnpj (usuario_id, cnpj) VALUES
 (49, '01234567000189'), (50, '12345678900190');
 
 -- ============================================
--- 5. INSERIR CATEGORIAS (se não existirem)
--- ============================================
-INSERT INTO Categoria_tipo (tipo_categoria) VALUES
-('Ferramentas'),
-('Eletrônicos'),
-('Livros'),
-('Esportes'),
-('Móveis'),
-('Eletrodomésticos'),
-('Jardim'),
-('Música'),
-('Brinquedos'),
-('Roupas'),
-('Automotivo'),
-('Informática'),
-('Cozinha'),
-('Decoração'),
-('Instrumentos Musicais'),
-('Filmes e Séries'),
-('Jogos'),
-('Camping'),
-('Fotografia'),
-('Artesanato');
-
--- ============================================
--- 6. INSERIR 30 ITENS
+-- 5. INSERIR 30 ITENS
 -- ============================================
 INSERT INTO Item (dono_id, nome_item, categoria, status_item, descricao, estado_conservacao) VALUES
 (1, 'Furadeira de Impacto 550W', 1, 1, 'Furadeira Bosch com 13mm, potente e em ótimo estado', 2),
@@ -215,7 +186,7 @@ INSERT INTO Item (dono_id, nome_item, categoria, status_item, descricao, estado_
 (25, 'Kit Churrasqueira Portátil', 18, 1, 'Churrasqueira a carvão dobrável, completa', 2);
 
 -- ============================================
--- 7. INSERIR PONTOS DE COLETA (15 pontos)
+-- 6. INSERIR PONTOS DE COLETA (15 pontos)
 -- ============================================
 INSERT INTO Ponto_coleta (nome_coleta, endereco_coleta) VALUES
 ('EcoPoint Shopping Center', 1),
@@ -235,7 +206,7 @@ INSERT INTO Ponto_coleta (nome_coleta, endereco_coleta) VALUES
 ('EcoHub Brooklin', 11);
 
 -- ============================================
--- 8. INSERIR 25 TRANSAÇÕES
+-- 7. INSERIR 25 TRANSAÇÕES
 -- ============================================
 INSERT INTO Transacao (item_id, comprador_id, coleta_id, tipo_transacao, data_transacao, data_coleta) VALUES
 -- Doações (tipo 1)
@@ -272,7 +243,7 @@ INSERT INTO Transacao (item_id, comprador_id, coleta_id, tipo_transacao, data_tr
 (25, 25, 11, 4, '2024-07-01 10:45:00', '2024-07-02 14:30:00');
 
 -- ============================================
--- 9. INSERIR DETALHES DE ALUGUEL (7 registros)
+-- 8. INSERIR DETALHES DE ALUGUEL (7 registros)
 -- ============================================
 INSERT INTO Aluguel (transacao_id, prev_devolucao, update_date, data_devolucao, preco, multa) VALUES
 (6, '2024-02-20', NULL, '2024-02-19', 30.00, NULL),
@@ -284,7 +255,7 @@ INSERT INTO Aluguel (transacao_id, prev_devolucao, update_date, data_devolucao, 
 (12, '2024-07-10', NULL, NULL, 45.00, NULL);
 
 -- ============================================
--- 10. INSERIR DETALHES DE EMPRÉSTIMO (6 registros)
+-- 9. INSERIR DETALHES DE EMPRÉSTIMO (6 registros)
 -- ============================================
 INSERT INTO Emprestimo (transacao_id, prev_devolucao, update_date, data_devolucao) VALUES
 (13, '2024-03-25', NULL, '2024-03-24'),
@@ -295,7 +266,7 @@ INSERT INTO Emprestimo (transacao_id, prev_devolucao, update_date, data_devoluca
 (18, '2024-08-01', NULL, NULL);
 
 -- ============================================
--- 11. INSERIR DETALHES DE VENDA (7 registros)
+-- 10. INSERIR DETALHES DE VENDA (7 registros)
 -- ============================================
 INSERT INTO Venda (transacao_id, preco) VALUES
 (19, 1200.00),
@@ -307,7 +278,7 @@ INSERT INTO Venda (transacao_id, preco) VALUES
 (25, 150.00);
 
 -- ============================================
--- 12. INSERIR 20 AVALIAÇÕES (alguns itens com múltiplas avaliações)
+-- 11. INSERIR 20 AVALIAÇÕES (alguns itens com múltiplas avaliações)
 -- ============================================
 -- Item 1 (Furadeira) - 2 avaliações
 INSERT INTO Avaliacao (transacao_id, avaliador_id, avaliado_id, nota, avaliacao) VALUES
@@ -363,7 +334,7 @@ INSERT INTO Avaliacao (transacao_id, avaliador_id, avaliado_id, nota, avaliacao)
 (24, 24, 22, 7, 'Funciona mas esquenta pouco, talvez precise trocar a ponta');
 
 -- ============================================
--- 13. INSERIR PAGAMENTOS (25 registros - um para cada transação)
+-- 12. INSERIR PAGAMENTOS (25 registros - um para cada transação)
 -- ============================================
 INSERT INTO Pagamento (id_pagamento, transacao_id, metodo_pagamento, valor, status_pagamento, data_pagamento, id_gateway_externo) VALUES
 (1, 1, 4, 0.00, 2, '2024-01-15 10:35:00', NULL),
@@ -393,7 +364,7 @@ INSERT INTO Pagamento (id_pagamento, transacao_id, metodo_pagamento, valor, stat
 (25, 25, 1, 150.00, 2, '2024-07-01 10:50:00', 'CC_789456');
 
 -- ============================================
--- 14. INSERIR MANUTENÇÕES (12 registros - alguns itens com múltiplas manutenções)
+-- 13. INSERIR MANUTENÇÕES (12 registros - alguns itens com múltiplas manutenções)
 -- ============================================
 -- Item 1 (Furadeira) - 2 manutenções
 INSERT INTO Manutencao (item_id, data_inicio_manutencao, data_fim_manutencao) VALUES
@@ -427,7 +398,7 @@ INSERT INTO Manutencao (item_id, data_inicio_manutencao, data_fim_manutencao) VA
 (22, '2024-06-01', NULL);
 
 -- ============================================
--- 15. INSERIR MENSAGENS (20 registros)
+-- 14. INSERIR MENSAGENS (20 registros)
 -- ============================================
 INSERT INTO Mensagem (hash_mensagem, item_id, remetente_id, destinatario_id, texto_mensagem, horario_mensagem) VALUES
 (UUID(), 1, 2, 1, 'Olá, gostaria de alugar a furadeira por 30 dias', '2024-01-14 09:00:00'),
@@ -452,7 +423,7 @@ INSERT INTO Mensagem (hash_mensagem, item_id, remetente_id, destinatario_id, tex
 (UUID(), 22, 24, 22, 'O ferro de solda esquenta rápido?', '2024-06-19 14:30:00');
 
 -- ============================================
--- 16. INSERIR DENÚNCIAS (10 registros)
+-- 15. INSERIR DENÚNCIAS (10 registros)
 -- ============================================
 INSERT INTO Denuncia (denuncia_denunciador_id, denuncia_alvo_id, denuncia_conteudo, denuncia_data, denuncia_estado, denuncia_responsavel) VALUES
 (13, 22, 'Usuário não devolveu item combinado', '2024-02-28', 1, NULL),

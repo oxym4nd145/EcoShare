@@ -136,7 +136,9 @@ SELECT
     u.nome_usuario AS 'Dono do Item',
     c.tipo_categoria AS 'Categoria',
     i.descricao AS 'Descrição',
-    e.tipo_estado AS 'Estado de Conservação'
+    e.tipo_estado AS 'Estado de Conservação',
+    m.data_inicio_manutencao AS 'Data de Entrada em Manutenção',
+    m.data_fim_manutencao AS 'Data de Saída da Manutenção'
 FROM
     Item i
 JOIN

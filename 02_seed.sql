@@ -25,6 +25,28 @@ INSERT INTO Status_tipo (id_status, tipo_status) VALUES
 (3, 'Em uso'),
 (4, 'Em manutenção');
 
+INSERT INTO Categoria_tipo (tipo_categoria) VALUES
+('Ferramentas'),
+('Eletrônicos'),
+('Livros'),
+('Esportes'),
+('Móveis'),
+('Eletrodomésticos'),
+('Jardim'),
+('Música'),
+('Brinquedos'),
+('Roupas'),
+('Automotivo'),
+('Informática'),
+('Cozinha'),
+('Decoração'),
+('Instrumentos Musicais'),
+('Filmes e Séries'),
+('Jogos'),
+('Camping'),
+('Fotografia'),
+('Artesanato');
+
 INSERT INTO Metodo_pagamento_tipo (id_metodo_pagamento, nome_metodo_pagamento) VALUES
 (1, 'Cartão de Crédito'),
 (2, 'Cartão de Débito'),
