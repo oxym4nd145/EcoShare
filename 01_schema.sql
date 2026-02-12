@@ -91,8 +91,7 @@ CREATE TABLE Usuario (
         ON UPDATE CASCADE ON DELETE SET NULL,
 
     FOREIGN KEY (alvo_id) REFERENCES Alvo_ID(id_alvo)
-        ON UPDATE CASCADE ON DELETE NO ACTION
-
+        ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 -- 8. Tabela de CPF 
@@ -144,7 +143,7 @@ CREATE TABLE Status_tipo (
 -- 13. Tabela de Itens
 CREATE TABLE Item (
     id_item INT AUTO_INCREMENT,
-    dono_id INT NOT NULL,
+    dono_id INT,
     nome_item VARCHAR(100) NOT NULL,
     categoria INT NOT NULL,
     status_item INT NOT NULL, 
@@ -159,7 +158,7 @@ CREATE TABLE Item (
         ON UPDATE CASCADE ON DELETE NO ACTION,
 
     FOREIGN KEY (dono_id) REFERENCES Usuario(id_usuario)
-        ON UPDATE CASCADE ON DELETE NO ACTION,
+        ON UPDATE CASCADE ON DELETE CASCADE,
 
     FOREIGN KEY (status_item) REFERENCES Status_tipo(id_status)
         ON UPDATE CASCADE ON DELETE NO ACTION,
@@ -168,7 +167,7 @@ CREATE TABLE Item (
         ON UPDATE CASCADE ON DELETE NO ACTION,
 
     FOREIGN KEY (alvo_id) REFERENCES Alvo_ID(id_alvo)
-        ON UPDATE CASCADE ON DELETE NO ACTION
+        ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 -- 14. Tabela de Fotos de Itens
@@ -221,7 +220,7 @@ CREATE TABLE Mensagem (
         ON UPDATE CASCADE ON DELETE SET NULL,
 
     FOREIGN KEY (alvo_id) REFERENCES Alvo_ID(id_alvo)
-        ON UPDATE CASCADE ON DELETE NO ACTION
+        ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 -- 17. Tabela de Pontos de Coleta
@@ -259,10 +258,10 @@ CREATE TABLE Transacao (
     PRIMARY KEY (id_transacao),
 
     FOREIGN KEY (item_id) REFERENCES Item(id_item)
-        ON UPDATE CASCADE ON DELETE NO ACTION,
+        ON UPDATE CASCADE ON DELETE CASCADE,
 
     FOREIGN KEY (comprador_id) REFERENCES Usuario(id_usuario)
-        ON UPDATE CASCADE ON DELETE NO ACTION,
+        ON UPDATE CASCADE ON DELETE CASCADE,
 
     FOREIGN KEY (coleta_id) REFERENCES Ponto_coleta(id_coleta)
         ON UPDATE CASCADE ON DELETE SET NULL,
@@ -271,7 +270,7 @@ CREATE TABLE Transacao (
         ON UPDATE CASCADE ON DELETE NO ACTION,
 
     FOREIGN KEY (alvo_id) REFERENCES Alvo_ID(id_alvo)
-        ON UPDATE CASCADE ON DELETE NO ACTION
+        ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 -- 20. Tabela de Transações de Aluguel
@@ -335,7 +334,7 @@ CREATE TABLE Avaliacao (
         ON UPDATE CASCADE ON DELETE CASCADE,
 
     FOREIGN KEY (alvo_id) REFERENCES Alvo_ID(id_alvo)
-        ON UPDATE CASCADE ON DELETE NO ACTION
+        ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 -- 24. Tabela de Métodos de Pagamento
@@ -367,7 +366,7 @@ CREATE TABLE Pagamento (
     PRIMARY KEY (id_pagamento),
 
     FOREIGN KEY (transacao_id) REFERENCES Transacao(id_transacao)
-        ON UPDATE CASCADE ON DELETE NO ACTION,
+        ON UPDATE CASCADE ON DELETE CASCADE,
 
     FOREIGN KEY (metodo_pagamento) REFERENCES Metodo_pagamento_tipo(id_metodo_pagamento)
         ON UPDATE CASCADE ON DELETE NO ACTION,

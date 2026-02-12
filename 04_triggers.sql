@@ -293,16 +293,6 @@ CREATE TRIGGER trg_usuario_delete
 BEFORE DELETE ON Usuario
 FOR EACH ROW
 BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM Denuncia
-        WHERE denuncia_alvo_id = OLD.alvo_id
-          AND denuncia_estado IN (1,2)
-    ) THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Objeto possui denúncia ativa.';
-    END IF;
-
     DELETE FROM Alvo_ID
     WHERE id_alvo = OLD.alvo_id;
 END;
@@ -313,16 +303,6 @@ CREATE TRIGGER trg_mensagem_delete
 BEFORE DELETE ON Mensagem
 FOR EACH ROW
 BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM Denuncia
-        WHERE denuncia_alvo_id = OLD.alvo_id
-          AND denuncia_estado IN (1,2)
-    ) THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Objeto possui denúncia ativa.';
-    END IF;
-
     DELETE FROM Alvo_ID
     WHERE id_alvo = OLD.alvo_id;
 END;
@@ -333,16 +313,6 @@ CREATE TRIGGER trg_transacao_delete
 BEFORE DELETE ON Transacao
 FOR EACH ROW
 BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM Denuncia
-        WHERE denuncia_alvo_id = OLD.alvo_id
-          AND denuncia_estado IN (1,2)
-    ) THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Objeto possui denúncia ativa.';
-    END IF;
-
     DELETE FROM Alvo_ID
     WHERE id_alvo = OLD.alvo_id;
 END;
@@ -353,18 +323,126 @@ CREATE TRIGGER trg_avaliacao_delete
 BEFORE DELETE ON Avaliacao
 FOR EACH ROW
 BEGIN
+    DELETE FROM Alvo_ID
+    WHERE id_alvo = OLD.alvo_id;
+END;
+//
+
+-- Trigger para impedir exclusão de alvo com denúncias ativas
+CREATE TRIGGER trg_alvo_delete
+BEFORE DELETE ON Alvo_ID
+FOR EACH ROW
+BEGIN
     IF EXISTS (
         SELECT 1
         FROM Denuncia
-        WHERE denuncia_alvo_id = OLD.alvo_id
+        WHERE denuncia_alvo_id = OLD.id_alvo
           AND denuncia_estado IN (1,2)
     ) THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Objeto possui denúncia ativa.';
     END IF;
+END;
+//
 
-    DELETE FROM Alvo_ID
-    WHERE id_alvo = OLD.alvo_id;
+-- Trigger para impedir deleção de item se a última transação dele tiver menos que 90 dias
+CREATE TRIGGER trg_item_delete_90dias
+BEFORE DELETE ON Item
+FOR EACH ROW
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM Transacao
+        WHERE item_id = OLD.id_item
+          AND DATEDIFF(CURDATE(), data_transacao) < 90
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Item possui transação recente (menos de 90 dias).';
+    END IF;
+END;
+//
+
+-- Triggers para impedir deleção de usuário se a última transação dele, seja como vendedor ou comprador, tiver menos que 90 dias
+CREATE TRIGGER trg_usuario_delete_90dias_comprador
+BEFORE DELETE ON Usuario
+FOR EACH ROW
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM Transacao
+        WHERE comprador_id = OLD.id_usuario
+          AND DATEDIFF(CURDATE(), data_transacao) < 90
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Usuário possui transação recente (menos de 90 dias).';
+    END IF;
+END;
+//
+
+CREATE TRIGGER trg_usuario_delete_90dias_vendedor
+BEFORE DELETE ON Usuario
+FOR EACH ROW
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM Transacao t
+        JOIN Item i ON t.item_id = i.id_item
+        WHERE i.dono_id = OLD.id_usuario
+          AND DATEDIFF(CURDATE(), t.data_transacao) < 90
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Usuário possui transação recente (menos de 90 dias).';
+    END IF;
+END;
+//
+
+-- Triggers para impedir atualização de item ou usuário se a última transação tiver menos que 5 dias
+CREATE TRIGGER trg_item_update_5dias
+BEFORE UPDATE ON Item
+FOR EACH ROW
+BEGIN
+    IF EXISTS(
+        SELECT 1
+        FROM TRANSACAO
+        WHERE item_id = OLD.id_item
+          AND DATEDIFF(CURDATE(), data_transacao) < 5
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Item possui transação recente (menos de 5 dias).';
+    END IF;
+END;
+//
+
+CREATE TRIGGER trg_usuario_update_5dias_comprador
+BEFORE UPDATE ON Usuario
+FOR EACH ROW
+BEGIN
+    IF EXISTS(
+        SELECT 1
+        FROM TRANSACAO
+        WHERE comprador_id = OLD.id_usuario
+          AND DATEDIFF(CURDATE(), data_transacao) < 5
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Usuário possui transação recente (menos de 5 dias).';
+    END IF;
+END;
+//
+
+CREATE TRIGGER trg_usuario_update_5dias_vendedor
+BEFORE UPDATE ON Usuario
+FOR EACH ROW
+BEGIN
+    IF EXISTS(
+        SELECT 1
+        FROM TRANSACAO t
+        JOIN Item i ON t.item_id = i.id_item
+        WHERE i.dono_id = OLD.id_usuario
+          AND DATEDIFF(CURDATE(), t.data_transacao) < 5
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Usuário possui transação recente (menos de 5 dias).';
+    END IF;
 END;
 //
 

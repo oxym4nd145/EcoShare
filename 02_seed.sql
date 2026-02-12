@@ -77,7 +77,6 @@ GRANT SELECT ON ECOSHARE.Venda TO moderador;
 
 -- Usuário
 GRANT SELECT ON ECOSHARE.* TO user_app;
-REVOKE SELECT ON ECOSHARE.Denuncia FROM user_app;
 
 GRANT INSERT ON ECOSHARE.Transacao TO user_app;
 GRANT INSERT ON ECOSHARE.Aluguel TO user_app;
