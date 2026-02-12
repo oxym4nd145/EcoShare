@@ -53,6 +53,86 @@ BEGIN
 END;
 //
 
+-- Atualiza estado após confirmação de DOAÇÂO
+CREATE TRIGGER trg_pos_transacao
+AFTER INSERT ON Transacao
+FOR EACH ROW
+BEGIN
+    -- Como Doação não tem tabela filha, atualizamos a disponibilidade aqui
+    -- Doação (1) -> Indisponível (2)
+    IF NEW.tipo_transacao = 1 THEN
+        SET @skip_trg_item_update_5dias = 1;
+        UPDATE Item SET status_item = 2 WHERE id_item = NEW.item_id;
+        SET @skip_trg_item_update_5dias = NULL;
+    END IF;
+END;
+//
+
+-- Atualiza estado após confirmação de VENDA
+CREATE TRIGGER trg_detalhe_venda
+AFTER INSERT ON Venda
+FOR EACH ROW
+BEGIN
+    SET @skip_trg_item_update_5dias = 1;
+    UPDATE Item 
+    SET status_item = 2 
+    WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
+    SET @skip_trg_item_update_5dias = NULL;
+END;
+//
+
+-- Atualiza estado após confirmação de ALUGUEL
+CREATE TRIGGER trg_detalhe_aluguel AFTER INSERT ON Aluguel FOR EACH ROW
+BEGIN
+    SET @skip_trg_item_update_5dias = 1;
+    UPDATE Item SET status_item = 3
+    WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
+    SET @skip_trg_item_update_5dias = NULL;
+END;
+//
+
+-- Atualiza estado após confirmação de EMPRÉSTIMO
+CREATE TRIGGER trg_detalhe_emprestimo AFTER INSERT ON Emprestimo FOR EACH ROW
+BEGIN
+    SET @skip_trg_item_update_5dias = 1;
+    UPDATE Item SET status_item = 3
+    WHERE id_item = (SELECT item_id FROM Transacao WHERE id_transacao = NEW.transacao_id);
+    SET @skip_trg_item_update_5dias = NULL;
+END;
+//
+
+-- Alteração do status após devolução de ALUGUEL
+CREATE TRIGGER trg_devolucao_aluguel
+AFTER UPDATE ON Aluguel
+FOR EACH ROW
+BEGIN
+    IF OLD.data_devolucao IS NULL AND NEW.data_devolucao IS NOT NULL THEN
+        SET @skip_trg_item_update_5dias = 1;
+        UPDATE Item i
+        JOIN Transacao t ON i.id_item = t.item_id
+        SET i.status_item = 1
+        WHERE t.id_transacao = NEW.transacao_id;
+        SET @skip_trg_item_update_5dias = NULL;
+    END IF;
+END;
+//
+
+-- Alteração do status após devolução de EMPRÉSTIMO
+CREATE TRIGGER trg_devolucao_emprestimo
+AFTER UPDATE ON Emprestimo
+FOR EACH ROW
+BEGIN
+    IF OLD.data_devolucao IS NULL AND NEW.data_devolucao IS NOT NULL THEN
+        SET @skip_trg_item_update_5dias = 1;
+        UPDATE Item i
+        JOIN Transacao t ON i.id_item = t.item_id
+        SET i.status_item = 1
+        WHERE t.id_transacao = NEW.transacao_id;
+        SET @skip_trg_item_update_5dias = NULL;
+    END IF;
+END;
+//
+
 -- Atualiza o saldo automaticamente
 CREATE TRIGGER trg_atualiza_saldo_vendedor
 AFTER UPDATE ON Pagamento

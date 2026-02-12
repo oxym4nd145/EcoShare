@@ -87,59 +87,51 @@ CREATE PROCEDURE criar_transacao (
     IN p_coleta INT,
     IN p_tipo INT,
     IN p_preco DECIMAL(10,2),
-    IN p_prev_devolucao DATE
+    IN p_prev_devolucao DATE,
+    IN p_data_transacao TIMESTAMP,      -- novo parâmetro
+    IN p_data_coleta TIMESTAMP          -- novo parâmetro
 )
 BEGIN
     DECLARE v_transacao_id INT;
+
+    -- Usa CURRENT_TIMESTAMP se p_data_transacao for NULL
+    IF p_data_transacao IS NULL THEN
+        SET p_data_transacao = CURRENT_TIMESTAMP;
+    END IF;
 
     INSERT INTO Transacao (
         item_id,
         comprador_id,
         coleta_id,
-        tipo_transacao
+        tipo_transacao,
+        data_transacao,
+        data_coleta
     )
     VALUES (
         p_item,
         p_comprador,
         p_coleta,
-        p_tipo
+        p_tipo,
+        p_data_transacao,
+        p_data_coleta
     );
 
     SET v_transacao_id = LAST_INSERT_ID();
 
-    IF p_tipo = 1 THEN
-        INSERT INTO Venda (
-            transacao_id,
-            preco
-        )
-        VALUES (
-            v_transacao_id,
-            p_preco
-        );
+    IF p_tipo = 4 THEN          -- Venda
+        INSERT INTO Venda (transacao_id, preco)
+        VALUES (v_transacao_id, p_preco);
 
-    ELSEIF p_tipo = 2 THEN
-        INSERT INTO Emprestimo (
-            transacao_id,
-            prev_devolucao
-        )
-        VALUES (
-            v_transacao_id,
-            p_prev_devolucao
-        );
+    ELSEIF p_tipo = 3 THEN      -- Empréstimo
+        INSERT INTO Emprestimo (transacao_id, prev_devolucao)
+        VALUES (v_transacao_id, p_prev_devolucao);
 
-    ELSEIF p_tipo = 3 THEN
-        INSERT INTO Aluguel (
-            transacao_id,
-            prev_devolucao,
-            preco
-        )
-        VALUES (
-            v_transacao_id,
-            p_prev_devolucao,
-            p_preco
-        );
+    ELSEIF p_tipo = 2 THEN      -- Aluguel
+        INSERT INTO Aluguel (transacao_id, prev_devolucao, preco)
+        VALUES (v_transacao_id, p_prev_devolucao, p_preco);
     END IF;
 
+    -- Doação (tipo 1) não insere detalhes adicionais
 END$$
 
 DELIMITER ;
