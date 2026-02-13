@@ -109,18 +109,25 @@ async function inicializarFiltros() {
             console.log('Disponibilidades carregadas:', disponibilidades);
 
             // Limpa e reconstrói opções
-            selectDisponibilidade.innerHTML = '<option value="">Todas Disponibilidades</option>';
+            selectDisponibilidade.innerHTML = '<option value="all">Todas Disponibilidades</option>';
+
+            const temParametros = window.location.search.length > 0;
 
             disponibilidades.forEach(d => {
                 const option = document.createElement('option');
                 option.value = d.id_status;
                 option.textContent = d.tipo_status;
                 
-                // Restaura seleção anterior se existir
-                if (dispAtiva && dispAtiva == d.id_status) {
+                // Se o ID está na URL, marca como selecionado
+                if (dispAtiva == d.id_status) {
                     option.selected = true;
                 }
                 
+                // SÓ entra aqui se o usuário digitou o endereço do site puro, sem clicar em nada
+                if (!temParametros && d.id_status == 1) {
+                    option.selected = true;
+                }
+
                 selectDisponibilidade.appendChild(option);
             });
         } catch (err) {
@@ -150,7 +157,9 @@ function aplicarFiltros() {
         urlParams.delete('est');
     }
 
-    if (dispVal) {
+    if (dispVal === "all") {
+        urlParams.set('disp', 'all');
+    } else if (dispVal) {
         urlParams.set('disp', dispVal);
     } else {
         urlParams.delete('disp');

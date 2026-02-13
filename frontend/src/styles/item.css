@@ -33,11 +33,23 @@
     line-height: 1.8;
 }
 
-.item-actions {
+.item-actions-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.item-actions, .item-alter-btns {
     display: flex;
     gap: 1rem;
-    margin-top: 2rem;
     flex-wrap: wrap;
+}
+
+.nav-opts {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: .5rem;
 }
 
 .btn-primary, .btn-secondary, .btn-danger {
