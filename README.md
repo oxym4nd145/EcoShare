@@ -9,10 +9,13 @@
 * [Lucas Paulo Gonçalves](https://github.com/oxym4nd145)
 * [Marcos Abílio Esmeraldo Melo](https://github.com/ma-melo)
 
-  Desenvolvimento iniciado em 16/01/2025, e finalizado para o curso em DATA
+  Desenvolvimento iniciado em 16/01/2026, e finalizado para o curso em 13/02/2026
+
+  Os slides da apresentação podem ser encontrados aqui:
+
+[https://docs.google.com/presentation/d/1RFBQOvvQIAh9BChTl2C6kT63XSpvOCCAhiGmV0y6DVg/edit?usp=sharing](https://docs.google.com/presentation/d/1RFBQOvvQIAh9BChTl2C6kT63XSpvOCCAhiGmV0y6DVg/edit?usp=sharing)
 
   Diagrama conceitual e DER podem ser encontrados nesse link: 
 
-https://drive.google.com/file/d/1LvL0J1WUHMB-azBDxigzCpRaIgBmo45I/view?usp=share_link
+[https://drive.google.com/file/d/1LvL0J1WUHMB-azBDxigzCpRaIgBmo45I/view?usp=share_link](https://drive.google.com/file/d/1LvL0J1WUHMB-azBDxigzCpRaIgBmo45I/view?usp=share_link)
 
-<img width="1782" height="1332" alt="Diagrama Conceitual EcoShare-Esquema Conceitual drawio-4" src="https://github.com/user-attachments/assets/a6ed6e5f-da1a-4504-957a-b1c5f70c3c2c" />
