@@ -1,4 +1,4 @@
-![ecoshare-logo-white](https://github.com/user-attachments/assets/9d02d0e3-5551-4060-a5bd-ad8227a50aed)
+<img width="3260" height="1690" alt="Frame 2(1)" src="https://github.com/user-attachments/assets/fc884a03-695f-4bc2-8376-41f2d0a375f0" />
 
 
   Trabalho feito como requisito para aprovação no curso MC24 - Banco de Dados, ministrado pelo professor [Dr. Rodrigo Ribeiro](https://folio.academy/rodrigoribeiro), pelo grupo:
