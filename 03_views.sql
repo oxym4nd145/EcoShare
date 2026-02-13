@@ -92,43 +92,7 @@ JOIN
 GROUP BY 
     c.tipo_categoria;
 
--- 6. View de Itens por Estado de Conservação
-CREATE VIEW Item_por_estado AS
-SELECT
-    e.tipo_estado AS 'Estado de Conservação',
-    COUNT(i.id_item) AS 'Total de Itens'
-FROM
-    Item i
-JOIN
-    Estado_tipo e ON i.estado_conservacao = e.id_estado
-GROUP BY
-    e.tipo_estado;
-
--- 7. View de Itens por Usuário
-CREATE VIEW Item_por_usuario AS
-SELECT
-    u.nome_usuario AS 'Nome do Usuário',
-    COUNT(i.id_item) AS 'Total de Itens'
-FROM
-    Item i
-JOIN
-    Usuario u ON i.dono_id = u.id_usuario
-GROUP BY
-    u.nome_usuario;
-
--- 8. View de Transações por Tipo
-CREATE VIEW Transacao_por_tipo AS
-SELECT
-    tt.tipo_transacao AS tipo_transacao,
-    COUNT(t.id_transacao) AS total_transacoes
-FROM
-    Transacao t
-INNER JOIN 
-    Transacao_tipo tt ON t.tipo_transacao = tt.id_transacao_tipo
-GROUP BY
-    tt.tipo_transacao;
-
--- 9. View de Itens em Manutenção
+-- 6. View de Itens em Manutenção
 CREATE VIEW Item_em_manutencao AS
 SELECT
     i.id_item AS 'ID do Item',
@@ -152,7 +116,72 @@ JOIN
 WHERE
     m.data_fim_manutencao IS NULL OR m.data_fim_manutencao > CURRENT_DATE;
 
--- 10. View de Itens mais Populares (mais transacionados)
+-- 7. View de Itens por Estado de Conservação
+CREATE VIEW Item_por_estado AS
+SELECT
+    e.tipo_estado AS 'Estado de Conservação',
+    COUNT(i.id_item) AS 'Total de Itens'
+FROM
+    Item i
+JOIN
+    Estado_tipo e ON i.estado_conservacao = e.id_estado
+GROUP BY
+    e.tipo_estado;
+
+-- 8. View de Itens por Usuário
+CREATE VIEW Item_por_usuario AS
+SELECT
+    u.nome_usuario AS 'Nome do Usuário',
+    COUNT(i.id_item) AS 'Total de Itens'
+FROM
+    Item i
+JOIN
+    Usuario u ON i.dono_id = u.id_usuario
+GROUP BY
+    u.nome_usuario;
+
+-- 9. View de Transações por Tipo
+CREATE VIEW Transacao_por_tipo AS
+SELECT
+    tt.tipo_transacao AS tipo_transacao,
+    COUNT(t.id_transacao) AS total_transacoes
+FROM
+    Transacao t
+INNER JOIN 
+    Transacao_tipo tt ON t.tipo_transacao = tt.id_transacao_tipo
+GROUP BY
+    tt.tipo_transacao;
+
+-- 10. View de Transações e Pagamentos
+CREATE VIEW Transacao_pagamento AS
+SELECT
+    tt.tipo_transacao AS 'Tipo de Transação',
+    i.nome_item AS 'Nome do Item',
+    uc.nome_usuario AS 'Comprador',
+    uv.nome_usuario AS 'Dono do Item',
+    t.data_transacao AS 'Data da Transação',
+    mp.nome_metodo_pagamento AS 'Método de Pagamento',
+    sp.nome_status_pagamento AS 'Status do Pagamento',
+    p.valor AS 'Valor da Transação',
+    p.data_pagamento AS 'Data do Pagamento'
+FROM 
+    Transacao t
+JOIN 
+    Transacao_tipo tt ON t.tipo_transacao = tt.id_transacao_tipo
+JOIN 
+    Item i ON t.item_id = i.id_item
+JOIN 
+    Usuario uv ON i.dono_id = uv.id_usuario
+LEFT JOIN 
+    Usuario uc ON t.comprador_id = uc.id_usuario
+LEFT JOIN 
+    Pagamento p ON p.transacao_id = t.id_transacao
+LEFT JOIN 
+    Metodo_pagamento_tipo mp ON p.metodo_pagamento = mp.id_metodo_pagamento
+LEFT JOIN 
+    Status_pagamento_tipo sp ON p.status_pagamento = sp.id_status_pagamento;
+
+-- 11. View de Itens mais Populares (mais transacionados)
 CREATE VIEW Item_popular AS
 SELECT
     i.nome_item AS 'Nome do Item',
@@ -167,7 +196,7 @@ ORDER BY
     'Total de Transações' DESC
 LIMIT 10;
 
--- 11. Denuncias mais recentes
+-- 12. Denuncias mais recentes
 CREATE VIEW Ultimas_denuncias AS
 SELECT
     d.id_denuncia AS 'ID da denúncia',
@@ -188,7 +217,7 @@ JOIN
 ORDER BY 
     'Data da denúncia' DESC;
 
--- 12. Denúncias mais antigas ainda em aberto 
+-- 13. Denúncias mais antigas ainda em aberto 
 CREATE VIEW Denuncias_abertas_mais_antigas AS
 SELECT
     d.id_denuncia AS 'ID da denúncia',
@@ -209,7 +238,7 @@ WHERE
 ORDER BY
     'Data da denúncia' ASC;
 
--- 13. Contagem de denúncias por estado
+-- 14. Contagem de denúncias por estado
 CREATE VIEW Denuncias_por_estado AS
 SELECT
     de.denuncia_estado AS 'Estado da denúncia',
