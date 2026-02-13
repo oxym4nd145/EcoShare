@@ -19,3 +19,11 @@
 
 [https://drive.google.com/file/d/1LvL0J1WUHMB-azBDxigzCpRaIgBmo45I/view?usp=share_link](https://drive.google.com/file/d/1LvL0J1WUHMB-azBDxigzCpRaIgBmo45I/view?usp=share_link)
 
+
+# Diagrama Conceitual Final
+<img width="2678" height="1910" alt="Diagrama Conceitual EcoShare-Copy of Esquema Conceitual drawio" src="https://github.com/user-attachments/assets/83bf2765-b788-4e5b-9528-320c57a969c8" />
+
+
+# Diagrama Entidade Relacionamento Estendido
+<img width="2026" height="1292" alt="Diagrama Conceitual EcoShare-Esquema EER drawio-2" src="https://github.com/user-attachments/assets/5621bbfb-5677-4907-a40d-135f82f59b62" />
+
