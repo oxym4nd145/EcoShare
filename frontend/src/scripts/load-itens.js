@@ -16,7 +16,13 @@ async function carregarItens() {
     
     const categoriaId = urlParams.get('cat');
     const estadoId = urlParams.get('est');
-    const dispId = urlParams.get('disp');
+    let disponibilidadeId = urlParams.get('disp');
+    
+    // CORREÇÃO: Se não tiver parâmetro disp na URL, mostra apenas disponíveis (ID 1)
+    if (disponibilidadeId === null) {
+        disponibilidadeId = '1';
+    }
+    
     const buscaTermo = urlParams.get('busca');
 
     try {
@@ -24,7 +30,12 @@ async function carregarItens() {
         
         if (categoriaId) urlApi.searchParams.append('cat', categoriaId);
         if (estadoId) urlApi.searchParams.append('est', estadoId);
-        if (dispId) urlApi.searchParams.append('disp', dispId);
+        
+        // CORREÇÃO: Usar disponibilidadeId em vez de dispId
+        if (disponibilidadeId && disponibilidadeId !== 'all') {
+            urlApi.searchParams.append('disp', disponibilidadeId);
+        }
+        
         if (buscaTermo) urlApi.searchParams.append('busca', buscaTermo);
 
         console.log('Buscando itens com URL:', urlApi.toString());

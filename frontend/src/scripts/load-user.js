@@ -122,6 +122,38 @@ async function carregarPerfil() {
     }
 }
 
+async function deletarItem(itemId, itemNome) {
+    if (!confirm(`Tem certeza que deseja deletar "${itemNome}"?\nEsta ação não pode ser desfeita.`)) {
+        return;
+    }
+
+    const usuarioId = localStorage.getItem('usuario_id');
+    if (!usuarioId) {
+        alert('Você precisa estar logado.');
+        return;
+    }
+
+    try {
+        const resposta = await fetch(`http://localhost:3000/api/itens/${itemId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usuario_id: usuarioId })
+        });
+
+        if (!resposta.ok) {
+            const erro = await resposta.json();
+            throw new Error(erro.error || 'Erro ao deletar');
+        }
+
+        alert('Item deletado com sucesso!');
+        // Recarregar a lista de itens
+        await carregarMeusItens();
+        carregarHistoricoTransacoes();
+    } catch (erro) {
+        console.error('Erro:', erro);
+        alert('Erro: ' + erro.message);
+    }
+}
 
 async function carregarMeusItens() {
     const container = document.getElementById('meus-itens-container');
@@ -141,21 +173,63 @@ async function carregarMeusItens() {
             return;
         }
 
+        // Criar os cards dos itens
         container.innerHTML = itens.map(item => `
-            <div class="product-card-wrapper">
+            <div class="product-card-wrapper" data-item-id="${item._id}">
                 <a href="item.html?id=${item._id}" class="product-card">
                     <div class="img-container">
                         <img src="${item.foto || './src/imgs/recycle-sign.svg'}" alt="${item.nome}">
                     </div>
                     <div class="card-info">
-                        <span class="badge type-${formatarClasse(item.tipo)}">
-                            ${item.tipo}
-                        </span>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span class="badge type-${formatarClasse(item.tipo)}">
+                                ${item.tipo}
+                            </span>
+                            <div class="item-alter-btns" style="display: flex; gap: .5rem;">
+                                <button class="btn-editar" style="background: none; border: none; cursor: pointer;">
+                                    <img src="./src/imgs/edit.svg" alt="Editar" class="icon" style="height: auto; width: 1.4rem">
+                                </button>
+                                <button class="btn-deletar" style="background: none; border: none; cursor: pointer;">
+                                    <img src="./src/imgs/trash.svg" alt="Deletar" class="icon" style="height: auto; width: 1.4rem">
+                                </button>
+                            </div>
+                        </div>
                         <h3>${item.nome}</h3>
                     </div>
                 </a>
             </div>
         `).join('');
+
+        // Adicionar event listeners para cada botão de editar e deletar
+        itens.forEach(item => {
+            // Encontrar o wrapper específico deste item
+            const itemWrapper = container.querySelector(`[data-item-id="${item._id}"]`);
+            
+            if (itemWrapper) {
+                // Botão de editar
+                const btnEditar = itemWrapper.querySelector('.btn-editar');
+                if (btnEditar) {
+                    btnEditar.addEventListener('click', (e) => {
+                        e.preventDefault(); // Prevenir navegação do link
+                        e.stopPropagation(); // Prevenir propagação do evento
+                        window.location.href = `edit-item.html?id=${item._id}`;
+                    });
+                }
+
+                // Botão de deletar
+                const btnDeletar = itemWrapper.querySelector('.btn-deletar');
+                if (btnDeletar) {
+                    btnDeletar.addEventListener('click', async (e) => {
+                        e.preventDefault(); // Prevenir navegação do link
+                        e.stopPropagation(); // Prevenir propagação do evento
+                        
+                        if (confirm(`Tem certeza que deseja deletar "${item.nome}"?`)) {
+                            await deletarItem(item._id, item.nome);
+                        }
+                    });
+                }
+            }
+        });
 
     } catch (erro) {
         console.error("Erro:", erro);

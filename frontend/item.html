@@ -69,11 +69,17 @@
     </header>
 
     <main class="container">
-        <a href="index.html" class="btn-back">
-            <img src="./src/imgs/arrow-left.svg" class="icon back-icon">
-            <span>Voltar para busca</span>
-        </a>
+        <div class="nav-opts">
+            <a href="index.html" class="btn-back">
+                <img src="./src/imgs/arrow-left.svg" class="icon back-icon">
+                <span>Voltar para busca</span>
+            </a>
 
+            <a href="perfil.html" class="btn-back" id="btn-back">
+                <span>Voltar para meu perfil</span>
+                <img src="./src/imgs/arrow-right.svg" class="icon back-icon">
+            </a>
+        </div>
         <div class="item-view">
             <div class="item-image-large">
                 <img id="item-img" src="./src/imgs/recycle-sign.svg" alt="Imagem do Item">
@@ -95,23 +101,27 @@
                     <p><strong>Local:</strong> <span id="item-localizacao">...</span></p>
                 </div>
 
-                <div class="item-actions">
-                    <button class="btn-primary btn-solicitar" id="btn-solicitar">
-                        <span>Solicitar Agora</span>
-                        <img src="./src/imgs/add-cart.svg" alt="Adicionar" class="icon">
-                    </button>
-                    <a href="mensagens.html" class="btn-secondary btn-chat">
-                        <span>Conversar</span>
-                        <img src="./src/imgs/chat-green.svg" class="icon">
-                    </a>
-                    <button id="btn-editar" style="display: none;">
-                        <span>Editar</span>
-                        <img src="./src/imgs/edit.svg" alt="Editar" class="icon">
-                    </button>
-                    <button id="btn-deletar" style="display: none;">
-                        <span>Deletar</span>
-                        <img src="./src/imgs/trash.svg" alt="Deletar" class="icon">
-                    </button>
+                <div class="item-actions-menu">
+                    <div id="item-trans-opts" class="item-trans-actions item-actions">
+                        <button class="btn-primary btn-solicitar" id="btn-solicitar">
+                            <span>Solicitar Agora</span>
+                            <img src="./src/imgs/add-cart.svg" alt="Adicionar" class="icon">
+                        </button>
+                        <a href="mensagens.html" class="btn-secondary btn-chat">
+                            <span>Conversar</span>
+                            <img src="./src/imgs/chat-green.svg" class="icon">
+                        </a>
+                    </div>
+                    <div class="item-alter-btns">
+                        <button id="btn-editar" style="display: none;">
+                            <span>Editar</span>
+                            <img src="./src/imgs/edit.svg" alt="Editar" class="icon">
+                        </button>
+                        <button id="btn-deletar" style="display: none;">
+                            <span>Deletar</span>
+                            <img src="./src/imgs/trash.svg" alt="Deletar" class="icon">
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

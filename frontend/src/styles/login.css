@@ -133,5 +133,63 @@ body {
     to { transform: scale(1); opacity: 1; }
 }
 
+.cadastro-container {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.cadastro-container > *:not(form):not(.form-scroll) {
+    padding-left: 40px;
+    padding-right: 40px;
+}
+
+.cadastro-container .logo-login {
+    margin: 30px auto 20px;
+}
+
+.cadastro-container h2 {
+    margin: 0 40px 25px;
+}
+
+/* Container scrollable apenas para o formulário */
+.form-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 40px;
+}
+
+/* Personalização da barra de rolagem */
+.form-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.form-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.form-scroll::-webkit-scrollbar-thumb {
+    background: var(--primary-green);
+    border-radius: 10px;
+}
+
+.form-scroll::-webkit-scrollbar-thumb:hover {
+    background: #1b5e20;
+}
+
+/* Botão fixo no final */
+.cadastro-container .btn-entrar {
+    margin: 20px 40px;
+    width: calc(100% - 80px);
+}
+
+/* Footer fixo */
+.cadastro-container .footer-links {
+    margin: 0 40px 30px;
+}
+
 .footer-links { margin-top: 20px; font-size: 0.85rem; }
 .footer-links a { color: var(--primary-green); text-decoration: none; font-weight: 600; }

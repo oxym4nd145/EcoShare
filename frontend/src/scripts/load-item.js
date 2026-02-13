@@ -65,9 +65,13 @@ async function carregarDetalhes() {
         const usuarioId = localStorage.getItem('usuario_id');
         const btnEditar = document.getElementById('btn-editar');
         const btnDeletar = document.getElementById('btn-deletar');
+        const transOpts = document.getElementById('item-trans-opts');
+        const btnBack = document.getElementById('btn-back');
 
         // Se o item é do usuário logado, mostra os botões
         if (usuarioId && itemCarregado.dono_id === Number(usuarioId)) {
+            transOpts.style.display = 'none';
+
             // Botão Editar
             if (btnEditar) {
                 btnEditar.style.display = 'inline-flex';
@@ -89,6 +93,7 @@ async function carregarDetalhes() {
             // Esconder botões se o item não é do usuário
             if (btnEditar) btnEditar.style.display = 'none';
             if (btnDeletar) btnDeletar.style.display = 'none';
+            if (btnBack) btnBack.style.display = 'none';
         }
 
         renderizarAvaliacoes(avaliacoes);
